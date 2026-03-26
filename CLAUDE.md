@@ -44,6 +44,7 @@ next_steps:
 | `mahalanobis_practical_threshold.R` | — | Re-run Mah with chi-square thresholds on same seeds |
 | `External_Validation.R` | — | ReReReRe vs practical Mahalanobis on real datasets with known careless respondents |
 | `PISA_Validation.R` | — | PISA 2018 validation (screen-time C/IER ground truth, per-country) |
+| `Calibration_nF_to_Z.R` | — | nF→z_threshold calibration: R=30, nF 2-40, items/factor=6, scatter cloud plot |
 
 ## External Datasets (`external_datasets/`)
 
@@ -522,7 +523,127 @@ Alfons & Welz (2024) explicitly called for creating an open benchmark repository
 datasets downloaded (Robie HEXACO, Arias 2020) but not suitable for primary validation due to
 circularity (Robie) or too few factors (Arias: 3 constructs, 36 items).
 
+## nF → z_threshold Calibration (2026-03-26, COMPLETED)
+
+### Design rationale
+
+The optimal z_threshold depends strongly on nF. Previous multiverse results showed per-nF best
+z ranging from 1.0 (nF≤12) to 2.0 (nF=25), but this was noisy because items/factor varied
+via the cycling pattern `c(10, 6, 3)`. To build a clean lookup table for automatic threshold
+selection, we run a dedicated calibration with **items/factor fixed at 6**.
+
+### Calibration parameters
+
+| Parameter | Value | Rationale |
+|-----------|-------|-----------|
+| nF range | 2-40 (step 1) | Full range, fine-grained |
+| items/factor | 6 (fixed) | Isolates pure nF effect, realistic middle value |
+| z_threshold | 0.1-3.0 (step 0.2) | Post-hoc, covers full useful range |
+| n_respondents | 300 | In "recommended" zone |
+| pct_careless | 10% | Realistic base rate |
+| corProp | 0.05 | Recommended default |
+| iterations | 100 | Standard permutation count |
+| Replications | 30 | 30 scatter points per nF |
+| Careless levels | 50-100% | Standard corruption range |
+
+Total ReReReRe calls: 39 nF × 30 reps = **1,170**. Runtime: ~47 minutes.
+
+### Output files
+
+- `calibration_nF_z_raw.csv` — all reps × nF × z_threshold (full evaluation grid)
+- `calibration_nF_z_best.csv` — optimal z per rep per nF (for scatter plot)
+- `calibration_nF_z_lookup.csv` — mean optimal z per nF (the actual lookup table)
+- `plot_calibration_scatter.png` — scatter cloud with mean overlay, point size = MCC
+
+### Results (2026-03-26)
+
+The optimal z_threshold follows a **U-shaped curve** as a function of nF:
+
+| nF zone | nF range | Mean optimal z | Mean MCC | Interpretation |
+|---------|----------|---------------|----------|----------------|
+| Dead zone | 2-7 | 0.9-1.2 | 0.09-0.17 | Too few factors, threshold noisy, poor detection |
+| Transition | 8-14 | 0.5-0.8 | 0.20-0.34 | z drops as signal emerges but is still weak |
+| Sweet spot entry | 15-20 | 0.5-0.7 | 0.35-0.46 | Stable low z, good MCC |
+| Scaling zone | 21-28 | 0.7-1.0 | 0.46-0.56 | z rises as z-score distribution separates |
+| High nF | 29-40 | 1.3-2.1 | 0.53-0.58 | Strong signal, higher z optimal |
+
+**Key nF breakpoints from lookup table:**
+| nF | items | mean_best_z | median_best_z | mean_MCC |
+|----|-------|-------------|---------------|----------|
+| 4 | 24 | 0.95 | 0.9 | 0.109 |
+| 8 | 48 | 0.71 | 0.7 | 0.197 |
+| 10 | 60 | 0.79 | 0.8 | 0.255 |
+| 12 | 72 | 0.73 | 0.7 | 0.310 |
+| 15 | 90 | 0.55 | 0.5 | 0.354 |
+| 20 | 120 | 0.63 | 0.7 | 0.455 |
+| 25 | 150 | 0.83 | 0.9 | 0.527 |
+| 30 | 180 | 1.29 | 1.3 | 0.540 |
+| 35 | 210 | 1.83 | 1.8 | 0.542 |
+| 40 | 240 | 2.11 | 2.2 | 0.582 |
+
+**U-shape explanation:** At low nF, z-scores are compressed (good and careless respondents
+overlap heavily), so a low threshold is needed to catch anyone — but this also catches many
+good respondents (low specificity → low MCC). As nF increases, the z-score distributions
+separate and the optimal threshold rises because higher z provides better specificity without
+losing sensitivity. The minimum of the U (~nF 13-15, z≈0.5) marks where the signal first
+becomes reliable enough for meaningful detection.
+
+**Scatter cloud variability:** SD of optimal z ranges from 0.29 (nF=14) to 0.77 (nF=5),
+confirming high stochastic noise at low nF. By nF≥25, the scatter tightens (SD≈0.5) and
+individual replications cluster more clearly around the mean.
+
+**Scatter cloud plot** (`archive/calibration_nF_z/plot_calibration_scatter.png`): One of the
+best figures for the paper. Blue dots = individual replications (jittered, size ∝ MCC), red
+dots = mean across reps (size ∝ mean MCC), dashed red line = mean trajectory. The U-shape
+is clearly visible: the red line descends from z≈1.0 (nF=2-6) to a minimum of z≈0.5
+(nF=13-15), then rises linearly to z≈2.1 (nF=40). Critically, the blue dot SIZE grows
+dramatically from left to right — at nF=2-6 all dots are tiny (MCC<0.15) while at nF=35-40
+they're large (MCC>0.5). This visually encodes both the threshold AND the quality of
+detection improving with more factors.
+
+### Auto-calibration implementation (2026-03-26)
+
+**Design:** Added `auto_z` parameter to `ReReReRe()`. When `auto_z=TRUE` (or `z_threshold="auto"`),
+the function:
+1. Runs parallel analysis (`psych::fa.parallel`) on the input data to estimate nF
+2. Looks up the optimal z_threshold from a LOESS curve fitted to the calibration data
+3. Returns results with the calibrated threshold in the output
+
+The LOESS fit smooths over the U-shaped calibration curve. For nF outside the calibrated range
+(2-40), it clamps to the nearest boundary value. The lookup is embedded directly in the function
+(no external CSV dependency) using the 39-point calibration means.
+
+**Rationale for LOESS over piecewise linear:** The raw means are noisy (especially at nF<10
+where R=30 gives SD>0.5). LOESS provides a smooth monotonic-ish curve that won't produce
+unexpected jumps between adjacent nF values. Span parameter chosen to balance smoothing with
+fidelity to the U-shape.
+
+**Limitation:** The calibration was done with items/factor=6 fixed. Real questionnaires vary
+(3-20 items/factor). The z_threshold depends primarily on nF (which controls total coupled
+pairs and signal richness), and only weakly on items/factor (which affects per-pair quality).
+The auto-calibration should be robust across reasonable items/factor ranges, but edge cases
+(very few items/factor like 2-3) may benefit from a lower threshold.
+
 ## Revision Log
+
+### 2026-03-26c — Auto-calibration: nF → z_threshold via parallel analysis
+
+**Added `auto_z` parameter** to `ReReReRe()`. When `auto_z=TRUE`, the function:
+1. Runs `psych::fa.parallel()` to estimate nF from the data
+2. Looks up the optimal z_threshold via a LOESS-smoothed calibration curve (nF=2-40)
+3. Uses the calibrated threshold for flagging
+
+**LOESS curve** (span=0.4, fitted on 39-point calibration means):
+- nF=5 → z=1.01, nF=10 → z=0.76, nF=15 → z=0.60 (minimum),
+  nF=20 → z=0.69, nF=25 → z=0.83, nF=30 → z=1.25, nF=40 → z=2.10
+- Clamped to nF=[2,40] for out-of-range inputs
+
+**Test result** (10-factor simulated data, n=200): parallel analysis detected 7 factors
+(typical underestimate with weak loadings), calibrated z=0.95, sensitivity=0.68,
+specificity=0.78. Consistent with expected performance at nF~7-10.
+
+**Output changes:** `flagged` column now uses z_score threshold (was percentile-based).
+Added `z_threshold_used` and `nFactors_detected` columns to output dataframe.
 
 ### 2026-03-27 — align_signs: sign flip → proper reverse coding
 

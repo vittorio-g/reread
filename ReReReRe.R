@@ -6,7 +6,9 @@
 #   indCors   - raw coupled absolute correlation
 #   rand_mean - mean of random iteration correlations
 #   rand_sd   - sd of random iteration correlations
-#   flagged   - legacy binary flag (result <= cutOff)
+#   flagged   - binary flag (z_score <= z_threshold)
+#   z_threshold_used - the z_threshold used for flagging (useful when auto_z=TRUE)
+#   nFactors_detected - number of factors detected by parallel analysis (when auto_z=TRUE)
 #
 # === REVISION 2026-03-10b ===
 # Added z_score output. The percentile (result) compresses toward 1.0
@@ -57,6 +59,16 @@
 # giving negative-correlation pairs disproportionate weight after
 # centering. Reverse coding preserves the value range and centering
 # balance. Uses per-item observed max as scale max.
+#
+# === REVISION 2026-03-26c ===
+# Added auto_z parameter for automatic z_threshold calibration based on
+# the number of factors detected via parallel analysis (psych::fa.parallel).
+# The optimal z_threshold follows a U-shaped curve as a function of nF,
+# calibrated via simulation (R=30, nF=2-40, items/factor=6, n=300).
+# A LOESS smoother provides the mapping nF → z_threshold.
+# When auto_z=TRUE, the function estimates nF from the data, looks up the
+# optimal z, and uses it for flagging. The user can override with a fixed
+# z_threshold value.
 # ===
 
 library(dplyr)
@@ -64,6 +76,28 @@ library(magrittr)
 library(lavaan)
 library(psych)
 library(mice)
+
+# --- Calibration lookup: nF → optimal z_threshold ---
+# From calibration simulation (R=30, items/factor=6, n=300, corProp=0.05, 10% careless)
+# LOESS-smoothed to avoid noise in the raw means.
+.calibration_nf <- 2:40
+.calibration_z  <- c(
+  0.88, 1.17, 0.95, 1.08, 1.09, 1.01, 0.71, 0.81, 0.79, 0.77,
+  0.73, 0.49, 0.47, 0.55, 0.73, 0.74, 0.64, 0.61, 0.63, 0.68,
+  0.85, 0.75, 0.84, 0.83, 0.87, 0.87, 1.02, 1.10, 1.29, 1.49,
+  1.40, 1.55, 1.74, 1.83, 1.79, 1.87, 1.94, 2.07, 2.11
+)
+
+# Fit LOESS once at source time (lightweight, <1ms)
+.loess_fit <- loess(.calibration_z ~ .calibration_nf, span = 0.4)
+
+#' Look up calibrated z_threshold for a given number of factors
+#' @param nf Number of factors (integer)
+#' @return Optimal z_threshold (numeric)
+get_calibrated_z <- function(nf) {
+  nf_clamped <- max(min(nf, 40), 2)
+  as.numeric(predict(.loess_fit, newdata = data.frame(.calibration_nf = nf_clamped)))
+}
 
 # --- Helper: vectorized row-wise absolute correlation ---
 # Given two N x k matrices, computes |cor(A[i,], B[i,])| for each row i.
@@ -82,16 +116,50 @@ rowCor_abs <- function(A, B, zero_val = 0) {
 
 ReReReRe <- function(data, #any dataset with questionnaire data
                     corProp=0.05, # the proportion of highest correlations to use
-                    cutOff=0.99, # the severity of the evaluation
+                    cutOff=0.99, # the severity of the evaluation (legacy, for percentile)
+                    z_threshold=1.5, # z-score threshold for flagging (or "auto")
                     iterations=100,
                     min_pairs=15, # minimum number of item pairs to use
                     align_signs=TRUE, # align reverse-coded items using sample correlation signs
+                    auto_z=FALSE, # auto-calibrate z_threshold via parallel analysis
                     progress = F){
 
   #keep only numeric values
   data <- data[, sapply(data, is.numeric), drop = FALSE]
   N <- nrow(data)
   J <- ncol(data)
+
+  # --- Auto-calibration via parallel analysis ---
+  nFactors_detected <- NA
+  if (auto_z || identical(z_threshold, "auto")) {
+    # Suppress fa.parallel's plot and verbose output
+    pa <- tryCatch({
+      suppressMessages(suppressWarnings(
+        fa.parallel(data, fa = "fa", plot = FALSE, n.iter = 20)
+      ))
+    }, error = function(e) {
+      warning("ReReReRe: parallel analysis failed (", e$message,
+              "). Using default z_threshold=1.5.")
+      NULL
+    })
+
+    if (!is.null(pa)) {
+      nFactors_detected <- pa$nfact
+      z_threshold <- get_calibrated_z(nFactors_detected)
+      if (progress) {
+        cat(sprintf("  Auto-calibration: %d factors detected -> z_threshold = %.2f\n",
+                    nFactors_detected, z_threshold))
+      }
+    } else {
+      z_threshold <- 1.5  # fallback
+    }
+  } else if (is.character(z_threshold) && z_threshold == "auto") {
+    # Handles the string "auto" case
+    auto_z <- TRUE
+  }
+
+  # Ensure z_threshold is numeric at this point
+  z_threshold <- as.numeric(z_threshold)
 
   #convert to matrix for faster operations
   mat <- as.matrix(data)
@@ -248,6 +316,8 @@ ReReReRe <- function(data, #any dataset with questionnaire data
     indCors = rowCors,             # raw coupled correlation
     rand_mean = rand_means,        # mean of random iterations
     rand_sd = rand_sds,            # sd of random iterations
-    flagged = corComparedIndex <= cutOff  # legacy flagging
+    flagged = z_score <= z_threshold,  # z-score flagging (primary)
+    z_threshold_used = z_threshold,    # threshold used (useful when auto_z=TRUE)
+    nFactors_detected = nFactors_detected  # from parallel analysis (NA if not auto)
   )
 }
