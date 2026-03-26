@@ -9,8 +9,9 @@ multiverse_results_by_type.csv
 # External datasets (not ours to redistribute)
 external_datasets/
 
-# Temporary/diagnostic files
-diagnostic_*.R
+# Temporary/diagnostic files (session-specific)
+diagnostic_schneider.R
+diagnostic_thresholds.R
 create_brief.js
 _analysis.py
 

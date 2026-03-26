@@ -5,7 +5,7 @@ status: active
 priority: 4
 urgency: 3
 completion_percent: 80
-last_updated: "2026-03-27"
+last_updated: "2026-03-26"
 description: "Multiverse simulation study evaluating a permutation-based method (ReReReRe) for detecting careless respondents in questionnaire data."
 language: en
 tags:
@@ -83,22 +83,29 @@ Previous AUC values in CLAUDE.md were 1-true_AUC. All values above are corrected
 | 04 | Bloy 2025 | Only 17 gibberish items. |
 | 07 | Kuang 2025 | Very short clinical scales (7-14 items each). |
 
-### PISA 2018 (tested, not included — construct mismatch)
+### PISA 2018 (tested, not included — structural limits)
 
-| # | Dataset | N | Items | Factors | GT Type | RR AUC | Mah AUC |
-|---|---------|---|-------|---------|---------|--------|---------|
-| 11 | PISA 2018 ITA | 4078* | 135 | 36 scales | Screen-time C/IER weights | 0.350 | **0.773** |
+| # | Dataset | N | Items | Factors | GT Type | RR AUC (raw) | RR AUC (0-1) | Mah AUC |
+|---|---------|---|-------|---------|---------|--------------|--------------|---------|
+| 11 | PISA 2018 ITA | 4078* | 135 | 36 scales | Screen-time C/IER weights | 0.612 | **0.678** | **0.774** |
 
-*After longstring removal. RR signal is **inverted**: careless (fast/acquiescent) respondents
-have HIGHER z-scores because they produce more within-scale consistency than attentive
-respondents who genuinely vary. RR detects *inconsistent* carelessness (random/mixed), not
-*consistent* carelessness (acquiescence/straight-lining). PISA's dominant careless pattern
-is the latter. Mahalanobis works because outlier distance captures both types.
+*After longstring removal. Previous sign-flip implementation gave inverted signal (AUC=0.35);
+proper reverse coding fixed this (AUC=0.612). Signal now in correct direction (low z = careless).
 
-Z-scoring items fixes inversion (AUC→0.60) but damages homogeneous-scale datasets
-(Schneider 0.83→0.67). Min-max [0,1] rescaling partially helps (AUC→0.43) but is fragile
-to data entry errors. Decision: do NOT build rescaling into algorithm. Document "ensure items
-use the same response scale" as preprocessing recommendation.
+**Scale mixing:** PISA has 97 items on 4-point, 27 on 5-point, 5 on 6-point scales. All item
+ranges verified correct (min=1, max=expected, computer-based administration). Rescaling items
+to [0,1] using theoretical range improves AUC from 0.612 to 0.678 (+0.066), confirming that
+mixed scales bias the individual-level correlation.
+
+**Residual gap with Mahalanobis (0.678 vs 0.774):** 135 items across ~36 scales of 2-9 items
+each. Many short scales limit the cross-factor signal RR relies on. Additionally, PISA's
+dominant careless pattern is acquiescence/speed (consistent carelessness), which RR detects
+less well than random/mixed patterns (inconsistent carelessness). These are complementary
+constructs. Best RR MCC=0.243 at z=1.0 (raw) vs Mah practical MCC higher.
+
+**Recommendation:** for mixed-scale questionnaires, users should rescale items to a common
+range as preprocessing. Do NOT build rescaling into the algorithm — it would damage
+homogeneous-scale datasets where it's unnecessary.
 
 **Files:** `STU/CY07_MSU_STU_QQQ.sav` (1.8GB), `TIM/CY07_MSU_STU_TIM.sav` (581MB).
 612K students, 79 countries. ITA: 11,785 rows, 5,048 complete Likert cases.
@@ -549,6 +556,14 @@ but requires a lower z threshold. Best MCC at z=0.0-0.5 for Schneider (only 4 fa
 
 **Threshold sensitivity:** optimal z varies by dataset (Schroeders: z=2.0, Schneider: z=0.0,
 Niessen: z=1.5). Full multiverse re-run needed to calibrate new default.
+
+**PISA 2018 re-test with reverse coding:** The sign-flip inversion (AUC=0.35) was partly an
+artefact. Reverse coding gives AUC=0.612 (raw) and 0.678 (0-1 rescaled), both in the correct
+direction. Mahalanobis AUC=0.774 still wins — PISA has 36 short scales (2-9 items) and the
+dominant careless pattern (acquiescence/speed) is consistent, not inconsistent. All 135 item
+ranges verified correct (computer-based, no data entry errors). Scale mix: 97x4pt, 27x5pt,
+5x6pt. Rescaling to [0,1] helps because it removes the bias from unequal Likert ranges in
+the individual-level correlation.
 
 ### 2026-03-26 — Re-simulation with align_signs, Optimal z Shift, MAD Experiment
 
