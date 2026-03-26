@@ -6,8 +6,12 @@ mahalanobis_practical_results.csv
 multiverse_results.csv
 multiverse_results_by_type.csv
 
-# External datasets (not ours to redistribute)
-external_datasets/
+# External datasets — include only the 3 validation datasets
+external_datasets/*
+!external_datasets/README.md
+!external_datasets/01_Schroeders_2022/
+!external_datasets/06_Schneider_QoL/
+!external_datasets/08_Niessen_2016/
 
 # Temporary/diagnostic files (session-specific)
 diagnostic_schneider.R
