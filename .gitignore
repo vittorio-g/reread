@@ -1,0 +1,26 @@
+# Large simulation results (too big for GitHub)
+final_multiverse_results.csv
+final_multiverse_results_by_type.csv
+final_benchmark_results.csv
+mahalanobis_practical_results.csv
+multiverse_results.csv
+multiverse_results_by_type.csv
+
+# External datasets (not ours to redistribute)
+external_datasets/
+
+# Temporary/diagnostic files
+diagnostic_*.R
+create_brief.js
+_analysis.py
+
+# Generated documents
+*.docx
+
+# R workspace
+.Rhistory
+.RData
+.Rproj.user/
+
+# Checkpoints
+*_checkpoint.rds
