@@ -45,6 +45,7 @@ next_steps:
 | `External_Validation.R` | — | ReReReRe vs practical Mahalanobis on real datasets with known careless respondents |
 | `PISA_Validation.R` | — | PISA 2018 validation (screen-time C/IER ground truth, per-country) |
 | `Calibration_nF_to_Z.R` | — | nF→z_threshold calibration: R=30, nF 2-40, items/factor=6, scatter cloud plot |
+| `Multiverse_Full.R` | — | Full multiverse: nF×ipf×n×pct×corProp, R=10, auto-z evaluation |
 
 ## External Datasets (`external_datasets/`)
 
@@ -382,15 +383,19 @@ The multiverse explored corProp and z_threshold across wide ranges, but **users 
 need to tune these**. The permutation baseline is self-calibrating, so robust defaults work
 across conditions. The paper should recommend:
 
-- **corProp = 0.05** — best at nF>=8 where RR is recommended; corProp=0.03 wins for nF>=12
-  but 0.05 is more robust across the full range
-- **z_threshold = 1.5** — best overall (MCC=0.247) and in recommended zone (0.336) and
-  sweet spot (0.435). Previous z=2.0 recommendation was pre-align_signs; the fix raises
-  the random baseline, compressing z-scores and shifting the optimal threshold down.
-  Per-nF best z: 1.0 for nF=4-12, 1.5 for nF=20, 2.0 only for nF=25.
+- **corProp = 0.03** — wins overall in full multiverse (MCC=0.352 vs 0.327 for 0.05).
+  Fewer but more selective coupled pairs produce cleaner signal. Updated from previous
+  recommendation of 0.05 based on full multiverse with items_per_factor varied.
+- **z_threshold = 1.5** — best overall (MCC=0.274), essentially tied with z=2.0 (0.274).
+  Auto-z calibration (LOESS from parallel analysis) gives identical performance (0.268).
+  Any value in the 1.0-2.0 range works well; the method is not threshold-sensitive.
 
 z=1.5 means "the respondent's coupled correlation is 1.5 SDs above their own random baseline."
 Lower than the pre-align_signs z=2.0 because sign alignment raises random pair correlations.
+
+**Auto-z option:** available via `auto_z=TRUE` for user convenience. Uses parallel analysis
+to estimate nF, then looks up calibrated z from LOESS curve. Performance is identical to
+fixed z=1.5 (MCC 0.268 vs 0.274), so it adds no value beyond not requiring a parameter choice.
 
 The multiverse validates that these fixed defaults perform well, not that users should navigate
 the parameter space. The method is designed for non-technical users who need a single function
@@ -601,30 +606,388 @@ dramatically from left to right — at nF=2-6 all dots are tiny (MCC<0.15) while
 they're large (MCC>0.5). This visually encodes both the threshold AND the quality of
 detection improving with more factors.
 
-### Auto-calibration implementation (2026-03-26)
+## Full Multiverse Variable Space
 
-**Design:** Added `auto_z` parameter to `ReReReRe()`. When `auto_z=TRUE` (or `z_threshold="auto"`),
-the function:
-1. Runs parallel analysis (`psych::fa.parallel`) on the input data to estimate nF
-2. Looks up the optimal z_threshold from a LOESS curve fitted to the calibration data
-3. Returns results with the calibrated threshold in the output
+### Dataset variables (simulation)
 
-The LOESS fit smooths over the U-shaped calibration curve. For nF outside the calibrated range
-(2-40), it clamps to the nearest boundary value. The lookup is embedded directly in the function
-(no external CSV dependency) using the 39-point calibration means.
+| # | Variable | Description | Reasonable range |
+|---|----------|-------------|------------------|
+| D1 | **nFactors** | Number of latent factors | 2-40 |
+| D2 | **items_per_factor** | Items per factor | 3, 6, 10, 15, 20 |
+| D3 | **n_respondents** | Sample size | 50, 100, 200, 300, 500, 1000 |
+| D4 | **pct_careless** | % careless respondents | 5%, 10%, 25%, 50% |
+| D5 | **careless_type** | Type (random/longstring/mixed) | 1/3 each (fixed) |
+| D6 | **corruption_level** | How much of profile is corrupted | 50%-100% (fixed) |
+| D7 | **loading_range** | Factor loading strength | U(0.2, 0.8) fixed |
+| D8 | **factor_cor_max** | Max inter-factor correlation | 0.3, 0.5, 0.8 |
 
-**Rationale for LOESS over piecewise linear:** The raw means are noisy (especially at nF<10
-where R=30 gives SD>0.5). LOESS provides a smooth monotonic-ish curve that won't produce
-unexpected jumps between adjacent nF values. Span parameter chosen to balance smoothing with
-fidelity to the U-shape.
+### ReReReRe variables
 
-**Limitation:** The calibration was done with items/factor=6 fixed. Real questionnaires vary
-(3-20 items/factor). The z_threshold depends primarily on nF (which controls total coupled
-pairs and signal richness), and only weakly on items/factor (which affects per-pair quality).
-The auto-calibration should be robust across reasonable items/factor ranges, but edge cases
-(very few items/factor like 2-3) may benefit from a lower threshold.
+| # | Variable | Description | Reasonable range |
+|---|----------|-------------|------------------|
+| R1 | **corProp** | Proportion of high-correlation pairs | 0.03, 0.05, 0.07, 0.10, 0.15, 0.20 |
+| R2 | **z_threshold** | Z-score flagging threshold | 0.1-3.0 (post-hoc, free) |
+| R3 | **auto_z** | Automatic calibration (TRUE/FALSE) | Evaluated post-hoc |
+| R4 | **min_pairs** | Minimum coupled pairs | 10, 15, 20, 30 |
+| R5 | **iterations** | Number of random permutations | 50, 100, 200 |
+| R6 | **align_signs** | Reverse-coded item alignment | TRUE (fixed, mandatory) |
+
+**Notes:**
+- z_threshold (R2) is post-hoc: compute once, evaluate at all levels for free
+- auto_z (R3) is post-hoc: just look up calibrated z from the LOESS curve
+- corProp (R1) is the most expensive: each level requires a separate ReReReRe call
+- items_per_factor (D2) was fixed at 6 in calibration — varying it tests LOESS robustness
+
+### Auto-calibration v1: nF-only (2026-03-26)
+
+**Design:** Added `auto_z` parameter to `ReReReRe()`. When `auto_z=TRUE`, runs parallel
+analysis to estimate nF, looks up optimal z from LOESS curve (nF=2-40, 39 calibration points).
+
+**Result:** auto-z ≈ fixed z=1.5 (MCC 0.268 vs 0.274). The 1D calibration provides no
+meaningful improvement because it ignores items_per_factor, which the full multiverse showed
+explains 31% of variance — more than nF itself (26%).
+
+### Auto-calibration v2: total_items (2026-03-27, CURRENT)
+
+**2D calibration** over nF (4-30, 10 levels) × ipf (3-12, 6 levels) = 60 cells, 30 reps each.
+Script: `Calibration_nF_ipf_Z.R` | Runtime: 35.5 min | 1,800 RR calls.
+
+**Key finding: total_items is the best single predictor of optimal z.**
+
+Simple linear model: `z = 0.505 + 0.0042 * total_items` (R²=0.476)
+vs `z = 0.261 + 0.020*nF + 0.055*ipf` (R²=0.245)
+
+Total_items alone explains twice the variance of nF + ipf separately, confirming that
+what matters is the total number of item pairs available for the coupled correlation.
+
+**Performance comparison:**
+
+| Strategy | Mean MCC | vs fixed z=1.5 |
+|----------|----------|----------------|
+| z fixed = 1.5 | 0.316 | — |
+| **Auto-z 2D** | **0.340** | **+0.024** |
+| Oracle | 0.380 | +0.064 |
+
+Auto-z 2D closes **38% of the gap** between fixed and oracle. The gain is concentrated
+on longer questionnaires where the optimal z diverges most from 1.5:
+
+| Total items | z=1.5 MCC | Auto-z MCC | Gain | Optimal z |
+|-------------|-----------|------------|------|-----------|
+| 48 | 0.14 | 0.15 | +0.01 | ~0.9 |
+| 120 | 0.41 | 0.45 | +0.04 | ~0.6 |
+| 200 | 0.66 | 0.66 | ±0.00 | ~1.2 |
+| 300 | 0.69 | 0.78 | +0.09 | ~2.4 |
+| 360 | 0.65 | 0.82 | +0.17 | ~2.8 |
+
+For questionnaires >200 items, the optimal z rises well above 1.5 and auto-calibration
+provides substantial gains. Below 100 items, z≈0.5-1.0 is optimal and the gain is small.
+
+**Optimal z by nF × ipf (from lookup table):**
+
+| nF\ipf | 3 | 6 | 10 | 12 |
+|--------|-----|-----|------|------|
+| 4 | 1.1 | 0.8 | 1.0 | 0.8 |
+| 8 | 1.0 | 1.0 | 0.7 | 0.7 |
+| 12 | 1.0 | 0.6 | 0.6 | 0.7 |
+| 15 | 0.7 | 0.5 | 0.7 | 1.1 |
+| 20 | 0.7 | 0.5 | 1.2 | 1.8 |
+| 25 | 0.7 | 0.7 | 1.9 | 2.3 |
+| 30 | 0.6 | 1.0 | 2.5 | 2.8 |
+
+The pattern is clear: optimal z forms a **diagonal gradient** from low-z (top-left, few items)
+to high-z (bottom-right, many items). This is because with many items, z-score distributions
+separate widely between good and careless respondents, allowing a higher threshold for better
+specificity without losing sensitivity.
+
+**SD of optimal z** (calibration stability):
+- Low total items (<60): SD 0.5-0.7 → very noisy, any z in 0.5-1.5 is roughly equivalent
+- Medium (60-150): SD 0.3-0.5 → moderate stability
+- High (>200): SD 0.2-0.4 → stable calibration, clear optimal
+- nF=30 ipf=12 (360 items): SD=0.17 → extremely stable (z=2.8 ± 0.17)
+
+**MCC at optimal z (best achievable detection):**
+
+| nF\ipf | 3 | 6 | 10 | 12 |
+|--------|-------|-------|-------|-------|
+| 8 | 0.102 | 0.183 | 0.311 | 0.371 |
+| 12 | 0.126 | 0.303 | 0.487 | 0.542 |
+| 15 | 0.164 | 0.363 | 0.615 | 0.665 |
+| 20 | 0.190 | 0.495 | 0.706 | 0.784 |
+| 25 | 0.238 | 0.573 | 0.762 | 0.815 |
+| 30 | 0.265 | 0.635 | 0.818 | 0.838 |
+
+At nF=30 ipf=12 (360 items), MCC=0.838 — near-perfect detection.
+
+**Implementation plan:** Replace 1D LOESS with 2D lookup. In `ReReReRe()`:
+1. Estimate nF via parallel analysis
+2. Estimate ipf as total_items / nF (or use ncol(data) / nF)
+3. Compute total_items = ncol(data)
+4. Look up z from LOESS surface fitted on the 60-cell calibration grid
+
+**Output files (in `archive/calibration_nF_ipf_z/`):**
+- `calibration_raw.csv` — all reps × cells × z_thresholds
+- `calibration_best.csv` — optimal z per rep per cell
+- `calibration_lookup.csv` — mean optimal z per nF × ipf
+- `calibration_report.txt` — full text report
+- `plot_01_heatmap_optimal_z.png` — 2D heatmap of optimal z
+- `plot_02_heatmap_mcc.png` — 2D heatmap of MCC at optimal z
+- `plot_03_scatter_z_by_total_items.png` — scatter cloud (the key figure)
+- `plot_04_scatter_z_by_nF_colored.png` — scatter by nF, colored by ipf
+- `plot_05_z_curves_selected.png` — MCC vs z for selected combos
+- `plot_06_heatmap_z_variability.png` — SD of optimal z (calibration stability)
+- `plot_07_z_vs_total_items_loess.png` — LOESS fit for total_items → z
+- `plot_08_fixed_vs_auto_z_mcc.png` — head-to-head comparison
+
+## Full Multiverse Results (2026-03-26, with items_per_factor varied)
+
+Script: `Multiverse_Full.R` | Runtime: 161 minutes | 5,670 RR calls | 85,050 result rows
+
+### Design
+
+| # | Variable | Levels | Count |
+|---|----------|--------|-------|
+| D1 | nFactors | 4, 8, 12, 16, 20, 25, 30 | 7 |
+| D2 | items_per_factor | 3, 6, 10 | 3 |
+| D3 | n_respondents | 100, 300, 500 | 3 |
+| D4 | pct_careless | .05, .10, .25 | 3 |
+| R1 | corProp | 0.03, 0.05, 0.10 | 3 |
+| R2 | z_threshold | 0.1-3.0 step 0.2 | 15 (post-hoc) |
+| R3 | auto_z | evaluated post-hoc | free |
+| Reps | | 10 | |
+
+Fixed: align_signs=TRUE, iterations=100, min_pairs=15, careless types 1/3 each,
+corruption 50-100%, loadings U(0.2,0.8).
+
+### Key finding: items_per_factor is a major driver
+
+Oracle best MCC by nFactors × items_per_factor (corProp=0.05, averaged over n and pct):
+
+| nF | ipf=3 | ipf=6 | ipf=10 |
+|----|-------|-------|--------|
+| 4 | 0.075 | 0.111 | 0.160 |
+| 8 | 0.111 | 0.207 | 0.314 |
+| 12 | 0.143 | 0.295 | 0.460 |
+| 16 | 0.171 | 0.388 | 0.579 |
+| 20 | 0.202 | 0.447 | 0.593 |
+| 25 | 0.222 | 0.467 | 0.596 |
+| 30 | 0.260 | 0.513 | 0.560 |
+
+**Total items matters more than nF alone.** nF=12 with ipf=10 (120 items, MCC=0.46) beats
+nF=25 with ipf=3 (75 items, MCC=0.22). The signal comes from the TOTAL number of high-|r|
+pairs available, which scales with both nF and ipf.
+
+At nF=30 with ipf=10, MCC slightly drops vs nF=25 — likely because 300 items with n=100-500
+approaches the n < p regime where individual-level correlations become noisy.
+
+### corProp: smaller is better
+
+| corProp | Mean MCC (oracle) |
+|---------|-------------------|
+| 0.03 | **0.352** |
+| 0.05 | 0.327 |
+| 0.10 | 0.286 |
+
+corProp=0.03 wins overall. Fewer but more selective coupled pairs produce cleaner signal.
+This updates the previous recommendation of corProp=0.05.
+
+### Auto-z vs fixed z: the critical comparison
+
+Auto-z (LOESS-calibrated from parallel analysis) vs fixed z thresholds (corProp=0.05):
+
+| nF | auto-z | z=1.0 | z=1.5 | z=2.0 | oracle |
+|----|--------|-------|-------|-------|--------|
+| 8 | 0.171 | 0.171 | 0.163 | 0.153 | 0.211 |
+| 20 | 0.310 | 0.315 | 0.332 | 0.327 | 0.414 |
+| 30 | 0.322 | 0.295 | 0.327 | 0.341 | 0.444 |
+
+**Overall means:**
+| Strategy | Mean MCC |
+|----------|----------|
+| auto-z | 0.268 |
+| z=1.0 | 0.260 |
+| z=1.5 | **0.274** |
+| z=2.0 | **0.274** |
+| oracle | 0.356 |
+
+**Auto-z ≈ fixed z=1.5 ≈ fixed z=2.0.** The auto-calibration provides no meaningful
+improvement over simply using z=1.5 as a universal default. Auto-z correctly adapts (uses
+low z at nF=8, matching z=1.0's performance there), but the gain at low nF is offset by
+slight losses at high nF.
+
+**Practical implication:** the auto-z feature is "nice to have" for user convenience (no
+parameter choice needed), but the paper should emphasize that **z=1.5 is a robust universal
+default** and auto-calibration adds complexity without performance gain. The oracle gap
+(~0.08 MCC) represents room for improvement, but it requires knowing the true labels —
+no threshold selection strategy can close this gap without external information.
+
+### Auto-z by items_per_factor (corProp=0.05)
+
+| nF | ipf=3 | ipf=6 | ipf=10 |
+|----|-------|-------|--------|
+| 8 | 0.070 | 0.175 | 0.268 |
+| 20 | 0.159 | 0.371 | 0.401 |
+| 30 | 0.191 | 0.395 | 0.379 |
+
+Auto-z performance tracks items_per_factor closely, confirming that the calibration
+(done at ipf=6) generalizes reasonably to ipf=3 and ipf=10.
+
+### Output files (in `archive/multiverse_full/`)
+
+- `multiverse_full_raw.csv` (85,050 rows) — all results per condition × z_threshold
+- `multiverse_full_best.csv` (5,670 rows) — oracle best z per cell
+- `multiverse_full_auto_z.csv` (2,430 rows) — auto-z performance
+- `plot_multiverse_oracle_heatmap.png` — nF × ipf heatmap
+- `plot_auto_z_vs_oracle.png` — auto-z vs oracle by nF
+- `plot_ipf_effect_auto_z.png` — auto-z by ipf
+
+### Comprehensive Report (18 plots in `archive/multiverse_full/report/`)
+
+Script: `Report_Full_Multiverse.R` — generates full analysis of all variables.
+
+**Overall summary:**
+- Mean MCC (oracle best z): 0.322
+- Median MCC: 0.272
+- Max MCC: 1.000
+- Cells MCC >= 0.3: 45.5%
+- Cells MCC >= 0.5: 21.5%
+
+**Variable importance (eta-squared from one-way ANOVAs):**
+
+| Variable | eta² | Variance explained |
+|----------|------|-------------------|
+| **items_per_factor** | **0.311** | **31.1%** |
+| **nFactors** | **0.261** | **26.1%** |
+| pct_careless | 0.036 | 3.6% |
+| corProp | 0.017 | 1.7% |
+| n_respondents | 0.010 | 1.0% |
+
+**This is the paper's most important structural finding:** items_per_factor explains MORE
+variance than nFactors (31% vs 26%). Previous analyses focused entirely on nF, but ipf is
+equally important. The practical recommendation must be framed in terms of **total questionnaire
+length** (nF × ipf), not just number of constructs.
+
+**Main effects by variable:**
+
+D1 — nFactors:
+| nF | Mean MCC | SD |
+|----|----------|-----|
+| 4 | 0.117 | 0.063 |
+| 8 | 0.207 | 0.108 |
+| 12 | 0.294 | 0.158 |
+| 16 | 0.368 | 0.191 |
+| 20 | 0.405 | 0.199 |
+| 25 | 0.423 | 0.217 |
+| 30 | 0.438 | 0.220 |
+
+D2 — items_per_factor:
+| ipf | Mean MCC | SD |
+|-----|----------|-----|
+| 3 | 0.169 | 0.090 |
+| 6 | 0.341 | 0.174 |
+| 10 | 0.455 | 0.221 |
+
+D3 — n_respondents (diminishing returns):
+| n | Mean MCC |
+|---|----------|
+| 100 | 0.290 |
+| 300 | 0.335 |
+| 500 | 0.340 |
+
+n=500 adds almost nothing over n=300 (+0.005 MCC).
+
+D4 — pct_careless:
+| pct | Mean MCC |
+|-----|----------|
+| 5% | 0.273 |
+| 10% | 0.320 |
+| 25% | 0.372 |
+
+Higher base rate → higher MCC (more signal to detect, less class imbalance).
+
+R1 — corProp:
+| corProp | Mean MCC |
+|---------|----------|
+| 0.03 | **0.352** |
+| 0.05 | 0.327 |
+| 0.10 | 0.286 |
+
+R2 — z_threshold (averaged across all conditions):
+Best overall: z=1.3 to z=1.5 (MCC≈0.249), very flat plateau from z=0.9 to z=1.9.
+The method is remarkably insensitive to z_threshold choice in this range.
+
+**Sensitivity-Specificity trade-off:** at z=1.5, mean sensitivity≈0.73, specificity≈0.58.
+Crossover point at approximately z=1.1.
+
+**Z-score separation (good vs careless respondents):**
+| nF | Mean z (good) | Mean z (careless) | Gap |
+|----|---------------|-------------------|-----|
+| 4 | 0.43 | -0.05 | 0.48 |
+| 8 | 1.45 | 0.12 | 1.33 |
+| 12 | 2.38 | 0.39 | 1.99 |
+| 16 | 3.08 | 0.67 | 2.41 |
+| 20 | 3.59 | 1.02 | 2.57 |
+| 25 | 4.17 | 1.50 | 2.67 |
+| 30 | 4.75 | 1.94 | 2.81 |
+
+The gap grows quasi-linearly with nF, explaining the scaling advantage. At nF=4, good and
+careless z-scores overlap heavily (gap=0.48). By nF=30, the gap is 2.81 — nearly 3 SD of
+separation.
+
+**Total items as unifying predictor:**
+| Total items | Mean MCC |
+|-------------|----------|
+| 12 | 0.075 |
+| 48 | 0.188 |
+| 72 | 0.291 |
+| 120 | 0.443 |
+| 160 | 0.558 |
+| 200 | 0.580 |
+| 300 | 0.550 |
+
+MCC follows a saturating curve: rises steeply to ~150 items, then plateaus. Above 250 items,
+MCC can actually decline slightly (n < p regime with n=100-500). The LOESS smooth in
+plot 09 shows this clearly.
+
+**Report plots (in `archive/multiverse_full/report/`):**
+- `01_mcc_by_nFactors.png` — main effect with errorbars
+- `02_mcc_by_items_per_factor.png` — bar chart
+- `03_mcc_by_n_respondents.png` — diminishing returns curve
+- `04_mcc_by_pct_careless.png` — base rate effect
+- `05_mcc_by_corProp.png` — corProp comparison
+- `06_mcc_by_z_threshold.png` — z curve with recommended line
+- `07_z_curves_by_nFactors.png` — z sensitivity by nF (optimal z shifts)
+- `08_heatmap_nF_x_ipf.png` — the key 2D heatmap
+- `09_mcc_by_total_items.png` — unifying total_items predictor with LOESS
+- `10_nF_x_n_interaction.png` — nF × sample size
+- `11_nF_x_pct_interaction.png` — nF × base rate
+- `12_nF_x_corProp_interaction.png` — nF × corProp
+- `13_auto_z_vs_fixed_vs_oracle.png` — threshold strategy comparison
+- `14_sens_spec_tradeoff.png` — sensitivity/specificity crossover
+- `15_boxplot_mcc_by_nF.png` — MCC distribution by nF
+- `16_heatmap_nF_x_z.png` — full nF × z heatmap with optimal borders
+- `17_ipf_within_nF.png` — grouped bars ipf within each nF
+- `18_z_separation_by_nF.png` — z-score gap good vs careless
 
 ## Revision Log
+
+### 2026-03-26d — Full Multiverse with items_per_factor varied
+
+Ran `Multiverse_Full.R`: 7 nF × 3 ipf × 3 n × 3 pct × 3 corProp × R=10 = 5,670 RR calls,
+85,050 result rows. Runtime: 161 minutes.
+
+**Three key findings:**
+
+1. **items_per_factor is a major driver** — at nF=12: ipf=3→MCC 0.14, ipf=6→0.30, ipf=10→0.46.
+   Total items matters more than nF alone. This means the practical recommendation should be
+   framed in terms of total questionnaire length, not just number of constructs.
+
+2. **corProp=0.03 beats 0.05** (MCC 0.352 vs 0.327) — fewer but more selective pairs work better.
+   Updates previous recommendation.
+
+3. **Auto-z ≈ fixed z=1.5** (MCC 0.268 vs 0.274) — the LOESS-calibrated threshold provides no
+   meaningful improvement over a universal z=1.5 default. Auto-z adapts correctly (low z at low
+   nF, high z at high nF) but the aggregate performance is identical. The feature adds
+   convenience without performance cost or gain.
 
 ### 2026-03-26c — Auto-calibration: nF → z_threshold via parallel analysis
 

@@ -1,0 +1,114 @@
+================================================================================
+FULL MULTIVERSE REPORT — ReReReRe Parameter Analysis
+Generated: 2026-03-26 20:26:52.450806
+================================================================================
+
+Total raw rows: 85050
+Total best rows: 5670
+Replications per cell: 10
+Dataset conditions: 189
+
+--- D1: nFactors ---
+  nF= 4: mean=0.117, sd=0.063, median=0.107
+  nF= 8: mean=0.207, sd=0.108, median=0.191
+  nF=12: mean=0.294, sd=0.158, median=0.274
+  nF=16: mean=0.368, sd=0.191, median=0.347
+  nF=20: mean=0.405, sd=0.199, median=0.403
+  nF=25: mean=0.423, sd=0.217, median=0.403
+  nF=30: mean=0.438, sd=0.220, median=0.426
+
+--- D2: items_per_factor ---
+  ipf= 3: mean=0.169, sd=0.090
+  ipf= 6: mean=0.341, sd=0.174
+  ipf=10: mean=0.455, sd=0.221
+
+--- D3: n_respondents ---
+  n= 100: mean=0.290, sd=0.176
+  n= 300: mean=0.335, sd=0.213
+  n= 500: mean=0.340, sd=0.225
+
+--- D4: pct_careless ---
+  pct=5%: mean=0.273, sd=0.201
+  pct=10%: mean=0.320, sd=0.204
+  pct=25%: mean=0.372, sd=0.205
+
+--- R1: corProp ---
+  corProp=0.03: mean=0.352, sd=0.234
+  corProp=0.05: mean=0.327, sd=0.207
+  corProp=0.10: mean=0.286, sd=0.170
+
+--- R2: z_threshold ---
+  z=0.1: mean=0.211
+  z=0.3: mean=0.222
+  z=0.5: mean=0.232
+  z=0.7: mean=0.239
+  z=0.9: mean=0.243
+  z=1.1: mean=0.247
+  z=1.3: mean=0.249
+  z=1.5: mean=0.249
+  z=1.7: mean=0.248
+  z=1.9: mean=0.245
+  z=2.1: mean=0.241
+  z=2.3: mean=0.237
+  z=2.5: mean=0.231
+  z=2.7: mean=0.226
+  z=2.9: mean=0.218
+
+--- Total Items Effect ---
+   12 items: mean=0.075, sd=0.041
+   24 items: mean=0.113, sd=0.048
+   36 items: mean=0.142, sd=0.058
+   40 items: mean=0.159, sd=0.064
+   48 items: mean=0.188, sd=0.071
+   60 items: mean=0.199, sd=0.067
+   72 items: mean=0.291, sd=0.097
+   75 items: mean=0.224, sd=0.087
+   80 items: mean=0.304, sd=0.093
+   90 items: mean=0.261, sd=0.089
+   96 items: mean=0.374, sd=0.112
+  120 items: mean=0.443, sd=0.120
+  150 items: mean=0.458, sd=0.139
+  160 items: mean=0.558, sd=0.132
+  180 items: mean=0.503, sd=0.165
+  200 items: mean=0.580, sd=0.161
+  250 items: mean=0.585, sd=0.216
+  300 items: mean=0.550, sd=0.249
+
+--- Z-score Separation ---
+  nF= 4: good=0.43, careless=-0.05, gap=0.48
+  nF= 8: good=1.45, careless=0.12, gap=1.33
+  nF=12: good=2.38, careless=0.39, gap=1.99
+  nF=16: good=3.08, careless=0.67, gap=2.41
+  nF=20: good=3.59, careless=1.02, gap=2.57
+  nF=25: good=4.17, careless=1.50, gap=2.67
+  nF=30: good=4.75, careless=1.94, gap=2.81
+
+================================================================================
+OVERALL SUMMARY
+================================================================================
+
+Overall mean MCC (oracle best z): 0.322
+Overall median MCC: 0.272
+Max MCC observed: 1.000
+Cells with MCC >= 0.3: 45.5%
+Cells with MCC >= 0.5: 21.5%
+
+VARIABLE IMPORTANCE (eta-squared from one-way ANOVAs on oracle MCC):
+              nFactors: eta2 = 0.261 (26.1% variance explained)
+      items_per_factor: eta2 = 0.311 (31.1% variance explained)
+         n_respondents: eta2 = 0.010 (1.0% variance explained)
+          pct_careless: eta2 = 0.036 (3.6% variance explained)
+               corProp: eta2 = 0.017 (1.7% variance explained)
+
+RECOMMENDED DEFAULTS:
+  corProp = 0.03 (best overall)
+  z_threshold = 1.5 (robust universal default)
+  auto_z = optional (no performance gain, adds convenience)
+  align_signs = TRUE (mandatory)
+  min_pairs = 15
+  iterations = 100
+
+PRACTICAL RECOMMENDATION:
+  Use ReReReRe when total_items >= 60 (e.g., nF>=10 with ipf>=6)
+  Sweet spot: total_items >= 120, n >= 300
+  Below 60 items: detection is weak (MCC < 0.20)
