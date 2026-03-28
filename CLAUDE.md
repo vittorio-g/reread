@@ -718,11 +718,22 @@ specificity without losing sensitivity.
 
 At nF=30 ipf=12 (360 items), MCC=0.838 — near-perfect detection.
 
-**Implementation plan:** Replace 1D LOESS with 2D lookup. In `ReReReRe()`:
-1. Estimate nF via parallel analysis
-2. Estimate ipf as total_items / nF (or use ncol(data) / nF)
-3. Compute total_items = ncol(data)
-4. Look up z from LOESS surface fitted on the 60-cell calibration grid
+**Implementation (DONE, 2026-03-28):** Replaced 1D LOESS with 2D total_items-based lookup.
+Changes to `ReReReRe.R`:
+
+| Parameter | Before | After | Rationale |
+|-----------|--------|-------|-----------|
+| corProp default | 0.05 | **0.03** | MCC 0.352 vs 0.327 in full multiverse |
+| auto_z engine | 1D (nF → z via LOESS) | **2D (total_items → z)** | R²=0.476 vs 0.245 |
+| Calibration table | 39 points (nF=2-40) | **60 points (10 nF × 6 ipf)** | More robust |
+| Fallback formula | none | **z = 0.505 + 0.0042 × total_items** | If LOESS fails |
+| z clamp range | nF in [2,40] | **z in [0.3, 3.5]** | Prevents extreme thresholds |
+
+When `auto_z=TRUE`, `ReReReRe()` now:
+1. Computes total_items = ncol(data)
+2. Optionally runs parallel analysis (for nF in output)
+3. Looks up z from LOESS fitted on 60-cell 2D calibration grid
+4. Falls back to linear formula if LOESS prediction fails
 
 **Output files (in `archive/calibration_nF_ipf_z/`):**
 - `calibration_raw.csv` — all reps × cells × z_thresholds
@@ -969,6 +980,19 @@ plot 09 shows this clearly.
 - `18_z_separation_by_nF.png` — z-score gap good vs careless
 
 ## Revision Log
+
+### 2026-03-28 — ReReReRe.R updated with multiverse-informed defaults
+
+Applied all findings from full multiverse and 2D calibration to the algorithm:
+
+1. **corProp default 0.05 → 0.03**: fewer but more selective coupled pairs (MCC +0.025)
+2. **auto_z engine replaced**: 1D nF-only LOESS → 2D total_items-based LOESS (R² doubled)
+3. **60-point calibration table** embedded (10 nF × 6 ipf, 30 reps each)
+4. **Linear fallback formula** added: z = 0.505 + 0.0042 × total_items
+5. **z clamped to [0.3, 3.5]** to prevent extreme thresholds
+
+Tested on simulated data: 24 items → z=1.04, 180 items → z=1.00, MCC=0.450 on 30-factor test.
+Calibration curve captures the U-shape correctly.
 
 ### 2026-03-26d — Full Multiverse with items_per_factor varied
 
