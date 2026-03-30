@@ -1,0 +1,4 @@
+"Dataset","Items","nF_approx","N","Pct_careless","GT_type","RR_AUC","Mah_AUC","RR_MCC_z15","RR_MCC_auto","RR_MCC_oracle","RR_oracle_z","Mah_MCC","Auto_z"
+"Schroeders2022",60,6,605,40.3,"Experimental",0.606,0.537,0.177,0.228,0.225,0.5,0.045,0.72
+"Schneider_QoL",31,4,1649,6.6,"Latent class",0.735,0.724,0.118,0.17,0.298,0.1,0.208,1
+"Niessen2016",100,5,180,16.7,"Experimental (speed)",0.639,0.436,0.073,-0.067,0.161,1.8,0,0.6

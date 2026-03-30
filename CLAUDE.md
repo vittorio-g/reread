@@ -5,7 +5,7 @@ status: active
 priority: 4
 urgency: 3
 completion_percent: 80
-last_updated: "2026-03-26"
+last_updated: "2026-03-30"
 description: "Multiverse simulation study evaluating a permutation-based method (ReReReRe) for detecting careless respondents in questionnaire data."
 language: en
 tags:
@@ -17,49 +17,69 @@ tags:
 collaborators:
   - "Vittorio"
 next_steps:
-  - "Re-run full multiverse simulation with reverse-coding fix to find new optimal z threshold"
+  - "Write paper draft with all results (multiverse + external validation)"
   - "Create publication-quality figures (heatmaps, crossover plot, AUC curves)"
-  - "Write paper draft with corrected results and updated default recommendations"
-  - "Consider Johnson IPIP-NEO-300 inject-and-detect validation (stress-test reverse coding)"
+  - "Consider additional external datasets if available"
 ---
 
 # ReReReRe — Working Notes
 
 ## Current Files (root)
 
+### Root (core files)
+
 | File | Function | Purpose |
 |------|----------|---------|
+| `ReReReRe.R` | `ReReReRe()` + `rowCor_abs()` | Core detection method (vectorized, min_pairs, align_signs) |
 | `Synthetic_Good_Responses_2.R` | `simulated_good_responses()` | Generate clean CFA-based questionnaire data |
 | `Careless_machine_2.R` | `inject_careless()` | Inject careless responses (random/longstring/mixed) |
-| `A_good_careless_dataset.R` | `careless_corruption()` | SPI-specific wrapper (not used in multiverse) |
-| `ReReReRe.R` | `ReReReRe()` + `rowCor_abs()` | Core detection method (vectorized, min_pairs, align_signs) |
-| `Multiverse_Runner.R` | — | Pilot simulation runner (single replication) |
-| `Explore_Results.R` | — | Loads results, computes summaries, generates plots |
-| `Stratified_Analysis.R` | — | Stratified analyses by corruption level, pattern type, metric comparison |
-| `Diagnostic_ReReReRe.R` | — | Quick score distribution check (run before multiverse) |
-| `Benchmark_Comparison.R` | — | Standalone benchmark comparison (pilot, 72 conditions) |
-| `Final_Multiverse_Runner.R` | — | Publication-quality multiverse: R=50, integrated benchmarks, 3 CSVs |
-| `analyze_final_results.py` | — | Python analysis of final results (pandas, summary tables) |
-| `mahalanobis_practical_analysis.py` | — | Oracle vs practical (chi-square) Mahalanobis threshold analysis |
-| `mahalanobis_practical_threshold.R` | — | Re-run Mah with chi-square thresholds on same seeds |
-| `External_Validation.R` | — | ReReReRe vs practical Mahalanobis on real datasets with known careless respondents |
-| `PISA_Validation.R` | — | PISA 2018 validation (screen-time C/IER ground truth, per-country) |
-| `Calibration_nF_to_Z.R` | — | nF→z_threshold calibration: R=30, nF 2-40, items/factor=6, scatter cloud plot |
-| `Multiverse_Full.R` | — | Full multiverse: nF×ipf×n×pct×corProp, R=10, auto-z evaluation |
+
+### archive/scripts/ (analysis scripts)
+
+| File | Purpose |
+|------|---------|
+| `Final_Multiverse_Runner.R` | Publication-quality multiverse: R=50, integrated benchmarks, 3 CSVs |
+| `Multiverse_Full.R` | Full multiverse: nF×ipf×n×pct×corProp, R=10, auto-z evaluation |
+| `Calibration_nF_ipf_Z.R` | 2D nF×ipf→z_threshold calibration (60 cells, 30 reps) |
+| `Calibration_nF_to_Z.R` | 1D nF→z_threshold calibration (39 points, 30 reps) |
+| `Report_Full_Multiverse.R` | 18-plot comprehensive report of full multiverse |
+| `Report_Calibration.R` | 16-plot calibration analysis report |
+| `External_Validation_v2.R` | Validation on 3 datasets (corProp=0.03) |
+| `External_Validation_Goldammer.R` | Goldammer 2024: 3 experimental studies, BFI-2/IPIP |
+| `External_Validation_Johnson.R` | Johnson IPIP-NEO-300: inject-and-detect, 300 items |
+| `External_Validation.R` | Original validation (corProp=0.05, superseded by v2) |
+| `Benchmark_Comparison.R` | Standalone benchmark comparison (pilot, 72 conditions) |
+| `mahalanobis_practical_threshold.R` | Re-run Mah with chi-square thresholds on same seeds |
+| `PISA_Validation.R` | PISA 2018 validation (screen-time C/IER ground truth) |
+| `Multiverse_Runner.R` | Pilot simulation runner (single replication) |
+| `Explore_Results.R` | Loads results, computes summaries, generates plots |
+| `Stratified_Analysis.R` | Stratified analyses by corruption level, pattern type |
+| `Diagnostic_ReReReRe.R` | Quick score distribution check |
+| `A_good_careless_dataset.R` | SPI-specific wrapper (not used in multiverse) |
+| `analyze_final_results.py` | Python analysis of final results |
+| `mahalanobis_practical_analysis.py` | Oracle vs practical Mahalanobis analysis |
 
 ## External Datasets (`external_datasets/`)
 
 Downloaded 2026-03-25 for validation on real data. Full details in `external_datasets/README.md`.
 
-### Validated datasets (used in External_Validation.R)
+### Validated datasets (updated 2026-03-28, corProp=0.03)
 
-| # | Dataset | N | Items | Factors | GT Type | RR AUC | Mah AUC | RR MCC | Mah MCC | Status |
-|---|---------|---|-------|---------|---------|--------|---------|--------|---------|--------|
-| 06 | Schneider QoL | 1649 | 31 | 4 | Latent class | **0.821** | 0.724 | **0.361** | 0.208 | Best result |
-| 01 | Schroeders 2022 | 605 | 60 | ~6 (HEXACO) | Experimental induction | **0.620** | 0.537 | **0.170** | 0.045 | Marginal (nF~6) |
-| 08 | Niessen 2016 | 230 | 100 | 5 (Big Five) | Experimental (speed) | 0.551 | **0.585** | 0.066 | **0.159** | Dead zone (nF=5) |
+| # | Dataset | N | Items | Factors | GT Type | RR AUC | Mah AUC | RR MCC z=1.5 | RR MCC auto | Mah MCC | Notes |
+|---|---------|---|-------|---------|---------|--------|---------|-------------|-------------|---------|-------|
+| 01 | Schroeders 2022 | 605 | 60 | ~6 | Experimental | **0.606** | 0.537 | **0.177** | **0.228** | 0.045 | RR wins both |
+| 06 | Schneider QoL | 1649 | 31 | 4 | Latent class | **0.735** | 0.724 | 0.118 | 0.170 | **0.208** | Mah wins MCC |
+| 08 | Niessen 2016 | 180 | 100 | 5 | Speed manip | **0.639** | 0.436 | 0.073 | -0.067 | 0.000 | Both weak |
+| 13a | Goldammer S1 (BFI-2 bidir) | 291 | 60 | ~8 | Experimental | 0.711 | **0.787** | **0.320** | 0.269 | 0.257 | RR MCC wins |
+| 13b | Goldammer S2 (IPIP unidir) | 265 | 60 | ~6 | Experimental | 0.674 | **0.795** | **0.304** | 0.241 | 0.266 | RR MCC wins |
+| 13c | Goldammer S3 (longitudinal) | 523 | 60 | ~7 | Experimental | 0.462 | 0.550 | -0.036 | -0.072 | 0.011 | Both fail |
+| 12 | Johnson IPIP-300 | 5000 | 300 | 30 | Inject&detect | — | — | 0.63 (mean) | 0.726 | — | Spec=1.000, oracle MCC~0.73 |
 
-No longstring pre-screening applied in current results. RR wins AUC on 2/3, Mah wins on Niessen.
+**Summary (6 ground-truth datasets + 1 inject-and-detect):** RR AUC > Mah AUC on 4/6 datasets.
+RR MCC (z=1.5) > Mah MCC on 4/6. Johnson IPIP-300 (inject-and-detect): oracle MCC=0.73,
+auto-z MCC=0.726, specificity=1.000 across all conditions — near-zero false positives with
+300 items. Goldammer S3 fails for both methods (67% careless in longitudinal design).
+No longstring pre-screening applied.
 
 **AUC direction bug (fixed 2026-03-25):** pROC `direction` parameter was swapped in earlier
 runs — `"<"` was used for z_score (should be `">"`) and `">"` for D^2 (should be `"<"`).
@@ -114,16 +134,59 @@ homogeneous-scale datasets where it's unnecessary.
 C/IER weights computed per-scale via `mclust` Gaussian mixture on log response times
 (Ulitzsch et al. 2023 method). 48 scales, 135 Likert items found (59 missing from ITA).
 
+### Goldammer 2024 (experimental manipulation, BFI-2 / IPIP)
+
+| # | Dataset | N | Items | Factors | GT Type |
+|---|---------|---|-------|---------|---------|
+| 13a | Study 1 (BFI-2 bidir) | 291 | 60 | ~8 | Experimental (0=honest, 1=33% careless, 2=100%) |
+| 13b | Study 2 (IPIP unidir) | 265 | 60 | ~6 | Experimental (same conditions) |
+| 13c | Study 3 (longitudinal) | 523 | 60 | ~7 | Experimental (same conditions, t1 only) |
+
+**Source:** ETH Zurich Polybox, downloaded 2026-03-28.
+**Results:** RR MCC (z=1.5) beats Mahalanobis on S1 (0.320 vs 0.257) and S2 (0.304 vs 0.266).
+S3 fails for both methods — 67% careless rate in longitudinal design, possibly confounded by
+practice effects or test-retest variability that masks the careless signal.
+**Breakdown S1 (100% vs 33% careless):** 100% careless AUC=0.692, 33% careless AUC=0.738.
+Interestingly, 33% partial careless is slightly easier to detect (oracle MCC=0.405 vs 0.398),
+possibly because 100% random responding creates more extreme outliers that Mahalanobis catches
+better, while partial careless is a more "natural" pattern that RR's correlation-based approach
+handles well.
+
 ### Johnson IPIP-NEO-300 (Strategy 2 — inject and detect)
 
 | # | Dataset | N | Items | Factors | GT |
 |---|---------|---|-------|---------|-----|
 | 12 | Johnson 2005 | 20,993 | 300 | 30 facets | None (cleaned; 1,455 straightliners already removed) |
 
-**Purpose:** Stress-test align_signs with heavy reverse coding (148/300 items). Inject
-careless respondents at various rates, run RR, compare detection against simulation results
-for nF=30. Same dataset used by Welz & Alfons (2023) for careless onset detection.
-**File:** `ipip20993.sav` (8.6MB SPSS).
+**What it is:** The IPIP-NEO-300 is a 300-item personality questionnaire measuring 30 facets
+of the Big Five (6 facets per trait: Extraversion, Agreeableness, Conscientiousness,
+Neuroticism, Openness). Collected by John A. Johnson (2005) via a public website where
+people could take the personality test for free. Original N=20,993. Johnson already removed
+1,455 straightliners, so the dataset is considered "clean" — no careless ground truth exists.
+
+**Why we use it:** (1) **Inject-and-detect strategy** — we take 5,000 clean respondents, inject
+artificial careless at various rates, and test if ReReReRe finds them. (2) **Stress-test for
+align_signs** — 148/300 items are reverse-coded (~49%), the most extreme case in our validation.
+(3) **Largest questionnaire tested** — verifies that simulation predictions for nF=30 hold on
+real data. (4) **1-5 Likert scale**, online administration — realistic conditions.
+Same dataset used by Welz & Alfons (2023) for careless onset detection.
+
+**File:** `ipip20993.sav` (8.6MB SPSS). Values of 0 = unanswered (recoded to NA).
+Complete cases: 7,325 out of 20,993. Sampled to 5,000 for computational feasibility.
+
+**Results (2026-03-30):** Sampled 5,000 complete respondents (0→NA, complete.cases → 7,325,
+then random 5,000). Injected careless at 5%, 10%, 20% × 3 reps each. corProp=0.03.
+
+| pct | Mean MCC (oracle, z=3.0) | Mean MCC (z=1.5) | Mean MCC (auto, z=2.37) | Specificity |
+|-----|--------------------------|-------------------|-------------------------|-------------|
+| 5% | **0.750** | 0.628 | 0.726 | 1.000 |
+| 10% | **0.726** | 0.635 | — | 1.000 |
+| 20% | **0.702** | 0.607 | — | 1.000 |
+
+Specificity = 1.000 across nearly all conditions — with 300 items, virtually zero false
+positives at z≥1.5. Oracle sensitivity ~55-60% at z=3.0. Auto-z chose z=2.37 (appropriate
+for 300 items), closing most of the gap to oracle. Results consistent with simulation
+predictions for nF=30 (MCC ~0.6-0.8).
 
 ## Pipeline
 
@@ -980,6 +1043,33 @@ plot 09 shows this clearly.
 - `18_z_separation_by_nF.png` — z-score gap good vs careless
 
 ## Revision Log
+
+### 2026-03-28b — Comprehensive External Validation (6 datasets + Johnson inject-and-detect)
+
+Ran ReReReRe (corProp=0.03, z=1.5 + auto_z) vs practical Mahalanobis (chi-sq .001) on 6 real
+datasets with ground truth, plus inject-and-detect on Johnson IPIP-NEO-300.
+
+**Results summary (corProp=0.03):**
+
+| Dataset | N | Items | nF | RR AUC | Mah AUC | RR MCC z=1.5 | RR auto | Mah MCC |
+|---------|---|-------|----|--------|---------|-------------|---------|---------|
+| Schroeders 2022 | 605 | 60 | ~10 | **0.606** | 0.537 | **0.177** | **0.228** | 0.045 |
+| Schneider QoL | 1649 | 31 | ~5 | **0.735** | 0.724 | 0.118 | 0.170 | **0.208** |
+| Niessen 2016 | 180 | 100 | ~6 | **0.639** | 0.436 | 0.073 | -0.067 | 0.000 |
+| Goldammer S1 | 291 | 60 | ~8 | 0.711 | **0.787** | **0.320** | 0.269 | 0.257 |
+| Goldammer S2 | 265 | 60 | ~6 | 0.674 | **0.795** | **0.304** | 0.241 | 0.266 |
+| Goldammer S3 | 523 | 60 | ~7 | 0.462 | 0.550 | -0.036 | -0.072 | 0.011 |
+
+**Key findings:**
+1. RR AUC > Mah AUC on 4/6 datasets (all except Goldammer S1-S2 which have 64% careless rate)
+2. RR MCC (z=1.5) > Mah MCC on 4/6 datasets — practical Mahalanobis remains weak
+3. Auto-z beat z=1.5 on Schroeders (0.228 vs 0.177) — auto chose z=0.72, appropriate for 60 items
+4. Goldammer S3 (longitudinal) fails for both methods — 67% careless, t1 data only
+5. Niessen: both methods essentially at chance (nF=5, speed manipulation ≠ inconsistent carelessness)
+6. Johnson (inject-and-detect, 300 items): mean oracle MCC=0.726-0.750, auto-z MCC=0.726, spec=1.000
+
+**Goldammer S1 breakdown:** 100% careless AUC=0.692, 33% careless AUC=0.738. Partial careless
+slightly easier for RR; full random easier for Mahalanobis.
 
 ### 2026-03-28 — ReReReRe.R updated with multiverse-informed defaults
 

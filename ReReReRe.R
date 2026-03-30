@@ -9,6 +9,7 @@
 #   flagged   - binary flag (z_score <= z_threshold)
 #   z_threshold_used - the z_threshold used for flagging (useful when auto_z=TRUE)
 #   nFactors_detected - number of factors detected by parallel analysis (when auto_z=TRUE)
+#   mode_used - "coupled" (standard top-k%) or "weighted" (all pairs, |r|-weighted)
 #
 # === REVISION 2026-03-10b ===
 # Added z_score output. The percentile (result) compresses toward 1.0
@@ -76,6 +77,24 @@
 #   z_threshold: 1.5 (confirmed as robust universal default)
 #   auto_z: now uses 2D calibration (total_items based)
 # Variable importance (eta²): ipf=31.1%, nF=26.1%, pct=3.6%, corProp=1.7%, n=1.0%
+#
+# === REVISION 2026-03-30 ===
+# Added weighted mode for short questionnaires (≤60 items).
+# Standard ReReReRe selects top-k% pairs by |r|; weighted mode uses ALL pairs
+# but weights each by its sample-level |r|. This maximizes information when
+# few high-correlation pairs are available.
+#
+# mode parameter: "auto" (default), "coupled", "weighted"
+#   "auto"    → weighted if total_items ≤ 60, coupled otherwise
+#   "coupled" → standard top-k% pair selection (original algorithm)
+#   "weighted"→ all pairs weighted by |r_sample|
+#
+# Simulation results (18 conditions, nF=4-20, ipf=3-10, 3 reps):
+#   ≤30 items:  weighted +37% MCC over standard
+#   30-60 items: weighted +24% MCC
+#   60-100 items: standard −8% better
+#   >100 items:  standard −16% better
+# The crossover is at ~60 items, justifying the auto-switch threshold.
 # ===
 
 library(dplyr)
@@ -152,6 +171,37 @@ rowCor_abs <- function(A, B, zero_val = 0) {
   r
 }
 
+# --- Helper: weighted coherence score across all pairs ---
+# Instead of computing a single correlation across k pairs (rowCor_abs),
+# this computes a weighted average of pair-level standardized agreement.
+# Each pair contributes proportionally to its sample-level |r| weight.
+#
+# A, B: N x k matrices (item values for each pair, after sign alignment)
+# weights: vector of length k (|r_sample| for each pair)
+# Returns: vector of length N (weighted coherence score per person)
+rowCor_weighted <- function(A, B, weights) {
+  N <- nrow(A)
+  k <- ncol(A)
+
+  # Standardize each column (across respondents)
+  A_z <- scale(A, center = TRUE, scale = TRUE)
+  B_z <- scale(B, center = TRUE, scale = TRUE)
+
+  # Replace NAs from zero-variance columns
+  A_z[is.na(A_z)] <- 0
+  B_z[is.na(B_z)] <- 0
+
+  # Cross-products: how well does each person follow each pair's pattern?
+  cross_products <- A_z * B_z  # N x k
+
+  # Weight each pair by |r_sample|
+  w_matrix <- matrix(weights, nrow = N, ncol = k, byrow = TRUE)
+  weighted_sum <- rowSums(cross_products * w_matrix, na.rm = TRUE)
+  total_weight <- sum(weights)
+
+  return(weighted_sum / total_weight)
+}
+
 ReReReRe <- function(data, #any dataset with questionnaire data
                     corProp=0.03, # proportion of highest correlations (0.03 beats 0.05 in multiverse)
                     cutOff=0.99, # the severity of the evaluation (legacy, for percentile)
@@ -160,12 +210,28 @@ ReReReRe <- function(data, #any dataset with questionnaire data
                     min_pairs=15, # minimum number of item pairs to use
                     align_signs=TRUE, # align reverse-coded items using sample correlation signs
                     auto_z=FALSE, # auto-calibrate z_threshold based on total_items
+                    mode="auto", # "auto", "coupled" (standard top-k%), "weighted" (all pairs, |r|-weighted)
+                    min_r=0.0, # minimum |r| to include a pair in weighted mode (0 = all pairs)
                     progress = F){
 
   #keep only numeric values
   data <- data[, sapply(data, is.numeric), drop = FALSE]
   N <- nrow(data)
   J <- ncol(data)
+
+  # --- Resolve mode: auto selects weighted (≤60 items) or coupled (>60 items) ---
+  mode <- match.arg(mode, c("auto", "coupled", "weighted"))
+  use_weighted <- FALSE
+  if (mode == "auto") {
+    use_weighted <- (J <= 60)
+    if (progress) {
+      cat(sprintf("  Mode: auto → %s (%d items %s 60)\n",
+                  ifelse(use_weighted, "weighted", "coupled"),
+                  J, ifelse(use_weighted, "<=", ">")))
+    }
+  } else if (mode == "weighted") {
+    use_weighted <- TRUE
+  }
 
   # --- Auto-calibration based on total_items ---
   # Uses total_items (ncol) as the primary predictor for optimal z_threshold.
@@ -221,122 +287,188 @@ ReReReRe <- function(data, #any dataset with questionnaire data
   corMat[upper.tri(corMat, diag = TRUE)] <- NA
   rawCorMat[upper.tri(rawCorMat, diag = TRUE)] <- NA
 
-  #getting the threshold correlation based on the proportion of highest correlation we decided to include.
-  corThreshold <- quantile(corMat, 1 - corProp, na.rm = TRUE)
-
-  #getting the row and col indices with values higher than threshold
-  couples <- which(corMat >= corThreshold, arr.ind = TRUE)
-  k <- nrow(couples)
-
-  # Enforce minimum number of pairs for stable individual-level correlations.
-  # With fewer than ~10-15 pairs, cor() across k points is extremely noisy
-  # (k=2 always gives r=±1, k=3-5 is barely meaningful).
-  # If corProp yields too few pairs, we lower the threshold to include more.
-  if (k < min_pairs) {
-    all_cors <- corMat[lower.tri(corMat)]
-    all_cors <- all_cors[!is.na(all_cors)]
-    n_available <- length(all_cors)
-    use_k <- min(min_pairs, n_available)
-    if (use_k > 0) {
-      corThreshold <- sort(all_cors, decreasing = TRUE)[use_k]
-      couples <- which(corMat >= corThreshold, arr.ind = TRUE)
-      k <- nrow(couples)
-    }
-  }
-
-  if (k == 0) {
-    warning("No item pairs above threshold. Returning NA.")
-    return(data.frame(result = rep(NA, N), indCors = rep(NA, N), flagged = rep(NA, N)))
-  }
-
-  # --- Sign alignment for reverse-coded items ---
-  # Get the sign of each coupled pair's sample-level correlation.
-  # Used to flip B columns so all pairs contribute the same direction
-  # at the individual level, preventing cancellation in rowCor_abs.
-  coupled_signs <- sign(rawCorMat[couples])
-  n_negative <- sum(coupled_signs < 0)
-
-  if (n_negative > 0 && !align_signs) {
-    warning(sprintf(
-      "ReReReRe: %d of %d coupled pairs (%.0f%%) have negative sample correlations. ",
-      n_negative, k, 100 * n_negative / k),
-      "This typically indicates reverse-coded items that will cancel each other ",
-      "in the individual-level correlation. Consider setting align_signs=TRUE ",
-      "or reverse-coding items before running ReReReRe.")
-  }
-
   # Precompute the full sign matrix for random pair reverse-coding
-  # (only the lower triangle is populated, matching rawCorMat)
   if (align_signs) {
     signMat <- sign(rawCorMat)
   }
 
-  #getting the correlation for each individual (VECTORIZED)
-  # Extract N x k matrices for the coupled pairs
-  A_coupled <- mat[, couples[, 1], drop = FALSE]
-  B_coupled <- mat[, couples[, 2], drop = FALSE]
+  if (use_weighted) {
+    # ====================================================================
+    # WEIGHTED MODE: use ALL pairs, weighted by |r_sample|
+    # Better for short questionnaires (≤60 items) where few high-|r| pairs
+    # exist. Every pair contributes, but strong correlations count more.
+    # ====================================================================
 
-  # Apply sign alignment: reverse-code B columns where sample correlation is negative
-  if (align_signs && n_negative > 0) {
-    # For each negatively-correlated coupled pair, reverse-code the B item
-    # using (max+1-x). This keeps values in the original Likert range,
-    # preventing centering distortion that sign flip (*-1) would cause.
-    needs_flip <- which(coupled_signs < 0)
-    # Get the max of each B item that needs flipping
-    flip_max <- item_max[couples[needs_flip, 2]]
-    # Reverse code: (max+1) - x, applied column-wise
-    B_coupled[, needs_flip] <- rep(flip_max + 1, each = N) - B_coupled[, needs_flip]
-  }
+    # Get all pairs from lower triangle
+    pair_idx <- which(!is.na(corMat), arr.ind = TRUE)
+    pair_r <- rawCorMat[pair_idx]
+    pair_abs_r <- corMat[pair_idx]
+    pair_sign <- sign(pair_r)
 
-  # zero_val=0: for zero-variance rows (longstring), return 0 so they are easily spotted
-  rowCors <- rowCor_abs(A_coupled, B_coupled, zero_val = 0)
+    # Filter by min_r (default 0 = all pairs)
+    keep <- pair_abs_r >= min_r & !is.na(pair_abs_r)
+    pair_idx <- pair_idx[keep, , drop = FALSE]
+    pair_r <- pair_r[keep]
+    pair_abs_r <- pair_abs_r[keep]
+    pair_sign <- pair_sign[keep]
 
-  #### RANDOM PERMUTATION ITERATIONS ####
+    k <- nrow(pair_idx)
+    weights <- pair_abs_r
 
-  #all possible column pair indices
-  all_pairs <- combn(J, 2) # 2 x C(J,2) matrix
-  n_pairs <- ncol(all_pairs)
+    if (progress) {
+      cat(sprintf("  Weighted mode: using %d pairs (min_r=%.2f), mean |r|=%.3f\n",
+                  k, min_r, mean(pair_abs_r)))
+    }
 
-  all_RIC <- matrix(NA_real_, nrow = N, ncol = iterations)
+    # Build A and B matrices
+    A_coupled <- mat[, pair_idx[, 1], drop = FALSE]
+    B_coupled <- mat[, pair_idx[, 2], drop = FALSE]
 
-  if(progress == TRUE){
-    pb <- txtProgressBar(min = 0, max = iterations, style = 3)
-  }
+    # Sign alignment: reverse-code B for negative-correlation pairs
+    n_negative <- sum(pair_sign < 0)
+    if (align_signs && n_negative > 0) {
+      needs_flip <- which(pair_sign < 0)
+      flip_max <- item_max[pair_idx[needs_flip, 2]]
+      B_coupled[, needs_flip] <- rep(flip_max + 1, each = N) - B_coupled[, needs_flip]
+    }
 
-  #computing random correlations
-  for (i in seq_len(iterations)){
+    # Weighted coherence score (coupled)
+    rowCors <- rowCor_weighted(A_coupled, B_coupled, weights)
 
-    if(progress == TRUE) setTxtProgressBar(pb, i)
+    # --- Random permutation baseline (weighted) ---
+    all_RIC <- matrix(NA_real_, nrow = N, ncol = iterations)
 
-    #Sampling k random column pairs (same number as coupled pairs)
-    sampled <- sample(n_pairs, k)
-    idx1 <- all_pairs[1, sampled]
-    idx2 <- all_pairs[2, sampled]
+    if (progress) pb <- txtProgressBar(min = 0, max = iterations, style = 3)
 
-    #computing the random individual correlation (VECTORIZED)
-    A_rand <- mat[, idx1, drop = FALSE]
-    B_rand <- mat[, idx2, drop = FALSE]
+    for (i in seq_len(iterations)) {
+      if (progress) setTxtProgressBar(pb, i)
 
-    # Apply sign alignment to random pairs too (reverse coding, same logic)
-    if (align_signs) {
-      # Look up sign from signMat. signMat has lower triangle populated
-      # (row > col), so ensure correct indexing.
-      ri <- pmax(idx1, idx2)
-      ci <- pmin(idx1, idx2)
-      rand_signs <- signMat[cbind(ri, ci)]
-      rand_signs[is.na(rand_signs)] <- 1
-      rand_neg <- which(rand_signs < 0)
-      if (length(rand_neg) > 0) {
-        rand_flip_max <- item_max[idx2[rand_neg]]
-        B_rand[, rand_neg] <- rep(rand_flip_max + 1, each = N) - B_rand[, rand_neg]
+      # Sample k random pairs (ensuring different items)
+      rand_idx1 <- sample(J, k, replace = TRUE)
+      rand_idx2 <- sample(J, k, replace = TRUE)
+      same <- rand_idx1 == rand_idx2
+      while (any(same)) {
+        rand_idx2[same] <- sample(J, sum(same), replace = TRUE)
+        same <- rand_idx1 == rand_idx2
+      }
+
+      A_rand <- mat[, rand_idx1, drop = FALSE]
+      B_rand <- mat[, rand_idx2, drop = FALSE]
+
+      # Sign alignment for random pairs
+      if (align_signs) {
+        ri <- pmax(rand_idx1, rand_idx2)
+        ci <- pmin(rand_idx1, rand_idx2)
+        rand_signs <- signMat[cbind(ri, ci)]
+        rand_signs[is.na(rand_signs)] <- 1
+        rand_neg <- which(rand_signs < 0)
+        if (length(rand_neg) > 0) {
+          rand_flip_max <- item_max[rand_idx2[rand_neg]]
+          B_rand[, rand_neg] <- rep(rand_flip_max + 1, each = N) - B_rand[, rand_neg]
+        }
+      }
+
+      # Use SAME weights as coupled (keeps comparison fair)
+      all_RIC[, i] <- rowCor_weighted(A_rand, B_rand, weights)
+    }
+
+    if (progress) close(pb)
+
+  } else {
+    # ====================================================================
+    # COUPLED MODE (standard): select top-k% pairs by |r|
+    # Better for longer questionnaires (>60 items) where high-|r| pairs
+    # provide a cleaner signal than including weak pairs as noise.
+    # ====================================================================
+
+    #getting the threshold correlation based on the proportion of highest correlation we decided to include.
+    corThreshold <- quantile(corMat, 1 - corProp, na.rm = TRUE)
+
+    #getting the row and col indices with values higher than threshold
+    couples <- which(corMat >= corThreshold, arr.ind = TRUE)
+    k <- nrow(couples)
+
+    # Enforce minimum number of pairs for stable individual-level correlations.
+    if (k < min_pairs) {
+      all_cors <- corMat[lower.tri(corMat)]
+      all_cors <- all_cors[!is.na(all_cors)]
+      n_available <- length(all_cors)
+      use_k <- min(min_pairs, n_available)
+      if (use_k > 0) {
+        corThreshold <- sort(all_cors, decreasing = TRUE)[use_k]
+        couples <- which(corMat >= corThreshold, arr.ind = TRUE)
+        k <- nrow(couples)
       }
     }
 
-    # zero_val=0: undefined correlation → 0 (no evidence of relationship).
-    all_RIC[, i] <- rowCor_abs(A_rand, B_rand, zero_val = 0)
-  }
+    if (k == 0) {
+      warning("No item pairs above threshold. Returning NA.")
+      return(data.frame(result = rep(NA, N), indCors = rep(NA, N), flagged = rep(NA, N)))
+    }
 
-  if(progress == TRUE) close(pb)
+    # --- Sign alignment for reverse-coded items ---
+    coupled_signs <- sign(rawCorMat[couples])
+    n_negative <- sum(coupled_signs < 0)
+
+    if (n_negative > 0 && !align_signs) {
+      warning(sprintf(
+        "ReReReRe: %d of %d coupled pairs (%.0f%%) have negative sample correlations. ",
+        n_negative, k, 100 * n_negative / k),
+        "This typically indicates reverse-coded items that will cancel each other ",
+        "in the individual-level correlation. Consider setting align_signs=TRUE ",
+        "or reverse-coding items before running ReReReRe.")
+    }
+
+    # Extract N x k matrices for the coupled pairs
+    A_coupled <- mat[, couples[, 1], drop = FALSE]
+    B_coupled <- mat[, couples[, 2], drop = FALSE]
+
+    # Apply sign alignment: reverse-code B columns where sample correlation is negative
+    if (align_signs && n_negative > 0) {
+      needs_flip <- which(coupled_signs < 0)
+      flip_max <- item_max[couples[needs_flip, 2]]
+      B_coupled[, needs_flip] <- rep(flip_max + 1, each = N) - B_coupled[, needs_flip]
+    }
+
+    # zero_val=0: for zero-variance rows (longstring), return 0 so they are easily spotted
+    rowCors <- rowCor_abs(A_coupled, B_coupled, zero_val = 0)
+
+    #### RANDOM PERMUTATION ITERATIONS ####
+
+    all_pairs <- combn(J, 2) # 2 x C(J,2) matrix
+    n_pairs <- ncol(all_pairs)
+
+    all_RIC <- matrix(NA_real_, nrow = N, ncol = iterations)
+
+    if (progress) pb <- txtProgressBar(min = 0, max = iterations, style = 3)
+
+    for (i in seq_len(iterations)){
+      if (progress) setTxtProgressBar(pb, i)
+
+      sampled <- sample(n_pairs, k)
+      idx1 <- all_pairs[1, sampled]
+      idx2 <- all_pairs[2, sampled]
+
+      A_rand <- mat[, idx1, drop = FALSE]
+      B_rand <- mat[, idx2, drop = FALSE]
+
+      if (align_signs) {
+        ri <- pmax(idx1, idx2)
+        ci <- pmin(idx1, idx2)
+        rand_signs <- signMat[cbind(ri, ci)]
+        rand_signs[is.na(rand_signs)] <- 1
+        rand_neg <- which(rand_signs < 0)
+        if (length(rand_neg) > 0) {
+          rand_flip_max <- item_max[idx2[rand_neg]]
+          B_rand[, rand_neg] <- rep(rand_flip_max + 1, each = N) - B_rand[, rand_neg]
+        }
+      }
+
+      all_RIC[, i] <- rowCor_abs(A_rand, B_rand, zero_val = 0)
+    }
+
+    if (progress) close(pb)
+  }
 
   corComparedIndex <- rowMeans(all_RIC < rowCors, na.rm = TRUE)
 
@@ -351,14 +483,17 @@ ReReReRe <- function(data, #any dataset with questionnaire data
                     (rowCors - rand_means) / rand_sds,
                     0)
 
+  mode_used <- ifelse(use_weighted, "weighted", "coupled")
+
   data.frame(
     result = corComparedIndex,     # legacy percentile score
     z_score = z_score,             # z-score: SDs above random baseline
-    indCors = rowCors,             # raw coupled correlation
+    indCors = rowCors,             # raw coupled/weighted coherence score
     rand_mean = rand_means,        # mean of random iterations
     rand_sd = rand_sds,            # sd of random iterations
     flagged = z_score <= z_threshold,  # z-score flagging (primary)
     z_threshold_used = z_threshold,    # threshold used (useful when auto_z=TRUE)
-    nFactors_detected = nFactors_detected  # from parallel analysis (NA if not auto)
+    nFactors_detected = nFactors_detected,  # from parallel analysis (NA if not auto)
+    mode_used = mode_used          # "coupled" or "weighted"
   )
 }

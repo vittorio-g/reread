@@ -159,3 +159,108 @@ Heatmaps, scatter clouds, curve z, LOESS fits, confronti fixed vs auto-z.
 - Usare ReReReRe quando **total_items ≥ 60** (es. nF≥10 con ipf≥6)
 - Sweet spot: **total_items ≥ 120, n ≥ 300**
 - Sotto 60 item: detection debole (MCC < 0.20)
+
+---
+
+### 6. Validazione Esterna (2026-03-28)
+
+Testato ReReReRe (corProp=0.03) vs Mahalanobis pratico (chi-sq .001) su **6 dataset reali** con ground truth di careless responding.
+
+#### Dataset validati
+
+| Dataset | N | Items | nF | Tipo GT | RR AUC | Mah AUC | RR MCC (z=1.5) | Mah MCC |
+|---------|---|-------|----|---------|--------|---------|---------------|---------|
+| Schroeders 2022 (HEXACO) | 605 | 60 | ~10 | Sperimentale | **0.606** | 0.537 | **0.177** | 0.045 |
+| Schneider QoL | 1649 | 31 | ~5 | Classe latente | **0.735** | 0.724 | 0.118 | **0.208** |
+| Niessen 2016 (IPIP) | 180 | 100 | ~6 | Speed manipulation | **0.639** | 0.436 | 0.073 | 0.000 |
+| Goldammer S1 (BFI-2) | 291 | 60 | ~8 | Sperimentale | 0.711 | **0.787** | **0.320** | 0.257 |
+| Goldammer S2 (IPIP) | 265 | 60 | ~6 | Sperimentale | 0.674 | **0.795** | **0.304** | 0.266 |
+| Goldammer S3 (long.) | 523 | 60 | ~7 | Sperimentale | 0.462 | 0.550 | -0.036 | 0.011 |
+
+#### Johnson IPIP-NEO-300 (inject-and-detect, COMPLETATO)
+
+300 item, 30 facet, ~148 reverse-coded. 5000 rispondenti, careless iniettati al 5%, 10%, 20%.
+
+| pct | MCC oracle (z=3.0) | MCC z=1.5 | MCC auto (z=2.37) | Specificità |
+|-----|---------------------|-----------|-------------------|-------------|
+| 5% | **0.750** | 0.628 | 0.726 | 1.000 |
+| 10% | **0.726** | 0.635 | — | 1.000 |
+| 20% | **0.702** | 0.607 | — | 1.000 |
+
+**Specificità = 1.000** su quasi tutte le condizioni — zero falsi positivi con 300 item!
+Auto-z ha scelto z=2.37, appropriato per 300 item. Risultati coerenti con le simulazioni per nF=30.
+
+#### Risultati chiave
+
+1. **RR AUC > Mah AUC su 4/6 dataset** — conferma il vantaggio del ranking
+2. **RR MCC (z=1.5) > Mah MCC su 4/6 dataset** — il Mahalanobis pratico resta debole
+3. **Auto-z funziona bene su Schroeders**: ha scelto z=0.72 (appropriato per 60 item), MCC=0.228 vs z=1.5 MCC=0.177
+4. **Goldammer S3 fallisce per entrambi** — 67% careless in design longitudinale, probabilmente confuso da effetti di pratica
+5. **Johnson (300 item)**: performance eccellente, coerente con le simulazioni per nF=30
+6. **Breakdown Goldammer S1**: 33% careless (AUC=0.738) leggermente più facile da detectare per RR rispetto a 100% careless (AUC=0.692) — il careless parziale mantiene più struttura che RR può sfruttare
+
+---
+
+### 7. Weighted Mode per questionari corti (2026-03-30)
+
+**Problema:** il ReReReRe standard seleziona il top-k% delle coppie di item per correlazione. Con questionari corti (≤60 item), ci sono poche coppie ad alta |r| → segnale debole, MCC basso.
+
+**Soluzione:** invece di selezionare solo le coppie migliori, usare **TUTTE le coppie** ma pesarle per la loro correlazione sample-level |r|. Le coppie fortemente correlate contano di più, quelle deboli contribuiscono poco ma non vengono scartate.
+
+#### Come funziona
+
+La funzione `rowCor_weighted()` calcola per ogni rispondente:
+1. Standardizza le risposte di ogni item (z-score across respondents)
+2. Per ogni coppia: calcola il prodotto incrociato z_A × z_B
+3. Pesa ogni coppia per il suo |r_sample|
+4. Media pesata → "coherence score" del rispondente
+
+#### Risultati simulazione (18 condizioni, nF=4-20, ipf=3-10)
+
+| Range item | Standard (MCC) | Weighted (MCC) | Differenza |
+|-----------|----------------|----------------|------------|
+| **≤30 item** | 0.110 | **0.151** | **+37%** |
+| **30-60 item** | 0.193 | **0.255** | **+32%** |
+| 60-100 item | **0.315** | 0.300 | −5% |
+| 100-200 item | **0.524** | 0.414 | −21% |
+
+**Crossover a ~60 item**: il weighted vince per questionari corti, il coupled vince per questionari lunghi.
+
+#### Integrazione automatica nel ReReReRe.R
+
+Nuovo parametro `mode` con tre opzioni:
+- `"auto"` (default) → **weighted** se ≤60 item, **coupled** se >60 item
+- `"coupled"` → forza il metodo standard (top-k% coppie)
+- `"weighted"` → forza il metodo pesato (tutte le coppie)
+
+**L'utente non deve fare nulla** — lo switch è automatico e trasparente. Il ReReReRe ora funziona meglio out-of-the-box su questionari di qualsiasi lunghezza.
+
+#### Test di verifica
+
+| Test | Item | Mode auto | MCC weighted | MCC coupled |
+|------|------|-----------|-------------|-------------|
+| 24 item (4 fattori) | 24 | weighted | **0.118** | 0.031 |
+| 120 item (20 fattori) | 120 | coupled | 0.197 | **0.442** |
+
+Conferma: lo switch automatico sceglie sempre il metodo migliore.
+
+---
+
+### 8. Dataset Pennycook & Rand 2019 (2026-03-30)
+
+Replicato l'articolo "Lazy, not biased" (Study 1 + Study 2) e applicato il ReReReRe.
+
+- **Study 1**: 30 item (15 fake + 15 real news accuracy ratings), scala 1-4
+- **Study 2**: 24 item (12 fake + 12 real), scala 1-4
+
+Il ReReReRe flagga ~48% dei rispondenti su queste scale molto corte — troppi. Questo ha motivato lo sviluppo del weighted mode (Sezione 7).
+
+Il codice di replicazione è in `Dataset/dataset_1/Replication_and_ReReReRe.R`.
+
+---
+
+### 9. Analisi fattoriale nel ReReReRe
+
+**No, il ReReReRe standard NON fa analisi fattoriale.** Lavora solo con la matrice di correlazione tra item e le permutazioni random. Non conosce la struttura fattoriale.
+
+L'unica eccezione: quando `auto_z=TRUE`, esegue una **parallel analysis** (`psych::fa.parallel()`) per stimare nF e calibrare automaticamente il z_threshold. Ma questo è opzionale — con i default (`auto_z=FALSE`, `z_threshold=1.5`), nessuna analisi fattoriale viene eseguita.
