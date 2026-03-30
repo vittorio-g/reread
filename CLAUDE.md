@@ -30,7 +30,7 @@ next_steps:
 
 | File | Function | Purpose |
 |------|----------|---------|
-| `ReReReRe.R` | `ReReReRe()` + `rowCor_abs()` | Core detection method (vectorized, min_pairs, align_signs) |
+| `ReReReRe.R` | `ReReReRe()` + `rowCor_abs()` + `rowCor_weighted()` | Core detection method (coupled + weighted modes, auto-switch at 60 items) |
 | `Synthetic_Good_Responses_2.R` | `simulated_good_responses()` | Generate clean CFA-based questionnaire data |
 | `Careless_machine_2.R` | `inject_careless()` | Inject careless responses (random/longstring/mixed) |
 
@@ -58,6 +58,7 @@ next_steps:
 | `A_good_careless_dataset.R` | SPI-specific wrapper (not used in multiverse) |
 | `analyze_final_results.py` | Python analysis of final results |
 | `mahalanobis_practical_analysis.py` | Oracle vs practical Mahalanobis analysis |
+| `Test_Weighted_ReReReRe.R` | Weighted vs standard ReReReRe simulation comparison (18 conditions) |
 
 ## External Datasets (`external_datasets/`)
 
@@ -225,6 +226,15 @@ Old-style validation: all injected careless respondents count as positive class.
 - **Do not mix response scales** — items with different Likert ranges (e.g., 4-point mixed with
   6-point) can bias the individual-level correlation. Z-scoring fixes this but damages
   homogeneous-scale data. Recommend users ensure uniform response scale as preprocessing.
+- **Weighted mode for short questionnaires** — when total_items ≤ 60, the standard top-k% pair
+  selection yields too few high-|r| pairs for reliable detection. The weighted mode uses ALL
+  item pairs but weights each by its sample-level |r|, maximizing information. Auto-switches
+  via `mode="auto"` (default). Simulation: +37% MCC for ≤30 items, +32% for 30-60 items.
+  For >60 items, coupled mode remains superior (weighted dilutes signal with weak pairs).
+- **No factor analysis required** — ReReReRe works purely from the item correlation matrix
+  and permutations. No knowledge of factor structure is needed. The only exception: when
+  `auto_z=TRUE`, a parallel analysis (`psych::fa.parallel()`) estimates nF for z_threshold
+  calibration, but this is optional.
 
 ## Final Multiverse Design (as run, 2026-03-21)
 
@@ -1043,6 +1053,48 @@ plot 09 shows this clearly.
 - `18_z_separation_by_nF.png` — z-score gap good vs careless
 
 ## Revision Log
+
+### 2026-03-30 — Weighted Mode for Short Questionnaires
+
+**Problem:** Standard ReReReRe selects top-k% item pairs by |r|. With short questionnaires
+(≤60 items), few high-|r| pairs exist, leading to weak detection (MCC ~0.03-0.11).
+
+**Solution:** New `rowCor_weighted()` function computes a weighted coherence score using ALL
+item pairs, where each pair's contribution is proportional to its sample-level |r|. Strong
+correlations count more, weak pairs contribute proportionally less but aren't discarded.
+
+**Algorithm (weighted mode):**
+1. Standardize each item across respondents (z-scores)
+2. For each pair: compute cross-product z_A × z_B per respondent
+3. Weight each pair by its |r_sample|
+4. Weighted average across all pairs → "coherence score" per respondent
+5. Permutation baseline: same k random pairs, same weights, z-score as usual
+
+**Simulation results (18 conditions: nF=4-20, ipf=3-10, N=300, 10% careless, 3 reps):**
+
+| Item range | Standard (oracle MCC) | Weighted (oracle MCC) | Difference |
+|-----------|----------------------|----------------------|------------|
+| ≤30 items | 0.110 | **0.151** | **+37%** |
+| 30-60 items | 0.193 | **0.255** | **+32%** |
+| 60-100 items | **0.315** | 0.300 | −5% |
+| 100-200 items | **0.524** | 0.414 | −21% |
+
+**Crossover at ~60 items.** Weighted wins below, coupled wins above.
+
+**Integration into ReReReRe.R:**
+
+| Parameter | Default | Options | Effect |
+|-----------|---------|---------|--------|
+| `mode` | `"auto"` | `"auto"`, `"coupled"`, `"weighted"` | Auto: weighted if ≤60 items, coupled if >60 |
+| `min_r` | 0.0 | 0.0-1.0 | Min |r| to include pair in weighted mode (0 = all) |
+
+New output column: `mode_used` ("coupled" or "weighted").
+
+**Verification test (single seed):**
+- 24 items: weighted MCC=0.118 vs coupled MCC=0.031 (auto chose weighted ✓)
+- 120 items: coupled MCC=0.442 vs weighted MCC=0.197 (auto chose coupled ✓)
+
+Also moved `Test_Weighted_ReReReRe.R` to `archive/scripts/`.
 
 ### 2026-03-28b — Comprehensive External Validation (6 datasets + Johnson inject-and-detect)
 
