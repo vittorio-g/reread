@@ -259,8 +259,97 @@ Il codice di replicazione è in `Dataset/dataset_1/Replication_and_ReReReRe.R`.
 
 ---
 
-### 9. Analisi fattoriale nel ReReReRe
+### 9. EFA-based pair selection: Opzione A testata e scartata (2026-03-30)
 
-**No, il ReReReRe standard NON fa analisi fattoriale.** Lavora solo con la matrice di correlazione tra item e le permutazioni random. Non conosce la struttura fattoriale.
+Abbiamo testato un'**Opzione A** in cui l'EFA guidava sia la selezione che il peso delle coppie:
+1. Parallel analysis → stima nF
+2. EFA (oblimin, minres) → assegna ogni item al fattore primario
+3. Genera TUTTE le coppie within-factor
+4. Pesa per **λ_i × λ_j** (prodotto dei loading — stimatore "shrinkage")
 
-L'unica eccezione: quando `auto_z=TRUE`, esegue una **parallel analysis** (`psych::fa.parallel()`) per stimare nF e calibrare automaticamente il z_threshold. Ma questo è opzionale — con i default (`auto_z=FALSE`, `z_threshold=1.5`), nessuna analisi fattoriale viene eseguita.
+**Risultati su 54 condizioni (nF=4-20, ipf=3-10, 3 reps):**
+
+| Range item | Standard | Weighted | EFA-A | Vincitore |
+|-----------|----------|----------|-------|-----------|
+| <30 | 0.101 | **0.167** | 0.152 | Weighted |
+| 30-60 | 0.183 | **0.247** | 0.240 | Weighted |
+| 60-100 | 0.352 | 0.351 | **0.378** | EFA-A |
+| 100-200 | **0.523** | 0.400 | 0.489 | Standard |
+
+L'EFA-A vince solo nella fascia 60-100 item (+0.027 MCC). Il problema: la parallel analysis sottostima nF (~70% del vero) e i prodotti dei loading amplificano questo errore.
+
+**Decisione: Opzione A scartata.** Ma l'idea di usare l'EFA per la *selezione* delle coppie resta promettente → vedi Opzione D sotto.
+
+---
+
+### 10. EFA-D: il nuovo metodo di default (2026-03-31)
+
+Dopo aver scartato l'Opzione A (loading weights), abbiamo testato l'**Opzione D**:
+- L'EFA decide **QUALI coppie** contano → solo coppie within-factor
+- La |r| osservata decide **QUANTO pesano** → più robusto dei loading
+
+L'idea è che l'EFA fornisce informazione *strutturale* (quali item appartengono allo stesso fattore), mentre la correlazione osservata fornisce *robustezza* (se l'EFA sbaglia l'assegnazione, la |r| bassa compensa automaticamente).
+
+#### Simulazione ampia (360 condizioni)
+
+8 nF × 3 ipf × 3 pct_careless × 5 reps, N=300. Runtime: 200 minuti.
+
+| Range item | Standard | Weighted | **EFA-D** | Vincitore |
+|-----------|----------|----------|-----------|-----------|
+| <30 | 0.108 | **0.160** | 0.158 | Weighted (per 0.002!) |
+| 30-60 | 0.198 | 0.244 | **0.261** | **EFA-D** |
+| 60-100 | 0.306 | 0.307 | **0.351** | **EFA-D** |
+| 100-200 | 0.501 | 0.405 | **0.529** | **EFA-D** |
+| >200 | **0.656** | 0.393 | 0.653 | Standard (per 0.003!) |
+
+**Complessivo: EFA-D = 0.347 vs Standard = 0.303 vs Weighted = 0.286**
+
+**EFA-D vince in 18/24 celle nF×ipf (75%).** Perde solo per margini irrisori (<0.01) nelle fasce estreme. È essenzialmente il metodo migliore *ovunque*.
+
+#### Winner map dettagliata (nF × ipf)
+
+| nF | ipf=3 | ipf=6 | ipf=10 |
+|----|-------|-------|--------|
+| 4 | Weighted (+0.006) | **EFA-D** (+0.005) | **EFA-D** (+0.036) |
+| 6 | Weighted (+0.005) | **EFA-D** (+0.009) | **EFA-D** (+0.032) |
+| 8 | **EFA-D** (+0.007) | Weighted (+0.007) | **EFA-D** (+0.038) |
+| 10 | Weighted (+0.010) | **EFA-D** (+0.027) | **EFA-D** (+0.035) |
+| 15 | **EFA-D** (+0.004) | **EFA-D** (+0.071) | **EFA-D** (+0.006) |
+| 20 | **EFA-D** (+0.016) | **EFA-D** (+0.091) | **EFA-D** (+0.011) |
+| 25 | **EFA-D** (+0.018) | **EFA-D** (+0.047) | **EFA-D** (+0.005) |
+| 30 | **EFA-D** (+0.011) | Standard (+0.012) | Standard (+0.011) |
+
+Il caso più forte: **nF=20, ipf=6 (120 item): EFA-D=0.499 vs Standard=0.408** (+22%).
+
+#### Perché funziona nonostante la parallel analysis sbagli?
+
+La parallel analysis sottostima sistematicamente nF (~69% del vero). Ma questo non è un problema perché:
+1. **Fattori più grandi = più coppie within-factor** per ogni fattore
+2. **Il peso |r| osservata compensa**: se un item finisce nel fattore sbagliato, la sua |r| con gli altri item di quel fattore sarà bassa → contribuisce poco
+3. L'EFA cattura comunque la struttura grossolana del questionario
+
+#### Implementazione nel ReReReRe.R
+
+`mode="efa_d"` è ora il **default**. L'algoritmo:
+1. Parallel analysis → stima nF
+2. EFA (oblimin, minres) → assegna ogni item al fattore primario
+3. Genera tutte le coppie within-factor
+4. Pesa per |r_osservata|
+5. `rowCor_weighted()` → score di coerenza per rispondente
+6. Baseline di permutazione: k coppie random, stessi pesi → z-score
+
+Se l'EFA fallisce (es. Heywood cases, convergenza), fa **fallback automatico al weighted** mode (tutte le coppie). I modi legacy `"coupled"` e `"weighted"` restano disponibili per retrocompatibilità.
+
+Nuovo output: `n_pairs` (numero di coppie usate).
+
+Report con 12 grafici in `archive/efa_d_comparison/`.
+
+---
+
+### 11. Analisi fattoriale nel ReReReRe
+
+**Sì, dal 2026-03-31 il ReReReRe usa l'EFA come parte del suo pipeline di default.**
+
+L'EFA viene usata SOLO per la selezione delle coppie (quali item sono nello stesso fattore), NON per lo scoring. Il peso delle coppie viene dalla correlazione osservata, non dai loading. Questo rende il metodo robusto anche quando l'EFA sbaglia la struttura fattoriale.
+
+`psych` era già una dipendenza (per `auto_z`), quindi non aggiunge nuove dipendenze.

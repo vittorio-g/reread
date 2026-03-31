@@ -8,93 +8,56 @@
 #   rand_sd   - sd of random iteration correlations
 #   flagged   - binary flag (z_score <= z_threshold)
 #   z_threshold_used - the z_threshold used for flagging (useful when auto_z=TRUE)
-#   nFactors_detected - number of factors detected by parallel analysis (when auto_z=TRUE)
-#   mode_used - "coupled" (standard top-k%) or "weighted" (all pairs, |r|-weighted)
+#   nFactors_detected - number of factors detected by parallel analysis
+#   mode_used - "efa_d" (EFA within-factor + |r| weights, default)
+#               or legacy modes "coupled"/"weighted" if forced
+#   n_pairs   - number of item pairs used
 #
-# === REVISION 2026-03-10b ===
-# Added z_score output. The percentile (result) compresses toward 1.0
-# with larger questionnaires (ceiling effect). The z-score preserves
-# how FAR above random the coupled correlation is, not just WHETHER
-# it beats random. With more items, z-scores for good respondents
-# INCREASE (better precision → smaller SD → larger z), while careless
-# respondents stay near 0. This inverts the ceiling effect.
+# === REVISION 2026-03-31 ===
+# EFA-D is now the DEFAULT AND ONLY method (mode="efa_d").
 #
-# === REVISION 2026-03-10c ===
-# Fixed zero_val for random pairs: changed from 1 to 0.
-# Old: zero_val=1 was a percentile-specific hack — it forced
-#   randomCor=1 for zero-variance rows so that (1 < indCors) = FALSE,
-#   pushing the percentile to 0. But this contaminated rand_mean and
-#   rand_sd, poisoning the z-score and delta metrics for partial
-#   longstring respondents (bimodal random iteration distributions).
-# New: zero_val=0 for both coupled and random. Undefined correlation
-#   = 0 (no evidence of linear relationship). Percentile still works:
-#   pure longstring → coupled=0, random=0, mean(0<0)=0 → flagged.
+# Previous approach: "coupled" (top-k% pairs by |r|) for >60 items,
+# "weighted" (all pairs, |r|-weighted) for ≤60 items. This required an
+# arbitrary cutoff and neither method was optimal across the full range.
 #
-# === REVISION 2026-03-25 ===
-# Added align_signs parameter (default TRUE) to fix reverse-coded item
-# cancellation. Problem: the sample-level correlation matrix uses abs()
-# to select coupled pairs, so pairs with negative correlations (e.g.,
-# positively-keyed x negatively-keyed items within the same factor)
-# are correctly identified as "strongly associated." But at the
-# individual level, rowCor_abs computes a SINGLE correlation across
-# all k pairs. Pairs with positive and negative sample-level correlations
-# contribute opposite signs, cancelling each other out INSIDE cor()
-# before abs() is applied. Result: indCors ≈ 0 for everyone.
+# EFA-D uses Exploratory Factor Analysis to identify WHICH pairs matter
+# (within-factor only), then weights by observed |r| (empirical, robust).
+# Simulation results (360 conditions, 8 nF × 3 ipf × 3 pct × 5 reps):
 #
-# Fix: use the sign of the raw (signed) sample correlation to align
-# all pairs before computing individual-level correlations. For each
-# pair where the sample-level correlation is negative, we reverse-code
-# the B column using (max+1-x) rather than multiplying by -1. Simple
-# sign flip (-1*x) distorts the centering in rowCor_abs: flipped values
-# fall outside the original Likert range, creating disproportionate
-# deviations from the mean and giving negative-correlation pairs more
-# weight in the individual-level correlation. Proper reverse coding
-# keeps all values in the original range, ensuring balanced contribution
-# from all pairs. Assumes max(observed) = max(scale), which holds for
-# Likert data with reasonable sample sizes. Applied to both coupled
-# and random pairs.
+#   Overall:     EFA-D=0.347 vs Standard=0.303 vs Weighted=0.286
+#   <30 items:   EFA-D=0.158 vs Standard=0.108 vs Weighted=0.160
+#   30-60 items: EFA-D=0.261 vs Standard=0.198 vs Weighted=0.244
+#   60-100:      EFA-D=0.351 vs Standard=0.306 vs Weighted=0.307
+#   100-200:     EFA-D=0.529 vs Standard=0.501 vs Weighted=0.405
+#   >200:        EFA-D=0.653 vs Standard=0.656 vs Weighted=0.393
 #
-# === REVISION 2026-03-26b ===
-# Changed align_signs from sign flip (*-1) to proper reverse coding
-# (max+1-x). Sign flip distorted the individual-level correlation by
-# giving negative-correlation pairs disproportionate weight after
-# centering. Reverse coding preserves the value range and centering
-# balance. Uses per-item observed max as scale max.
+# EFA-D wins or ties in every range. It wins 18/24 nF×ipf cells (75%).
+# The only cells where another method wins are by margins <0.01.
 #
-# === REVISION 2026-03-26c ===
-# Added auto_z parameter for automatic z_threshold calibration.
-# v1 (nF-only): LOESS on nF from 1D calibration. R²=0.245.
-# v2 (total_items, CURRENT): uses total_items = ncol(data) as predictor.
-#   Simple linear: z = 0.505 + 0.0042 * total_items (R²=0.476).
-#   2D LOESS surface over nF × ipf for when parallel analysis is available.
-#   total_items alone explains 2x more variance than nF+ipf separately.
-#   Auto-z closes 38% of the gap between fixed z=1.5 and oracle.
-#   Calibrated on: 10 nF (4-30) × 6 ipf (3-12) = 60 cells, 30 reps each.
+# Algorithm:
+#   1. Parallel analysis → estimate nF
+#   2. EFA (oblimin, minres) → assign each item to primary factor
+#   3. Generate ALL within-factor pairs
+#   4. Weight each pair by observed |r| (not loading product — more robust)
+#   5. rowCor_weighted() → coherence score per respondent
+#   6. Permutation baseline: same k random pairs, same weights → z-score
 #
-# === REVISION 2026-03-28 ===
-# Updated defaults based on full multiverse (5,670 RR calls, 85,050 rows):
-#   corProp: 0.05 → 0.03 (MCC 0.352 vs 0.327, fewer but more selective pairs)
-#   z_threshold: 1.5 (confirmed as robust universal default)
-#   auto_z: now uses 2D calibration (total_items based)
-# Variable importance (eta²): ipf=31.1%, nF=26.1%, pct=3.6%, corProp=1.7%, n=1.0%
+# Parallel analysis underestimates nF (~69% of true on average), but this
+# doesn't hurt — larger factors collect more within-factor pairs, and the
+# observed |r| weighting compensates for any cross-factor contamination.
 #
-# === REVISION 2026-03-30 ===
-# Added weighted mode for short questionnaires (≤60 items).
-# Standard ReReReRe selects top-k% pairs by |r|; weighted mode uses ALL pairs
-# but weights each by its sample-level |r|. This maximizes information when
-# few high-correlation pairs are available.
+# Legacy modes "coupled" and "weighted" remain available via mode parameter
+# for backward compatibility, but EFA-D is recommended for all cases.
 #
-# mode parameter: "auto" (default), "coupled", "weighted"
-#   "auto"    → weighted if total_items ≤ 60, coupled otherwise
-#   "coupled" → standard top-k% pair selection (original algorithm)
-#   "weighted"→ all pairs weighted by |r_sample|
-#
-# Simulation results (18 conditions, nF=4-20, ipf=3-10, 3 reps):
-#   ≤30 items:  weighted +37% MCC over standard
-#   30-60 items: weighted +24% MCC
-#   60-100 items: standard −8% better
-#   >100 items:  standard −16% better
-# The crossover is at ~60 items, justifying the auto-switch threshold.
+# === REVISION HISTORY ===
+# 2026-03-10b: Added z_score output (percentile has ceiling effect)
+# 2026-03-10c: Fixed zero_val for random pairs (1 → 0)
+# 2026-03-25:  Added align_signs for reverse-coded items
+# 2026-03-26b: Changed align_signs from sign flip to reverse coding
+# 2026-03-26c: Added auto_z calibration (total_items based)
+# 2026-03-28:  Updated defaults (corProp 0.05→0.03, confirmed z=1.5)
+# 2026-03-30:  Added weighted mode for short questionnaires
+# 2026-03-31:  EFA-D as default single method (replaces coupled/weighted split)
 # ===
 
 library(dplyr)
@@ -202,15 +165,114 @@ rowCor_weighted <- function(A, B, weights) {
   return(weighted_sum / total_weight)
 }
 
+# --- Helper: EFA-based within-factor pair selection ---
+# Runs parallel analysis + EFA, assigns items to primary factors,
+# generates all within-factor pairs, returns pair indices + observed |r| weights.
+#
+# Returns list(idx_A, idx_B, weights, pair_sign, nF_detected, k) or NULL on failure.
+.efa_pairs <- function(mat, align_signs = TRUE, progress = FALSE) {
+  N <- nrow(mat)
+  p <- ncol(mat)
+
+  # Step 1: Estimate nF via parallel analysis
+  pa <- tryCatch({
+    suppressMessages(suppressWarnings(
+      fa.parallel(mat, fa = "fa", plot = FALSE, n.iter = 20)
+    ))
+  }, error = function(e) NULL)
+
+  nF_est <- NULL
+  if (!is.null(pa) && !is.null(pa$nfact) && pa$nfact >= 1) {
+    nF_est <- pa$nfact
+  } else {
+    # Fallback: Kaiser criterion
+    ev <- eigen(cor(mat, use = "pairwise.complete.obs"),
+                symmetric = TRUE, only.values = TRUE)$values
+    nF_est <- max(1, sum(ev > 1))
+  }
+  nF_est <- max(1, min(nF_est, floor(p / 2)))
+
+  if (progress) cat(sprintf("  EFA: estimating %d factors...\n", nF_est))
+
+  # Step 2: Run EFA
+  efa_result <- tryCatch({
+    suppressWarnings(
+      fa(mat, nfactors = nF_est, rotate = "oblimin", fm = "minres",
+         scores = "none", warnings = FALSE)
+    )
+  }, error = function(e) {
+    # Try with fewer factors
+    tryCatch({
+      suppressWarnings(
+        fa(mat, nfactors = max(1, nF_est - 1), rotate = "oblimin", fm = "minres",
+           scores = "none", warnings = FALSE)
+      )
+    }, error = function(e2) NULL)
+  })
+
+  if (is.null(efa_result)) {
+    warning("EFA failed — falling back to weighted mode (all pairs).")
+    return(NULL)
+  }
+
+  # Step 3: Assign items to primary factor
+  loadings_mat <- as.matrix(efa_result$loadings[])
+  nF_actual <- ncol(loadings_mat)
+  primary_factor <- apply(abs(loadings_mat), 1, which.max)
+
+  # Step 4: Generate within-factor pairs
+  pair_list <- list()
+  for (f in seq_len(nF_actual)) {
+    items_f <- which(primary_factor == f)
+    if (length(items_f) < 2) next
+    combos <- combn(items_f, 2)
+    for (ci in seq_len(ncol(combos)))
+      pair_list[[length(pair_list) + 1]] <- c(combos[1, ci], combos[2, ci])
+  }
+
+  if (length(pair_list) == 0) {
+    warning("EFA produced no within-factor pairs — falling back to weighted mode.")
+    return(NULL)
+  }
+
+  pair_mat <- do.call(rbind, pair_list)
+  idx_A <- pair_mat[, 1]
+  idx_B <- pair_mat[, 2]
+
+  # Step 5: Weight by observed |r|
+  raw_cor_mat <- cor(mat, use = "pairwise.complete.obs")
+  pair_r <- numeric(length(idx_A))
+  for (j in seq_along(idx_A)) pair_r[j] <- raw_cor_mat[idx_A[j], idx_B[j]]
+  pair_abs_r <- abs(pair_r)
+  pair_sign <- sign(pair_r)
+
+  # Remove NA pairs
+  keep <- !is.na(pair_abs_r)
+  idx_A <- idx_A[keep]; idx_B <- idx_B[keep]
+  pair_abs_r <- pair_abs_r[keep]; pair_sign <- pair_sign[keep]
+
+  k <- length(idx_A)
+  weights <- pair_abs_r
+  weights[weights < 1e-6] <- 1e-6
+
+  if (progress) {
+    cat(sprintf("  EFA: %d factors, %d within-factor pairs, mean |r|=%.3f\n",
+                nF_actual, k, mean(pair_abs_r)))
+  }
+
+  list(idx_A = idx_A, idx_B = idx_B, weights = weights,
+       pair_sign = pair_sign, nF_detected = nF_est, k = k)
+}
+
 ReReReRe <- function(data, #any dataset with questionnaire data
-                    corProp=0.03, # proportion of highest correlations (0.03 beats 0.05 in multiverse)
+                    corProp=0.03, # proportion of highest correlations (legacy, for coupled mode)
                     cutOff=0.99, # the severity of the evaluation (legacy, for percentile)
                     z_threshold=1.5, # z-score threshold for flagging (or "auto")
                     iterations=100,
-                    min_pairs=15, # minimum number of item pairs to use
+                    min_pairs=15, # minimum number of item pairs to use (coupled mode)
                     align_signs=TRUE, # align reverse-coded items using sample correlation signs
                     auto_z=FALSE, # auto-calibrate z_threshold based on total_items
-                    mode="auto", # "auto", "coupled" (standard top-k%), "weighted" (all pairs, |r|-weighted)
+                    mode="efa_d", # "efa_d" (default), "coupled", "weighted" (legacy)
                     min_r=0.0, # minimum |r| to include a pair in weighted mode (0 = all pairs)
                     progress = F){
 
@@ -219,96 +281,146 @@ ReReReRe <- function(data, #any dataset with questionnaire data
   N <- nrow(data)
   J <- ncol(data)
 
-  # --- Resolve mode: auto selects weighted (≤60 items) or coupled (>60 items) ---
-  mode <- match.arg(mode, c("auto", "coupled", "weighted"))
-  use_weighted <- FALSE
-  if (mode == "auto") {
-    use_weighted <- (J <= 60)
-    if (progress) {
-      cat(sprintf("  Mode: auto → %s (%d items %s 60)\n",
-                  ifelse(use_weighted, "weighted", "coupled"),
-                  J, ifelse(use_weighted, "<=", ">")))
-    }
-  } else if (mode == "weighted") {
-    use_weighted <- TRUE
-  }
+  # --- Resolve mode ---
+  mode <- match.arg(mode, c("efa_d", "auto", "coupled", "weighted"))
+  # "auto" now maps to "efa_d" (backward compat: old auto picked weighted/coupled)
+  if (mode == "auto") mode <- "efa_d"
+
+  if (progress) cat(sprintf("  Mode: %s (%d items)\n", mode, J))
 
   # --- Auto-calibration based on total_items ---
-  # Uses total_items (ncol) as the primary predictor for optimal z_threshold.
-  # Optionally also runs parallel analysis to estimate nF for the output.
-  # total_items explains 2x more variance than nF+ipf separately (R²=0.476).
   nFactors_detected <- NA
   if (auto_z || identical(z_threshold, "auto")) {
-    total_items <- J  # J = ncol(data), already computed above
+    total_items <- J
 
-    # Try parallel analysis to estimate nF (for output, and as secondary info)
-    pa <- tryCatch({
-      suppressMessages(suppressWarnings(
-        fa.parallel(data, fa = "fa", plot = FALSE, n.iter = 20)
-      ))
-    }, error = function(e) NULL)
-
-    if (!is.null(pa)) {
-      nFactors_detected <- pa$nfact
+    # Parallel analysis will be run by EFA anyway, but for non-EFA modes we need it
+    if (mode != "efa_d") {
+      pa <- tryCatch({
+        suppressMessages(suppressWarnings(
+          fa.parallel(data, fa = "fa", plot = FALSE, n.iter = 20)
+        ))
+      }, error = function(e) NULL)
+      if (!is.null(pa)) nFactors_detected <- pa$nfact
     }
 
-    # Calibrate z from total_items (the best predictor)
     z_threshold <- get_calibrated_z(total_items, nf = nFactors_detected)
 
     if (progress) {
-      cat(sprintf("  Auto-calibration: %d items, nF=%s -> z_threshold = %.2f\n",
-                  total_items,
-                  ifelse(is.na(nFactors_detected), "?", as.character(nFactors_detected)),
-                  z_threshold))
+      cat(sprintf("  Auto-calibration: %d items -> z_threshold = %.2f\n",
+                  total_items, z_threshold))
     }
-  } else if (is.character(z_threshold) && z_threshold == "auto") {
-    auto_z <- TRUE
   }
 
-  # Ensure z_threshold is numeric at this point
+  # Ensure z_threshold is numeric
   z_threshold <- as.numeric(z_threshold)
 
   #convert to matrix for faster operations
   mat <- as.matrix(data)
 
   # Precompute per-item observed max for reverse coding (align_signs).
-  # Assumes max(observed) = max(scale), valid for Likert data with n >= ~50.
   if (align_signs) {
     item_max <- apply(mat, 2, max, na.rm = TRUE)
   }
 
-  #### COMPUTING COUPLED CORRELATION ####
-
-  #computing correlations: raw (signed) and absolute
+  # Precompute correlation matrices
   rawCorMat <- cor(mat, use = "pairwise.complete.obs")
   corMat <- abs(rawCorMat)
-
-  #substituting upper triangle (diagonal included) with NAs
   corMat[upper.tri(corMat, diag = TRUE)] <- NA
   rawCorMat[upper.tri(rawCorMat, diag = TRUE)] <- NA
 
-  # Precompute the full sign matrix for random pair reverse-coding
   if (align_signs) {
     signMat <- sign(rawCorMat)
   }
 
-  if (use_weighted) {
-    # ====================================================================
-    # WEIGHTED MODE: use ALL pairs, weighted by |r_sample|
-    # Better for short questionnaires (≤60 items) where few high-|r| pairs
-    # exist. Every pair contributes, but strong correlations count more.
-    # ====================================================================
+  # ====================================================================
+  # MODE: EFA-D (default) — EFA within-factor pairs + observed |r| weights
+  # ====================================================================
+  if (mode == "efa_d") {
 
-    # Get all pairs from lower triangle
+    efa_info <- .efa_pairs(mat, align_signs = align_signs, progress = progress)
+
+    if (!is.null(efa_info)) {
+      # EFA succeeded — use within-factor pairs
+      idx_A <- efa_info$idx_A
+      idx_B <- efa_info$idx_B
+      weights <- efa_info$weights
+      pair_sign <- efa_info$pair_sign
+      nFactors_detected <- efa_info$nF_detected
+      k <- efa_info$k
+
+      A_coupled <- mat[, idx_A, drop = FALSE]
+      B_coupled <- mat[, idx_B, drop = FALSE]
+
+      # Sign alignment using observed correlation sign
+      if (align_signs) {
+        needs_flip <- which(pair_sign < 0)
+        if (length(needs_flip) > 0) {
+          flip_max <- item_max[idx_B[needs_flip]]
+          B_coupled[, needs_flip] <- rep(flip_max + 1, each = N) - B_coupled[, needs_flip]
+        }
+      }
+
+      # Weighted coherence score
+      rowCors <- rowCor_weighted(A_coupled, B_coupled, weights)
+
+      # Permutation baseline: k random pairs, same weights
+      all_RIC <- matrix(NA_real_, nrow = N, ncol = iterations)
+
+      if (progress) pb <- txtProgressBar(min = 0, max = iterations, style = 3)
+
+      for (i in seq_len(iterations)) {
+        if (progress) setTxtProgressBar(pb, i)
+
+        rand_idx1 <- sample(J, k, replace = TRUE)
+        rand_idx2 <- sample(J, k, replace = TRUE)
+        same <- rand_idx1 == rand_idx2
+        while (any(same)) {
+          rand_idx2[same] <- sample(J, sum(same), replace = TRUE)
+          same <- rand_idx1 == rand_idx2
+        }
+
+        A_rand <- mat[, rand_idx1, drop = FALSE]
+        B_rand <- mat[, rand_idx2, drop = FALSE]
+
+        if (align_signs) {
+          ri <- pmax(rand_idx1, rand_idx2)
+          ci <- pmin(rand_idx1, rand_idx2)
+          rand_signs <- signMat[cbind(ri, ci)]
+          rand_signs[is.na(rand_signs)] <- 1
+          rand_neg <- which(rand_signs < 0)
+          if (length(rand_neg) > 0) {
+            rand_flip_max <- item_max[rand_idx2[rand_neg]]
+            B_rand[, rand_neg] <- rep(rand_flip_max + 1, each = N) - B_rand[, rand_neg]
+          }
+        }
+
+        all_RIC[, i] <- rowCor_weighted(A_rand, B_rand, weights)
+      }
+
+      if (progress) close(pb)
+
+      mode_used <- "efa_d"
+
+    } else {
+      # EFA failed — fallback to weighted (all pairs)
+      mode <- "weighted"
+      if (progress) cat("  EFA failed, falling back to weighted mode.\n")
+    }
+  }
+
+  # ====================================================================
+  # LEGACY MODE: WEIGHTED (all pairs, |r|-weighted)
+  # Also used as fallback when EFA fails
+  # ====================================================================
+  if (mode == "weighted") {
+
     pair_idx <- which(!is.na(corMat), arr.ind = TRUE)
     pair_r <- rawCorMat[pair_idx]
     pair_abs_r <- corMat[pair_idx]
     pair_sign <- sign(pair_r)
 
-    # Filter by min_r (default 0 = all pairs)
     keep <- pair_abs_r >= min_r & !is.na(pair_abs_r)
     pair_idx <- pair_idx[keep, , drop = FALSE]
-    pair_r <- pair_r[keep]
     pair_abs_r <- pair_abs_r[keep]
     pair_sign <- pair_sign[keep]
 
@@ -316,15 +428,12 @@ ReReReRe <- function(data, #any dataset with questionnaire data
     weights <- pair_abs_r
 
     if (progress) {
-      cat(sprintf("  Weighted mode: using %d pairs (min_r=%.2f), mean |r|=%.3f\n",
-                  k, min_r, mean(pair_abs_r)))
+      cat(sprintf("  Weighted mode: %d pairs, mean |r|=%.3f\n", k, mean(pair_abs_r)))
     }
 
-    # Build A and B matrices
     A_coupled <- mat[, pair_idx[, 1], drop = FALSE]
     B_coupled <- mat[, pair_idx[, 2], drop = FALSE]
 
-    # Sign alignment: reverse-code B for negative-correlation pairs
     n_negative <- sum(pair_sign < 0)
     if (align_signs && n_negative > 0) {
       needs_flip <- which(pair_sign < 0)
@@ -332,63 +441,44 @@ ReReReRe <- function(data, #any dataset with questionnaire data
       B_coupled[, needs_flip] <- rep(flip_max + 1, each = N) - B_coupled[, needs_flip]
     }
 
-    # Weighted coherence score (coupled)
     rowCors <- rowCor_weighted(A_coupled, B_coupled, weights)
 
-    # --- Random permutation baseline (weighted) ---
     all_RIC <- matrix(NA_real_, nrow = N, ncol = iterations)
-
     if (progress) pb <- txtProgressBar(min = 0, max = iterations, style = 3)
 
     for (i in seq_len(iterations)) {
       if (progress) setTxtProgressBar(pb, i)
-
-      # Sample k random pairs (ensuring different items)
       rand_idx1 <- sample(J, k, replace = TRUE)
       rand_idx2 <- sample(J, k, replace = TRUE)
       same <- rand_idx1 == rand_idx2
-      while (any(same)) {
-        rand_idx2[same] <- sample(J, sum(same), replace = TRUE)
-        same <- rand_idx1 == rand_idx2
-      }
-
+      while (any(same)) { rand_idx2[same] <- sample(J, sum(same), replace = TRUE); same <- rand_idx1 == rand_idx2 }
       A_rand <- mat[, rand_idx1, drop = FALSE]
       B_rand <- mat[, rand_idx2, drop = FALSE]
-
-      # Sign alignment for random pairs
       if (align_signs) {
-        ri <- pmax(rand_idx1, rand_idx2)
-        ci <- pmin(rand_idx1, rand_idx2)
-        rand_signs <- signMat[cbind(ri, ci)]
-        rand_signs[is.na(rand_signs)] <- 1
+        ri <- pmax(rand_idx1, rand_idx2); ci <- pmin(rand_idx1, rand_idx2)
+        rand_signs <- signMat[cbind(ri, ci)]; rand_signs[is.na(rand_signs)] <- 1
         rand_neg <- which(rand_signs < 0)
         if (length(rand_neg) > 0) {
-          rand_flip_max <- item_max[rand_idx2[rand_neg]]
-          B_rand[, rand_neg] <- rep(rand_flip_max + 1, each = N) - B_rand[, rand_neg]
+          B_rand[, rand_neg] <- rep(item_max[rand_idx2[rand_neg]] + 1, each = N) - B_rand[, rand_neg]
         }
       }
-
-      # Use SAME weights as coupled (keeps comparison fair)
       all_RIC[, i] <- rowCor_weighted(A_rand, B_rand, weights)
     }
-
     if (progress) close(pb)
 
-  } else {
-    # ====================================================================
-    # COUPLED MODE (standard): select top-k% pairs by |r|
-    # Better for longer questionnaires (>60 items) where high-|r| pairs
-    # provide a cleaner signal than including weak pairs as noise.
-    # ====================================================================
+    mode_used <- "weighted"
+    nFactors_detected <- NA
+  }
 
-    #getting the threshold correlation based on the proportion of highest correlation we decided to include.
+  # ====================================================================
+  # LEGACY MODE: COUPLED (top-k% pairs by |r|)
+  # ====================================================================
+  if (mode == "coupled") {
+
     corThreshold <- quantile(corMat, 1 - corProp, na.rm = TRUE)
-
-    #getting the row and col indices with values higher than threshold
     couples <- which(corMat >= corThreshold, arr.ind = TRUE)
     k <- nrow(couples)
 
-    # Enforce minimum number of pairs for stable individual-level correlations.
     if (k < min_pairs) {
       all_cors <- corMat[lower.tri(corMat)]
       all_cors <- all_cors[!is.na(all_cors)]
@@ -406,7 +496,6 @@ ReReReRe <- function(data, #any dataset with questionnaire data
       return(data.frame(result = rep(NA, N), indCors = rep(NA, N), flagged = rep(NA, N)))
     }
 
-    # --- Sign alignment for reverse-coded items ---
     coupled_signs <- sign(rawCorMat[couples])
     n_negative <- sum(coupled_signs < 0)
 
@@ -414,76 +503,55 @@ ReReReRe <- function(data, #any dataset with questionnaire data
       warning(sprintf(
         "ReReReRe: %d of %d coupled pairs (%.0f%%) have negative sample correlations. ",
         n_negative, k, 100 * n_negative / k),
-        "This typically indicates reverse-coded items that will cancel each other ",
-        "in the individual-level correlation. Consider setting align_signs=TRUE ",
-        "or reverse-coding items before running ReReReRe.")
+        "Consider setting align_signs=TRUE or reverse-coding items.")
     }
 
-    # Extract N x k matrices for the coupled pairs
     A_coupled <- mat[, couples[, 1], drop = FALSE]
     B_coupled <- mat[, couples[, 2], drop = FALSE]
 
-    # Apply sign alignment: reverse-code B columns where sample correlation is negative
     if (align_signs && n_negative > 0) {
       needs_flip <- which(coupled_signs < 0)
       flip_max <- item_max[couples[needs_flip, 2]]
       B_coupled[, needs_flip] <- rep(flip_max + 1, each = N) - B_coupled[, needs_flip]
     }
 
-    # zero_val=0: for zero-variance rows (longstring), return 0 so they are easily spotted
     rowCors <- rowCor_abs(A_coupled, B_coupled, zero_val = 0)
 
-    #### RANDOM PERMUTATION ITERATIONS ####
-
-    all_pairs <- combn(J, 2) # 2 x C(J,2) matrix
-    n_pairs <- ncol(all_pairs)
-
+    all_pairs <- combn(J, 2)
+    n_pairs_total <- ncol(all_pairs)
     all_RIC <- matrix(NA_real_, nrow = N, ncol = iterations)
-
     if (progress) pb <- txtProgressBar(min = 0, max = iterations, style = 3)
 
-    for (i in seq_len(iterations)){
+    for (i in seq_len(iterations)) {
       if (progress) setTxtProgressBar(pb, i)
-
-      sampled <- sample(n_pairs, k)
-      idx1 <- all_pairs[1, sampled]
-      idx2 <- all_pairs[2, sampled]
-
-      A_rand <- mat[, idx1, drop = FALSE]
-      B_rand <- mat[, idx2, drop = FALSE]
-
+      sampled <- sample(n_pairs_total, k)
+      idx1 <- all_pairs[1, sampled]; idx2 <- all_pairs[2, sampled]
+      A_rand <- mat[, idx1, drop = FALSE]; B_rand <- mat[, idx2, drop = FALSE]
       if (align_signs) {
-        ri <- pmax(idx1, idx2)
-        ci <- pmin(idx1, idx2)
-        rand_signs <- signMat[cbind(ri, ci)]
-        rand_signs[is.na(rand_signs)] <- 1
+        ri <- pmax(idx1, idx2); ci <- pmin(idx1, idx2)
+        rand_signs <- signMat[cbind(ri, ci)]; rand_signs[is.na(rand_signs)] <- 1
         rand_neg <- which(rand_signs < 0)
         if (length(rand_neg) > 0) {
-          rand_flip_max <- item_max[idx2[rand_neg]]
-          B_rand[, rand_neg] <- rep(rand_flip_max + 1, each = N) - B_rand[, rand_neg]
+          B_rand[, rand_neg] <- rep(item_max[idx2[rand_neg]] + 1, each = N) - B_rand[, rand_neg]
         }
       }
-
       all_RIC[, i] <- rowCor_abs(A_rand, B_rand, zero_val = 0)
     }
-
     if (progress) close(pb)
+
+    mode_used <- "coupled"
+    nFactors_detected <- NA
   }
 
   corComparedIndex <- rowMeans(all_RIC < rowCors, na.rm = TRUE)
 
   # --- Z-score: how many SDs is indCors above the respondent's random baseline? ---
-  # mean and sd of random iterations per respondent (row-wise)
   rand_means <- rowMeans(all_RIC, na.rm = TRUE)
   rand_sds   <- apply(all_RIC, 1, sd, na.rm = TRUE)
 
-  # z = (coupled_cor - mean_random) / sd_random
-  # When sd is 0 (all random iterations identical, very rare), return 0
   z_score <- ifelse(rand_sds > 0,
                     (rowCors - rand_means) / rand_sds,
                     0)
-
-  mode_used <- ifelse(use_weighted, "weighted", "coupled")
 
   data.frame(
     result = corComparedIndex,     # legacy percentile score
@@ -492,8 +560,9 @@ ReReReRe <- function(data, #any dataset with questionnaire data
     rand_mean = rand_means,        # mean of random iterations
     rand_sd = rand_sds,            # sd of random iterations
     flagged = z_score <= z_threshold,  # z-score flagging (primary)
-    z_threshold_used = z_threshold,    # threshold used (useful when auto_z=TRUE)
-    nFactors_detected = nFactors_detected,  # from parallel analysis (NA if not auto)
-    mode_used = mode_used          # "coupled" or "weighted"
+    z_threshold_used = z_threshold,    # threshold used
+    nFactors_detected = nFactors_detected,  # from parallel analysis
+    mode_used = mode_used,         # "efa_d", "coupled", or "weighted"
+    n_pairs = k                    # number of item pairs used
   )
 }

@@ -1,0 +1,170 @@
+================================================================
+REPORT: EFA-Based vs Weighted vs Standard ReReReRe
+================================================================
+Date: 2026-03-30
+Conditions: 54 (nF x ipf x reps)
+Design: nF={4,6,8,10,15,20} x ipf={3,6,10} x 3 reps
+Fixed: N=300, pct_careless=10%, iterations=50, align_signs=TRUE
+Metric: Oracle best MCC (z searched 0.1-3.0 step 0.1)
+
+================================================================
+1. OVERALL RESULTS
+================================================================
+
+Standard (top-k%, corProp=0.03): 0.245
+Weighted (all pairs, |r|):       0.268
+EFA (within-factor, lam*lam):    0.280
+
+EFA wins overall (+14% vs Standard, +4.5% vs Weighted)
+
+================================================================
+2. RESULTS BY ITEM RANGE
+================================================================
+
+Items         n     Std      Wt     EFA    EFA-Std     EFA-Wt Winner
+--------------------------------------------------------------------------- 
+<30          15   0.101   0.167   0.152     +0.052     -0.014 Weighted
+30-60        21   0.183   0.247   0.240     +0.056     -0.007 Weighted
+60-100        9   0.352   0.351   0.378     +0.026     +0.027 EFA
+100-200       9   0.523   0.400   0.489     -0.034     +0.089 Standard
+
+
+Key findings:
+- <30 items:   Weighted wins. EFA unstable (PA underestimates nF).
+- 30-60 items: Weighted wins, EFA close. PA improving but still noisy.
+- 60-100 items: EFA WINS. Factor model stable, loading weights provide
+                shrinkage advantage over raw |r|.
+- 100-200 items: Standard wins. Top-k% already selects within-factor
+                 pairs; EFA adds estimation noise without new information.
+
+
+================================================================
+3. RESULTS BY nF x ipf
+================================================================
+
+ nF ipf items     Std      Wt     EFA   nF_det   k_efa Winner
+------------------------------------------------------------------------ 
+  4   3    12   0.112   0.151   0.147      2.7      25 Wt
+  6   3    18   0.095   0.191   0.191      3.7      40 Wt
+  4   6    24   0.096   0.228   0.191      3.0      95 Wt
+  8   3    24   0.054   0.097   0.100      5.0      57 EFA
+ 10   3    30   0.146   0.166   0.133      6.3      67 Wt
+  6   6    36   0.164   0.229   0.206      4.7     134 Wt
+  4  10    40   0.127   0.263   0.236      3.0     269 Wt
+ 15   3    45   0.179   0.252   0.270      7.3     130 EFA
+  8   6    48   0.209   0.224   0.217      6.7     160 Wt
+  6  10    60   0.191   0.310   0.269      4.0     459 Wt
+ 10   6    60   0.245   0.265   0.270      7.3     231 EFA
+ 20   3    60   0.169   0.188   0.210     13.0     128 EFA
+  8  10    80   0.297   0.319   0.341      6.3     508 EFA
+ 15   6    90   0.385   0.393   0.403     10.3     382 EFA
+ 10  10   100   0.375   0.340   0.391      8.0     629 EFA
+ 20   6   120   0.485   0.316   0.382     13.7     509 Std
+ 15  10   150   0.477   0.421   0.478     12.3     877 EFA
+ 20  10   200   0.608   0.464   0.608     14.7    1356 EFA
+
+
+================================================================
+4. PARALLEL ANALYSIS ACCURACY
+================================================================
+
+ True   Detected       SD    Ratio
+----------------------------------- 
+    4        2.9      0.6     0.72
+    6        4.1      0.6     0.69
+    8        6.0      1.3     0.75
+   10        7.2      1.4     0.72
+   15       10.0      2.3     0.67
+   20       13.8      1.5     0.69
+
+Parallel analysis systematically underestimates nF:
+- nF=4: detects ~2.7 (68%)
+- nF=10: detects ~7.2 (72%)
+- nF=20: detects ~13.8 (69%)
+This means EFA creates FEWER, LARGER factors than the true structure,
+which INCREASES within-factor pairs but may mix items from different
+true factors. The loading-based weighting partially compensates.
+
+
+================================================================
+5. OPTIMAL z-THRESHOLD PATTERNS
+================================================================
+
+Items        z_Std    z_Wt   z_EFA
+----------------------------------- 
+<30           1.31    0.59    0.75
+30-60         1.05    0.73    0.78
+60-100        0.92    1.03    0.78
+100-200       1.11    1.66    0.73
+
+Each method has a different optimal z pattern.
+Standard: z rises with items (more signal -> higher threshold).
+Weighted: z stays low (all-pairs dilute signal).
+EFA: intermediate pattern.
+
+
+================================================================
+6. STATISTICAL INTERPRETATION
+================================================================
+
+WHY EFA WINS AT 60-100 ITEMS:
+-------------------------------
+With 60-100 items, the factor model is stable enough for EFA to correctly
+identify within-factor pairs. The loading-based weights (lambda_i * lambda_j)
+provide a SHRINKAGE ESTIMATOR of the true pair correlation:
+  - Observed r = true_r + sampling_error
+  - Loading product = model-implied r (regularized, less noisy)
+This is analogous to James-Stein shrinkage: the model-based estimate is
+biased toward the factor structure but has lower MSE than the raw correlation.
+
+WHY WEIGHTED WINS AT <60 ITEMS:
+-------------------------------
+With <60 items, parallel analysis underestimates nF (detects 2-5 instead of
+4-10 true factors). This causes:
+  1. Items from different true factors get merged into one EFA factor
+  2. Within-factor pairs now include cross-factor pairs (noise)
+  3. Loading weights are based on wrong factor assignments
+The weighted approach avoids this by using ALL pairs with empirical |r| weights,
+which doesn't depend on correct factor extraction.
+
+WHY STANDARD WINS AT >100 ITEMS:
+-------------------------------
+With 100+ items, the top-3% pairs by |r| are already almost entirely within-factor
+(the correlation structure converges). EFA adds estimation noise without new
+information, and the loading-based weighting can slightly distort pair importance
+when the factor model doesn't perfectly match the true structure.
+The standard method's simplicity becomes an advantage: fewer assumptions, fewer
+things that can go wrong.
+
+PRACTICAL RECOMMENDATION:
+-------------------------------
+Optimal auto-switch cascade:
+  <= 60 items  -> Weighted (all pairs, |r|-weighted)
+  60-100 items -> EFA (within-factor, loading-weighted)
+  > 100 items  -> Standard (top-k% by |r|)
+
+However, the EFA advantage at 60-100 items is modest (+0.027 MCC over Standard,
++0.028 over Weighted). A simpler 2-level switch (weighted/coupled at 60 items)
+captures most of the benefit. The 3-level switch adds complexity for marginal gain.
+
+
+================================================================
+7. PLOTS GENERATED
+================================================================
+
+01_overall_mcc.png          - Bar chart: overall mean MCC by method
+02_mcc_by_item_bin.png      - Grouped bars: MCC by item range and method
+03_mcc_by_nF.png            - Line plot: MCC by nF for each method
+04_mcc_vs_total_items.png   - Scatter + LOESS: MCC vs total items
+05_heatmap_best_method.png  - Heatmap: best method per nF x ipf cell
+06_efa_advantage.png        - Scatter: EFA advantage over other methods
+07_nF_detection_accuracy.png - PA detected vs true nF
+08_efa_n_pairs.png          - Within-factor pairs vs total items
+09_optimal_z_by_method.png  - Optimal z-threshold by method
+10_ipf_within_nF.png        - ipf effect within each nF (faceted)
+11_dominance_map.png        - Method dominance by total items
+12_boxplot_by_bin.png       - MCC distribution boxplots
+
+================================================================
+END OF REPORT
+================================================================

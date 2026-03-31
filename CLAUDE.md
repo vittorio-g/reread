@@ -5,7 +5,7 @@ status: active
 priority: 4
 urgency: 3
 completion_percent: 80
-last_updated: "2026-03-30"
+last_updated: "2026-03-31"
 description: "Multiverse simulation study evaluating a permutation-based method (ReReReRe) for detecting careless respondents in questionnaire data."
 language: en
 tags:
@@ -30,7 +30,7 @@ next_steps:
 
 | File | Function | Purpose |
 |------|----------|---------|
-| `ReReReRe.R` | `ReReReRe()` + `rowCor_abs()` + `rowCor_weighted()` | Core detection method (coupled + weighted modes, auto-switch at 60 items) |
+| `ReReReRe.R` | `ReReReRe()` + `rowCor_abs()` + `rowCor_weighted()` + `.efa_pairs()` | Core detection method (EFA-D default: within-factor pairs + |r| weights) |
 | `Synthetic_Good_Responses_2.R` | `simulated_good_responses()` | Generate clean CFA-based questionnaire data |
 | `Careless_machine_2.R` | `inject_careless()` | Inject careless responses (random/longstring/mixed) |
 
@@ -226,15 +226,17 @@ Old-style validation: all injected careless respondents count as positive class.
 - **Do not mix response scales** — items with different Likert ranges (e.g., 4-point mixed with
   6-point) can bias the individual-level correlation. Z-scoring fixes this but damages
   homogeneous-scale data. Recommend users ensure uniform response scale as preprocessing.
-- **Weighted mode for short questionnaires** — when total_items ≤ 60, the standard top-k% pair
-  selection yields too few high-|r| pairs for reliable detection. The weighted mode uses ALL
-  item pairs but weights each by its sample-level |r|, maximizing information. Auto-switches
-  via `mode="auto"` (default). Simulation: +37% MCC for ≤30 items, +32% for 30-60 items.
-  For >60 items, coupled mode remains superior (weighted dilutes signal with weak pairs).
-- **No factor analysis required** — ReReReRe works purely from the item correlation matrix
-  and permutations. No knowledge of factor structure is needed. The only exception: when
-  `auto_z=TRUE`, a parallel analysis (`psych::fa.parallel()`) estimates nF for z_threshold
-  calibration, but this is optional.
+- **EFA-D mode (default since 2026-03-31)** — uses EFA to identify within-factor item pairs,
+  then weights by observed |r|. Replaces the previous 2-level switch (weighted ≤60, coupled >60).
+  EFA-D wins or ties across ALL questionnaire lengths (12-300 items). Simulation (360 conditions):
+  EFA-D=0.347 vs Standard=0.303 vs Weighted=0.286 mean MCC. Wins 18/24 nF×ipf cells.
+  Parallel analysis underestimates nF (~69% of true) but this doesn't hurt — larger factors
+  collect more within-factor pairs, and observed |r| weighting compensates.
+  Falls back to weighted mode if EFA fails. Legacy modes "coupled" and "weighted" available
+  via `mode` parameter for backward compatibility.
+- **EFA is now integral** — ReReReRe runs parallel analysis + EFA (oblimin, minres) as part
+  of the default pipeline. This adds `psych` as a hard dependency (was already imported for
+  `auto_z`). The EFA is used ONLY for pair selection (within-factor), not for scoring.
 
 ## Final Multiverse Design (as run, 2026-03-21)
 
@@ -1054,6 +1056,49 @@ plot 09 shows this clearly.
 
 ## Revision Log
 
+### 2026-03-31 — EFA-D as Default Single Method
+
+**Problem:** The previous 2-level switch (weighted ≤60 items, coupled >60) required an arbitrary
+cutoff and neither method was optimal across the full range. Option A (EFA + loading weights)
+was tested first but rejected because parallel analysis underestimates nF, making loading
+products unreliable. Option D uses EFA for pair SELECTION only, with observed |r| for WEIGHTING.
+
+**Comprehensive simulation (360 conditions):**
+8 nF (4-30) × 3 ipf (3-10) × 3 pct (5-25%) × 5 reps, N=300, iterations=50.
+Runtime: 200 minutes.
+
+| Range | Standard | Weighted | **EFA-D** | Winner |
+|-------|----------|----------|-----------|--------|
+| <30 items | 0.108 | **0.160** | 0.158 | Wt (by 0.002) |
+| 30-60 | 0.198 | 0.244 | **0.261** | **EFA-D** |
+| 60-100 | 0.306 | 0.307 | **0.351** | **EFA-D** |
+| 100-200 | 0.501 | 0.405 | **0.529** | **EFA-D** |
+| >200 | **0.656** | 0.393 | 0.653 | Std (by 0.003) |
+
+**Overall: EFA-D=0.347 vs Std=0.303 vs Wt=0.286.** EFA-D wins 18/24 nF×ipf cells (75%).
+Loses only in extreme ranges by margins <0.01.
+
+**Winner map:** EFA-D dominates from ipf=6 upward. Weighted wins only for ipf=3 with nF≤10
+(12-30 items). Standard wins only for nF=30 with ipf≥6 (180-300 items, by 0.011 margin).
+
+**Implementation:** `mode="efa_d"` is now the default. Algorithm:
+1. Parallel analysis → estimate nF
+2. EFA (oblimin, minres) → assign items to primary factor
+3. Generate ALL within-factor pairs
+4. Weight by observed |r| (robust to EFA misspecification)
+5. `rowCor_weighted()` → coherence score per respondent
+6. Permutation baseline: same k random pairs, same weights → z-score
+
+Falls back to weighted mode if EFA fails. Legacy modes remain via `mode="coupled"` or
+`mode="weighted"`. New `.efa_pairs()` helper function encapsulates EFA logic.
+
+**Key insight:** parallel analysis underestimates nF (~69% of true), but this actually helps —
+fewer, larger factors mean more within-factor pairs per factor, and the observed |r| weighting
+ensures that truly strong pairs dominate. The EFA provides structural information (which pairs
+are within-factor) while the empirical |r| provides robustness (compensates for EFA errors).
+
+Report with 12 plots in `archive/efa_d_comparison/`.
+
 ### 2026-03-30 — Weighted Mode for Short Questionnaires
 
 **Problem:** Standard ReReReRe selects top-k% item pairs by |r|. With short questionnaires
@@ -1095,6 +1140,34 @@ New output column: `mode_used` ("coupled" or "weighted").
 - 120 items: coupled MCC=0.442 vs weighted MCC=0.197 (auto chose coupled ✓)
 
 Also moved `Test_Weighted_ReReReRe.R` to `archive/scripts/`.
+
+### 2026-03-30b — EFA-Based Pair Selection: Tested and Rejected (Option A)
+
+Tested EFA-guided pair selection: parallel analysis → EFA (oblimin, minres) → within-factor
+pairs only → weights = |λ_i × λ_j| (loading products as shrinkage estimator).
+
+**54 conditions** (nF={4,6,8,10,15,20} × ipf={3,6,10} × 3 reps), N=300, 10% careless.
+
+| Item range | Standard | Weighted | EFA | Winner |
+|-----------|----------|----------|-----|--------|
+| <30 | 0.101 | **0.167** | 0.152 | Weighted |
+| 30-60 | 0.183 | **0.247** | 0.240 | Weighted |
+| 60-100 | 0.352 | 0.351 | **0.378** | EFA |
+| 100-200 | **0.523** | 0.400 | 0.489 | Standard |
+
+Overall: Standard=0.245, Weighted=0.268, EFA=0.280.
+
+**EFA wins only at 60-100 items** (+0.027 MCC over standard). The loading-product weights
+provide a shrinkage advantage (model-implied r is less noisy than observed r). But parallel
+analysis systematically underestimates nF (~70% of true), creating too-large factors that
+mix items from different constructs. This hurts at <60 items (EFA < Weighted) and provides
+no advantage at >100 items (Standard already selects within-factor pairs).
+
+**Decision: rejected.** The gain at 60-100 items doesn't justify adding EFA as a dependency
+(model estimation, Heywood case handling, parallel analysis instability). The 2-level
+auto-switch (weighted ≤60, coupled >60) captures most of the benefit.
+
+Report with 12 plots saved in `archive/efa_comparison/`. Scripts moved to `archive/scripts/`.
 
 ### 2026-03-28b — Comprehensive External Validation (6 datasets + Johnson inject-and-detect)
 
