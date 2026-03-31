@@ -226,17 +226,14 @@ Old-style validation: all injected careless respondents count as positive class.
 - **Do not mix response scales** — items with different Likert ranges (e.g., 4-point mixed with
   6-point) can bias the individual-level correlation. Z-scoring fixes this but damages
   homogeneous-scale data. Recommend users ensure uniform response scale as preprocessing.
-- **EFA-D mode (default since 2026-03-31)** — uses EFA to identify within-factor item pairs,
-  then weights by observed |r|. Replaces the previous 2-level switch (weighted ≤60, coupled >60).
-  EFA-D wins or ties across ALL questionnaire lengths (12-300 items). Simulation (360 conditions):
-  EFA-D=0.347 vs Standard=0.303 vs Weighted=0.286 mean MCC. Wins 18/24 nF×ipf cells.
-  Parallel analysis underestimates nF (~69% of true) but this doesn't hurt — larger factors
-  collect more within-factor pairs, and observed |r| weighting compensates.
-  Falls back to weighted mode if EFA fails. Legacy modes "coupled" and "weighted" available
-  via `mode` parameter for backward compatibility.
-- **EFA is now integral** — ReReReRe runs parallel analysis + EFA (oblimin, minres) as part
-  of the default pipeline. This adds `psych` as a hard dependency (was already imported for
-  `auto_z`). The EFA is used ONLY for pair selection (within-factor), not for scoring.
+- **EFA-based pair selection tested and rejected (2026-03-31)** — Two EFA strategies were tested:
+  Option A (within-factor pairs + loading weights) and Option D (within-factor pairs + observed
+  |r| weights). Both won on simulated data (EFA-D: MCC=0.347 vs Std=0.303, 18/24 cells) but
+  **lost on real data validation** (EFA-D AUC=0.561 vs Coupled AUC=0.635, coupled wins 5/6
+  datasets). The simulation-to-real gap is caused by parallel analysis producing poor factor
+  assignments on real data with cross-loadings and noisy structure. The 2-level switch
+  (weighted ≤60 items, coupled >60) remains the default. EFA-D available via `mode="efa_d"`
+  for research purposes.
 
 ## Final Multiverse Design (as run, 2026-03-21)
 
@@ -1056,48 +1053,67 @@ plot 09 shows this clearly.
 
 ## Revision Log
 
-### 2026-03-31 — EFA-D as Default Single Method
+### 2026-03-31 — EFA-Based Pair Selection: Tested and Rejected (Options A and D)
 
-**Problem:** The previous 2-level switch (weighted ≤60 items, coupled >60) required an arbitrary
-cutoff and neither method was optimal across the full range. Option A (EFA + loading weights)
-was tested first but rejected because parallel analysis underestimates nF, making loading
-products unreliable. Option D uses EFA for pair SELECTION only, with observed |r| for WEIGHTING.
+Tested two EFA-guided pair selection strategies to see if they could replace the coupled/weighted
+2-level switch with a single unified method.
 
-**Comprehensive simulation (360 conditions):**
-8 nF (4-30) × 3 ipf (3-10) × 3 pct (5-25%) × 5 reps, N=300, iterations=50.
-Runtime: 200 minutes.
+**Option A: EFA within-factor pairs + loading product weights (λ_i × λ_j)**
 
-| Range | Standard | Weighted | **EFA-D** | Winner |
-|-------|----------|----------|-----------|--------|
+54 conditions (nF=4-20 × ipf=3-10 × 3 reps), N=300, 10% careless.
+
+| Item range | Standard | Weighted | EFA-A | Winner |
+|-----------|----------|----------|-------|--------|
+| <30 | 0.101 | **0.167** | 0.152 | Weighted |
+| 30-60 | 0.183 | **0.247** | 0.240 | Weighted |
+| 60-100 | 0.352 | 0.351 | **0.378** | EFA-A |
+| 100-200 | **0.523** | 0.400 | 0.489 | Standard |
+
+Overall: Std=0.245, Wt=0.268, EFA-A=0.280. EFA-A wins only at 60-100 items.
+**Rejected:** loading products unreliable because parallel analysis underestimates nF (~69%
+of true), creating too-large factors that mix constructs.
+
+**Option D: EFA within-factor pairs + observed |r| weights**
+
+Comprehensive simulation (360 conditions): 8 nF (4-30) × 3 ipf (3-10) × 3 pct (5-25%)
+× 5 reps, N=300, iterations=50.
+
+| Range | Standard | Weighted | EFA-D | Winner |
+|-------|----------|----------|-------|--------|
 | <30 items | 0.108 | **0.160** | 0.158 | Wt (by 0.002) |
-| 30-60 | 0.198 | 0.244 | **0.261** | **EFA-D** |
-| 60-100 | 0.306 | 0.307 | **0.351** | **EFA-D** |
-| 100-200 | 0.501 | 0.405 | **0.529** | **EFA-D** |
+| 30-60 | 0.198 | 0.244 | **0.261** | EFA-D |
+| 60-100 | 0.306 | 0.307 | **0.351** | EFA-D |
+| 100-200 | 0.501 | 0.405 | **0.529** | EFA-D |
 | >200 | **0.656** | 0.393 | 0.653 | Std (by 0.003) |
 
-**Overall: EFA-D=0.347 vs Std=0.303 vs Wt=0.286.** EFA-D wins 18/24 nF×ipf cells (75%).
-Loses only in extreme ranges by margins <0.01.
+Overall on simulated data: EFA-D=0.347 vs Std=0.303 vs Wt=0.286. EFA-D wins 18/24 nF×ipf
+cells (75%) on simulated data.
 
-**Winner map:** EFA-D dominates from ipf=6 upward. Weighted wins only for ipf=3 with nF≤10
-(12-30 items). Standard wins only for nF=30 with ipf≥6 (180-300 items, by 0.011 margin).
+**BUT: external validation on real data showed EFA-D loses badly:**
 
-**Implementation:** `mode="efa_d"` is now the default. Algorithm:
-1. Parallel analysis → estimate nF
-2. EFA (oblimin, minres) → assign items to primary factor
-3. Generate ALL within-factor pairs
-4. Weight by observed |r| (robust to EFA misspecification)
-5. `rowCor_weighted()` → coherence score per respondent
-6. Permutation baseline: same k random pairs, same weights → z-score
+| Dataset | Items | nF | EFA-D AUC | Coupled AUC | EFA-D MCC₁.₅ | Coupled MCC₁.₅ |
+|---------|-------|----|-----------|-------------|-------------|----------------|
+| Schroeders | 60 | ~10 | 0.583 | **0.613** | 0.126 | **0.182** |
+| Schneider | 31 | ~5 | 0.459 | **0.729** | -0.019 | **0.114** |
+| Niessen | 100 | ~5 | 0.587 | **0.637** | 0.037 | **0.073** |
+| Goldammer S1 | 60 | ~8 | 0.605 | **0.717** | 0.167 | **0.314** |
+| Goldammer S2 | 60 | ~6 | 0.599 | **0.656** | 0.096 | **0.286** |
+| Goldammer S3 | 60 | ~7 | **0.532** | 0.456 | 0.096 | -0.032 |
 
-Falls back to weighted mode if EFA fails. Legacy modes remain via `mode="coupled"` or
-`mode="weighted"`. New `.efa_pairs()` helper function encapsulates EFA logic.
+Means: EFA-D AUC=0.561 vs Coupled AUC=0.635. Coupled wins 5/6 datasets.
 
-**Key insight:** parallel analysis underestimates nF (~69% of true), but this actually helps —
-fewer, larger factors mean more within-factor pairs per factor, and the observed |r| weighting
-ensures that truly strong pairs dominate. The EFA provides structural information (which pairs
-are within-factor) while the empirical |r| provides robustness (compensates for EFA errors).
+**Why EFA-D fails on real data:** Parallel analysis on real data with cross-loadings, method
+effects, and noisy structure produces poor factor assignments. Simulated data has clean
+factor structure that EFA recovers well; real data doesn't. Additionally, datasets with high
+careless rates (Goldammer 63-67%) corrupt the correlation matrix, degrading EFA quality.
+The coupled method's empirical top-k% by |r| is more robust because the ranking of |r|
+survives contamination better than the factor structure does.
 
-Report with 12 plots in `archive/efa_d_comparison/`.
+**Decision: BOTH REJECTED.** The coupled/weighted 2-level switch remains the default.
+The simulation-to-real gap is a cautionary tale: method improvements must be validated on
+real data, not just simulations.
+
+Reports in `archive/efa_comparison/` (Option A) and `archive/efa_d_comparison/` (Option D).
 
 ### 2026-03-30 — Weighted Mode for Short Questionnaires
 
