@@ -5,7 +5,7 @@ status: active
 priority: 4
 urgency: 3
 completion_percent: 80
-last_updated: "2026-03-31"
+last_updated: "2026-04-01"
 description: "Multiverse simulation study evaluating a permutation-based method (ReReReRe) for detecting careless respondents in questionnaire data."
 language: en
 tags:
@@ -30,7 +30,7 @@ next_steps:
 
 | File | Function | Purpose |
 |------|----------|---------|
-| `ReReReRe.R` | `ReReReRe()` + `rowCor_abs()` + `rowCor_weighted()` + `.efa_pairs()` | Core detection method (EFA-D default: within-factor pairs + |r| weights) |
+| `ReReReRe.R` | `ReReReRe()` + `ReReReRe_F()` + helpers | Standard (weighted/coupled auto-switch) + Per-factor variant (EFA-based, experimental) |
 | `Synthetic_Good_Responses_2.R` | `simulated_good_responses()` | Generate clean CFA-based questionnaire data |
 | `Careless_machine_2.R` | `inject_careless()` | Inject careless responses (random/longstring/mixed) |
 
@@ -226,14 +226,14 @@ Old-style validation: all injected careless respondents count as positive class.
 - **Do not mix response scales** — items with different Likert ranges (e.g., 4-point mixed with
   6-point) can bias the individual-level correlation. Z-scoring fixes this but damages
   homogeneous-scale data. Recommend users ensure uniform response scale as preprocessing.
-- **EFA-based pair selection tested and rejected (2026-03-31)** — Two EFA strategies were tested:
-  Option A (within-factor pairs + loading weights) and Option D (within-factor pairs + observed
-  |r| weights). Both won on simulated data (EFA-D: MCC=0.347 vs Std=0.303, 18/24 cells) but
-  **lost on real data validation** (EFA-D AUC=0.561 vs Coupled AUC=0.635, coupled wins 5/6
-  datasets). The simulation-to-real gap is caused by parallel analysis producing poor factor
-  assignments on real data with cross-loadings and noisy structure. The 2-level switch
-  (weighted ≤60 items, coupled >60) remains the default. EFA-D available via `mode="efa_d"`
-  for research purposes.
+- **Two-function architecture (2026-04-01)** — `ReReReRe()` is the standard method (weighted
+  ≤60 items, coupled >60 items). `ReReReRe_F()` is the per-factor EFA variant (experimental).
+  Both EFA-A and EFA-D were tested: they win on simulated data but **lose on real validation
+  datasets** (EFA-D AUC=0.561 vs Coupled AUC=0.635, coupled wins 5/6 datasets). However,
+  `ReReReRe_F()` improves results on short real questionnaires (Pennycook: r +0.047, R² +0.037).
+  Per-factor coherence (per-EFA-factor z-scores) also wins simulation but loses on real data.
+  The simulation-to-real gap is caused by parallel analysis producing poor factor assignments
+  on real data with cross-loadings and noisy structure.
 
 ## Final Multiverse Design (as run, 2026-03-21)
 
@@ -1052,6 +1052,43 @@ plot 09 shows this clearly.
 - `18_z_separation_by_nF.png` — z-score gap good vs careless
 
 ## Revision Log
+
+### 2026-04-01 — Two-function architecture: ReReReRe() + ReReReRe_F()
+
+**Decision:** Split into two public functions instead of a single method with mode switching.
+
+`ReReReRe()` — Standard (default): auto-switches between weighted (≤60 items) and coupled
+(>60 items). This is the validated, recommended method for all primary analyses.
+
+`ReReReRe_F()` — Per-factor (experimental): wrapper that calls `ReReReRe(mode="efa_d")`.
+Uses EFA to select within-factor pairs, weights by observed |r|. Recommended as secondary
+analysis, especially for short questionnaires.
+
+**Motivation:** Per-factor/EFA methods consistently win on simulated data but lose on real
+validation datasets with ground truth. However, on the Pennycook & Rand dataset (30 items),
+EFA-D improves the paper's key results substantially (r +0.047, R² +0.037) while coupled
+makes them worse. The two functions serve complementary purposes.
+
+**Per-factor simulation results (360 conditions, Test_PerFactor_v2.R):**
+
+| Items range | PerFactor mean(z) | Standard coupled | Winner |
+|-------------|-------------------|------------------|--------|
+| <30 | **0.149** | 0.107 | PF (+39%) |
+| 30-60 | **0.256** | 0.197 | PF (+30%) |
+| 60-100 | **0.326** | 0.303 | PF (+8%) |
+| 100-200 | 0.508 | **0.523** | Std (+3%) |
+| >200 | 0.640 | **0.639** | ~Tied |
+
+**Pennycook test (20% flagging cap):**
+
+Study 1 (30 items, N=782): EFA-D r(CRT,Disc) +0.047, R² +0.037. Coupled: −0.009.
+Study 2 (24 items, N=2564): Weighted +0.019, EFA-D +0.017. Coupled: −0.002.
+All Table 1 correlations improve with EFA-D (e.g., Trump Rep-consistent .197→.270).
+
+**Ground truth validation caveat:** The external datasets have questionable ground truth
+quality (63-67% instructed careless in Goldammer, speed-based in Niessen, algorithmic in
+Schneider). The Pennycook test uses a different criterion: "do paper results improve?",
+which is arguably more ecologically valid.
 
 ### 2026-03-31 — EFA-Based Pair Selection: Tested and Rejected (Options A and D)
 

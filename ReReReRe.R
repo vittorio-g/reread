@@ -1,5 +1,9 @@
 #### ReReReRe: Permutation-based careless respondent detection ####
 #
+# Two public functions:
+#   ReReReRe()   — standard 2-level method (default, recommended)
+#   ReReReRe_F() — per-factor variant using EFA (experimental)
+#
 # Returns per-respondent:
 #   result    - legacy percentile: P(random < coupled)
 #   z_score   - (coupled_cor - mean_random) / sd_random
@@ -9,45 +13,23 @@
 #   flagged   - binary flag (z_score <= z_threshold)
 #   z_threshold_used - the z_threshold used for flagging (useful when auto_z=TRUE)
 #   nFactors_detected - number of factors detected by parallel analysis
-#   mode_used - "efa_d" (EFA within-factor + |r| weights, default)
-#               or legacy modes "coupled"/"weighted" if forced
+#   mode_used - "coupled", "weighted", or "efa_d"
 #   n_pairs   - number of item pairs used
 #
-# === REVISION 2026-03-31 ===
-# EFA-D is now the DEFAULT AND ONLY method (mode="efa_d").
+# === ARCHITECTURE (2026-04-01) ===
 #
-# Previous approach: "coupled" (top-k% pairs by |r|) for >60 items,
-# "weighted" (all pairs, |r|-weighted) for ≤60 items. This required an
-# arbitrary cutoff and neither method was optimal across the full range.
+# ReReReRe() — STANDARD (default)
+#   mode="auto": weighted (all pairs, |r|-weighted) for ≤60 items,
+#                coupled (top-k% pairs by |r|) for >60 items.
+#   Validated on 6 real datasets + Johnson IPIP-300 inject-and-detect.
+#   Coupled AUC=0.635 on real data (wins 5/6 datasets vs EFA-D's 0.561).
 #
-# EFA-D uses Exploratory Factor Analysis to identify WHICH pairs matter
-# (within-factor only), then weights by observed |r| (empirical, robust).
-# Simulation results (360 conditions, 8 nF × 3 ipf × 3 pct × 5 reps):
-#
-#   Overall:     EFA-D=0.347 vs Standard=0.303 vs Weighted=0.286
-#   <30 items:   EFA-D=0.158 vs Standard=0.108 vs Weighted=0.160
-#   30-60 items: EFA-D=0.261 vs Standard=0.198 vs Weighted=0.244
-#   60-100:      EFA-D=0.351 vs Standard=0.306 vs Weighted=0.307
-#   100-200:     EFA-D=0.529 vs Standard=0.501 vs Weighted=0.405
-#   >200:        EFA-D=0.653 vs Standard=0.656 vs Weighted=0.393
-#
-# EFA-D wins or ties in every range. It wins 18/24 nF×ipf cells (75%).
-# The only cells where another method wins are by margins <0.01.
-#
-# Algorithm:
-#   1. Parallel analysis → estimate nF
-#   2. EFA (oblimin, minres) → assign each item to primary factor
-#   3. Generate ALL within-factor pairs
-#   4. Weight each pair by observed |r| (not loading product — more robust)
-#   5. rowCor_weighted() → coherence score per respondent
-#   6. Permutation baseline: same k random pairs, same weights → z-score
-#
-# Parallel analysis underestimates nF (~69% of true on average), but this
-# doesn't hurt — larger factors collect more within-factor pairs, and the
-# observed |r| weighting compensates for any cross-factor contamination.
-#
-# Legacy modes "coupled" and "weighted" remain available via mode parameter
-# for backward compatibility, but EFA-D is recommended for all cases.
+# ReReReRe_F() — PER-FACTOR (experimental)
+#   Uses EFA to identify within-factor pairs, weights by observed |r|.
+#   Wins on simulated data (MCC=0.333 vs Std=0.305 overall).
+#   Wins on short questionnaires (<60 items) on real data (Pennycook).
+#   Loses on real validation datasets with ground truth labels.
+#   Recommended for: secondary analysis, short questionnaires, exploratory use.
 #
 # === REVISION HISTORY ===
 # 2026-03-10b: Added z_score output (percentile has ceiling effect)
@@ -57,7 +39,8 @@
 # 2026-03-26c: Added auto_z calibration (total_items based)
 # 2026-03-28:  Updated defaults (corProp 0.05→0.03, confirmed z=1.5)
 # 2026-03-30:  Added weighted mode for short questionnaires
-# 2026-03-31:  EFA-D as default single method (replaces coupled/weighted split)
+# 2026-03-31:  Tested EFA-D as default — rejected after real data validation
+# 2026-04-01:  Split into ReReReRe() (standard) + ReReReRe_F() (per-factor)
 # ===
 
 library(dplyr)
@@ -272,7 +255,7 @@ ReReReRe <- function(data, #any dataset with questionnaire data
                     min_pairs=15, # minimum number of item pairs to use (coupled mode)
                     align_signs=TRUE, # align reverse-coded items using sample correlation signs
                     auto_z=FALSE, # auto-calibrate z_threshold based on total_items
-                    mode="efa_d", # "efa_d" (default), "coupled", "weighted" (legacy)
+                    mode="auto", # "auto" (default: weighted≤60, coupled>60), "coupled", "weighted", "efa_d"
                     min_r=0.0, # minimum |r| to include a pair in weighted mode (0 = all pairs)
                     progress = F){
 
@@ -282,9 +265,10 @@ ReReReRe <- function(data, #any dataset with questionnaire data
   J <- ncol(data)
 
   # --- Resolve mode ---
-  mode <- match.arg(mode, c("efa_d", "auto", "coupled", "weighted"))
-  # "auto" now maps to "efa_d" (backward compat: old auto picked weighted/coupled)
-  if (mode == "auto") mode <- "efa_d"
+  mode <- match.arg(mode, c("auto", "coupled", "weighted", "efa_d"))
+  if (mode == "auto") {
+    mode <- if (J <= 60) "weighted" else "coupled"
+  }
 
   if (progress) cat(sprintf("  Mode: %s (%d items)\n", mode, J))
 
@@ -565,4 +549,47 @@ ReReReRe <- function(data, #any dataset with questionnaire data
     mode_used = mode_used,         # "efa_d", "coupled", or "weighted"
     n_pairs = k                    # number of item pairs used
   )
+}
+
+
+# ======================================================================
+# ReReReRe_F: Per-factor variant (experimental)
+# ======================================================================
+#
+# Uses EFA (parallel analysis + oblimin rotation) to:
+#   1. Assign items to factors
+#   2. Select only within-factor pairs
+#   3. Weight by observed |r|
+#
+# Advantages over standard ReReReRe:
+#   - Wins on simulated data overall (MCC=0.333 vs 0.305)
+#   - Wins on short questionnaires (<60 items) even on real data
+#   - Theoretically principled: only uses pairs that "should" correlate
+#
+# Disadvantages:
+#   - Loses on real validation datasets with ground truth (AUC 0.561 vs 0.635)
+#   - Depends on EFA quality, which degrades with noisy real-world data
+#   - Adds computational cost (parallel analysis + EFA)
+#
+# Use case: secondary/complementary analysis, especially for short instruments.
+# ======================================================================
+
+ReReReRe_F <- function(data,
+                       z_threshold = 1.5,
+                       iterations = 100,
+                       align_signs = TRUE,
+                       auto_z = FALSE,
+                       min_r = 0.0,
+                       progress = FALSE) {
+
+  # Delegate to ReReReRe with mode="efa_d"
+  ReReReRe(data,
+           corProp = 0.03,
+           z_threshold = z_threshold,
+           iterations = iterations,
+           align_signs = align_signs,
+           auto_z = auto_z,
+           mode = "efa_d",
+           min_r = min_r,
+           progress = progress)
 }
