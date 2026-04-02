@@ -5,7 +5,7 @@ status: active
 priority: 4
 urgency: 3
 completion_percent: 80
-last_updated: "2026-04-01"
+last_updated: "2026-04-02"
 description: "Multiverse simulation study evaluating a permutation-based method (ReReReRe) for detecting careless respondents in questionnaire data."
 language: en
 tags:
@@ -30,9 +30,11 @@ next_steps:
 
 | File | Function | Purpose |
 |------|----------|---------|
-| `ReReReRe.R` | `ReReReRe()` + `ReReReRe_F()` + helpers | Standard (weighted/coupled auto-switch) + Per-factor variant (EFA-based, experimental) |
+| `ReReReRe.R` | `ReReReRe()` + `ReReReRe_F()` + variants | Standard (weighted/coupled auto-switch) + Per-factor variant (EFA-based) + proplow/meanvar/iterative |
 | `Synthetic_Good_Responses_2.R` | `simulated_good_responses()` | Generate clean CFA-based questionnaire data |
 | `Careless_machine_2.R` | `inject_careless()` | Inject careless responses (random/longstring/mixed) |
+| `Simulation_AllVariants.R` | All-variants comparison | 13 methods × 75 conditions, buone_idee.md fully tested |
+| `Simulation_Realistic_Corruption.R` | Realistic corruption sim | Std vs F with 10-100% corruption, GT >50% |
 
 ### archive/scripts/ (analysis scripts)
 
@@ -1052,6 +1054,58 @@ plot 09 shows this clearly.
 - `18_z_separation_by_nF.png` — z-score gap good vs careless
 
 ## Revision Log
+
+### 2026-04-02 — All Variants Simulation: buone_idee.md fully tested
+
+Ran comprehensive simulation comparing 13 method variants (75 conditions: 5 nF × 3 ipf × 5
+reps, N=300, 15% careless, corruption 10-100%, GT >50%). Script: `Simulation_AllVariants.R`.
+Runtime: 123 minutes.
+
+**Methods tested:** std, std_cf (cross-factor baseline), efa_d, efa_d_cf, iterative (2-round
+EFA), pf_mean (per-factor z mean), proplow (4 factor_z thresholds), pf_comb (3 lambda values).
+
+**Oracle MCC ranking:**
+
+| Method | Oracle MCC |
+|--------|------------|
+| iterative | **0.398** |
+| efa_d | 0.394 |
+| efa_d_cf | 0.390 |
+| std | 0.383 |
+| std_cf | 0.380 |
+| pf_mean | 0.379 |
+| proplow (best) | 0.280 |
+| pf_comb (best) | 0.277 |
+
+**By item range:**
+- <30 items: efa_d wins (0.207)
+- 30-60: efa_d wins (0.281)
+- 60-100: iterative wins (0.407)
+- 100-200: iterative ≈ std (0.580 vs 0.576)
+- >200: std wins decisively (0.832 vs 0.725)
+
+**Key findings from buone_idee.md ideas:**
+
+1. **Cross-factor baseline (idea 2): NO BENEFIT.** std 0.383→0.380, efa_d 0.394→0.390.
+   Removing within-factor pairs from the random baseline doesn't help — the proportion of
+   accidental within-factor pairs (~1/nF) is too small to matter.
+
+2. **proplow — % factors with z<threshold (idea 1): MUCH WORSE.** Best MCC=0.280 vs std=0.383.
+   Binarizing z-scores per factor loses information vs continuous z.
+
+3. **pf_comb — mean-λ√var (idea 1): VERY BAD.** Best MCC=0.277. Variance penalty doesn't
+   discriminate careless from attentive respondents.
+
+4. **pf_mean — mean of per-factor z (idea 1): EQUIVALENT to std.** MCC 0.379 vs 0.383.
+
+5. **Iterative EFA (idea 4): BEST OVERALL (+4% over std).** Wins 7/15 cells, especially at
+   60-200 items where re-estimating EFA on clean data improves pair selection quality.
+   At >200 items, std coupled is better (empirical |r| selection is already optimal).
+
+**Practical implication:** iterative EFA is a genuine improvement for mid-range questionnaires
+but doesn't change the big picture. std remains best for very long questionnaires.
+
+Output: `sim_variants_results.csv` (12,525 rows), `archive/variants_comparison/report.txt`.
 
 ### 2026-04-01 — Two-function architecture: ReReReRe() + ReReReRe_F()
 

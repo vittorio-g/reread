@@ -244,8 +244,164 @@ rowCor_weighted <- function(A, B, weights) {
   }
 
   list(idx_A = idx_A, idx_B = idx_B, weights = weights,
-       pair_sign = pair_sign, nF_detected = nF_est, k = k)
+       pair_sign = pair_sign, nF_detected = nF_est, k = k,
+       primary_factor = primary_factor, nF_actual = nF_actual)
 }
+
+# --- Helper: sample cross-factor pairs (idea 2 from buone_idee.md) ---
+# Samples k pairs where the two items belong to DIFFERENT factors.
+# This ensures the permutation baseline is purely cross-factor noise.
+#
+# primary_factor: integer vector of length J (factor assignment per item)
+# k: number of pairs to sample
+# J: total number of items
+# Returns list(idx1, idx2)
+.sample_cross_factor_pairs <- function(primary_factor, k, J) {
+  # Precompute cross-factor items for each factor
+  factors <- unique(primary_factor)
+  if (length(factors) < 2) {
+    # Only 1 factor: can't do cross-factor, fall back to unrestricted
+    idx1 <- sample(J, k, replace = TRUE)
+    idx2 <- sample(J, k, replace = TRUE)
+    same <- idx1 == idx2
+    while (any(same)) { idx2[same] <- sample(J, sum(same), replace = TRUE); same <- idx1 == idx2 }
+    return(list(idx1 = idx1, idx2 = idx2))
+  }
+
+  cross_items <- lapply(factors, function(f) which(primary_factor != f))
+  names(cross_items) <- as.character(factors)
+
+  idx1 <- sample(J, k, replace = TRUE)
+  idx2 <- integer(k)
+
+  for (i in seq_len(k)) {
+    pool <- cross_items[[as.character(primary_factor[idx1[i]])]]
+    idx2[i] <- pool[sample.int(length(pool), 1)]
+  }
+
+  list(idx1 = idx1, idx2 = idx2)
+}
+
+# --- Helper: compute per-factor z-scores ---
+# Runs EFA, computes z-score per factor, returns matrix + metadata.
+# Used by per-factor variant functions.
+#
+# Returns list(factor_z_matrix, primary_factor, nF_detected, n_factors_used, efa_info)
+.compute_per_factor_z <- function(mat, iterations = 50, align_signs = TRUE,
+                                   min_items_per_factor = 3,
+                                   cross_factor_baseline = FALSE,
+                                   external_efa = NULL) {
+  N <- nrow(mat); p <- ncol(mat)
+  item_max <- if (align_signs) apply(mat, 2, max, na.rm = TRUE) else NULL
+
+  # Step 1: EFA (or use external)
+  if (!is.null(external_efa)) {
+    primary_factor <- external_efa$primary_factor
+    nF_est <- external_efa$nF_detected
+    nF_actual <- length(unique(primary_factor))
+  } else {
+    pa <- tryCatch({
+      suppressMessages(suppressWarnings(
+        fa.parallel(mat, fa = "fa", plot = FALSE, n.iter = 20)
+      ))
+    }, error = function(e) NULL)
+
+    nF_est <- if (!is.null(pa) && !is.null(pa$nfact) && pa$nfact >= 1) pa$nfact
+              else max(1, sum(eigen(cor(mat, use="pairwise.complete.obs"),
+                                     symmetric=TRUE, only.values=TRUE)$values > 1))
+    nF_est <- max(1, min(nF_est, floor(p / 2)))
+
+    efa_result <- tryCatch({
+      suppressWarnings(fa(mat, nfactors = nF_est, rotate = "oblimin", fm = "minres",
+                          scores = "none", warnings = FALSE))
+    }, error = function(e) {
+      tryCatch({
+        suppressWarnings(fa(mat, nfactors = max(1, nF_est-1), rotate = "oblimin",
+                            fm = "minres", scores = "none", warnings = FALSE))
+      }, error = function(e2) NULL)
+    })
+
+    if (is.null(efa_result)) return(NULL)
+
+    loadings_mat <- as.matrix(efa_result$loadings[])
+    nF_actual <- ncol(loadings_mat)
+    primary_factor <- apply(abs(loadings_mat), 1, which.max)
+  }
+
+  # Precompute
+  raw_cor_mat <- cor(mat, use = "pairwise.complete.obs")
+  signMat <- sign(raw_cor_mat)
+  signMat[upper.tri(signMat, diag = TRUE)] <- NA
+
+  # Step 2: Per-factor computation
+  factor_z_matrix <- matrix(NA_real_, nrow = N, ncol = nF_actual)
+  factors_used <- 0
+
+  for (f in seq_len(nF_actual)) {
+    items_f <- which(primary_factor == f)
+    if (length(items_f) < min_items_per_factor) next
+
+    combos <- combn(items_f, 2)
+    idx_A <- combos[1, ]; idx_B <- combos[2, ]
+    k_f <- length(idx_A)
+
+    pair_r <- numeric(k_f)
+    for (j in seq_len(k_f)) pair_r[j] <- raw_cor_mat[idx_A[j], idx_B[j]]
+    pair_abs_r <- abs(pair_r); pair_sign <- sign(pair_r)
+
+    keep <- !is.na(pair_abs_r)
+    if (sum(keep) < 2) next
+    idx_A <- idx_A[keep]; idx_B <- idx_B[keep]
+    pair_abs_r <- pair_abs_r[keep]; pair_sign <- pair_sign[keep]
+    k_f <- length(idx_A)
+    weights <- pair_abs_r; weights[weights < 1e-6] <- 1e-6
+
+    A_f <- mat[, idx_A, drop = FALSE]; B_f <- mat[, idx_B, drop = FALSE]
+    if (align_signs) {
+      nf <- which(pair_sign < 0)
+      if (length(nf) > 0) B_f[, nf] <- rep(item_max[idx_B[nf]] + 1, each = N) - B_f[, nf]
+    }
+
+    coupled_f <- rowCor_weighted(A_f, B_f, weights)
+
+    # Permutation baseline
+    rand_f <- matrix(NA_real_, N, iterations)
+    for (iter in seq_len(iterations)) {
+      if (cross_factor_baseline && length(unique(primary_factor)) >= 2) {
+        cf <- .sample_cross_factor_pairs(primary_factor, k_f, p)
+        ri1 <- cf$idx1; ri2 <- cf$idx2
+      } else {
+        ri1 <- sample(p, k_f, replace = TRUE); ri2 <- sample(p, k_f, replace = TRUE)
+        same <- ri1 == ri2
+        while (any(same)) { ri2[same] <- sample(p, sum(same), replace = TRUE); same <- ri1 == ri2 }
+      }
+      Ar <- mat[, ri1, drop = FALSE]; Br <- mat[, ri2, drop = FALSE]
+      if (align_signs) {
+        ri <- pmax(ri1, ri2); ci <- pmin(ri1, ri2)
+        rs <- signMat[cbind(ri, ci)]; rs[is.na(rs)] <- 1
+        rn <- which(rs < 0)
+        if (length(rn) > 0) Br[, rn] <- rep(item_max[ri2[rn]] + 1, each = N) - Br[, rn]
+      }
+      rand_f[, iter] <- rowCor_weighted(Ar, Br, weights)
+    }
+
+    rm_f <- rowMeans(rand_f, na.rm = TRUE)
+    rsd_f <- apply(rand_f, 1, sd, na.rm = TRUE); rsd_f[rsd_f == 0] <- 1e-10
+    factor_z_matrix[, f] <- (coupled_f - rm_f) / rsd_f
+    factors_used <- factors_used + 1
+  }
+
+  if (factors_used == 0) return(NULL)
+
+  valid_cols <- which(colSums(!is.na(factor_z_matrix)) > 0)
+  fz <- factor_z_matrix[, valid_cols, drop = FALSE]
+
+  list(factor_z_matrix = fz,
+       primary_factor = primary_factor,
+       nF_detected = nF_est,
+       n_factors_used = factors_used)
+}
+
 
 ReReReRe <- function(data, #any dataset with questionnaire data
                     corProp=0.03, # proportion of highest correlations (legacy, for coupled mode)
@@ -257,6 +413,7 @@ ReReReRe <- function(data, #any dataset with questionnaire data
                     auto_z=FALSE, # auto-calibrate z_threshold based on total_items
                     mode="auto", # "auto" (default: weighted≤60, coupled>60), "coupled", "weighted", "efa_d"
                     min_r=0.0, # minimum |r| to include a pair in weighted mode (0 = all pairs)
+                    cross_factor_baseline=FALSE, # use cross-factor only random pairs (requires EFA)
                     progress = F){
 
   #keep only numeric values
@@ -352,15 +509,23 @@ ReReReRe <- function(data, #any dataset with questionnaire data
 
       if (progress) pb <- txtProgressBar(min = 0, max = iterations, style = 3)
 
+      # Get primary_factor for cross-factor baseline
+      efa_primary_factor <- efa_info$primary_factor
+
       for (i in seq_len(iterations)) {
         if (progress) setTxtProgressBar(pb, i)
 
-        rand_idx1 <- sample(J, k, replace = TRUE)
-        rand_idx2 <- sample(J, k, replace = TRUE)
-        same <- rand_idx1 == rand_idx2
-        while (any(same)) {
-          rand_idx2[same] <- sample(J, sum(same), replace = TRUE)
+        if (cross_factor_baseline && length(unique(efa_primary_factor)) >= 2) {
+          cf <- .sample_cross_factor_pairs(efa_primary_factor, k, J)
+          rand_idx1 <- cf$idx1; rand_idx2 <- cf$idx2
+        } else {
+          rand_idx1 <- sample(J, k, replace = TRUE)
+          rand_idx2 <- sample(J, k, replace = TRUE)
           same <- rand_idx1 == rand_idx2
+          while (any(same)) {
+            rand_idx2[same] <- sample(J, sum(same), replace = TRUE)
+            same <- rand_idx1 == rand_idx2
+          }
         }
 
         A_rand <- mat[, rand_idx1, drop = FALSE]
@@ -389,6 +554,18 @@ ReReReRe <- function(data, #any dataset with questionnaire data
       # EFA failed — fallback to weighted (all pairs)
       mode <- "weighted"
       if (progress) cat("  EFA failed, falling back to weighted mode.\n")
+    }
+  }
+
+  # --- Cross-factor baseline: get factor assignments if needed ---
+  cf_factor <- NULL
+  if (cross_factor_baseline && mode %in% c("weighted", "coupled")) {
+    efa_for_cf <- .efa_pairs(mat, align_signs = align_signs, progress = FALSE)
+    if (!is.null(efa_for_cf)) {
+      cf_factor <- efa_for_cf$primary_factor
+      nFactors_detected <- efa_for_cf$nF_detected
+    } else {
+      cross_factor_baseline <- FALSE  # EFA failed, disable
     }
   }
 
@@ -432,10 +609,15 @@ ReReReRe <- function(data, #any dataset with questionnaire data
 
     for (i in seq_len(iterations)) {
       if (progress) setTxtProgressBar(pb, i)
-      rand_idx1 <- sample(J, k, replace = TRUE)
-      rand_idx2 <- sample(J, k, replace = TRUE)
-      same <- rand_idx1 == rand_idx2
-      while (any(same)) { rand_idx2[same] <- sample(J, sum(same), replace = TRUE); same <- rand_idx1 == rand_idx2 }
+      if (cross_factor_baseline && !is.null(cf_factor) && length(unique(cf_factor)) >= 2) {
+        cf <- .sample_cross_factor_pairs(cf_factor, k, J)
+        rand_idx1 <- cf$idx1; rand_idx2 <- cf$idx2
+      } else {
+        rand_idx1 <- sample(J, k, replace = TRUE)
+        rand_idx2 <- sample(J, k, replace = TRUE)
+        same <- rand_idx1 == rand_idx2
+        while (any(same)) { rand_idx2[same] <- sample(J, sum(same), replace = TRUE); same <- rand_idx1 == rand_idx2 }
+      }
       A_rand <- mat[, rand_idx1, drop = FALSE]
       B_rand <- mat[, rand_idx2, drop = FALSE]
       if (align_signs) {
@@ -506,10 +688,24 @@ ReReReRe <- function(data, #any dataset with questionnaire data
     all_RIC <- matrix(NA_real_, nrow = N, ncol = iterations)
     if (progress) pb <- txtProgressBar(min = 0, max = iterations, style = 3)
 
+    # Precompute cross-factor pair pool for coupled mode
+    cf_cross_pairs <- NULL
+    if (cross_factor_baseline && !is.null(cf_factor) && length(unique(cf_factor)) >= 2) {
+      # Filter all_pairs to only cross-factor
+      pf1 <- cf_factor[all_pairs[1, ]]; pf2 <- cf_factor[all_pairs[2, ]]
+      cf_mask <- pf1 != pf2
+      cf_cross_pairs <- all_pairs[, cf_mask, drop = FALSE]
+    }
+
     for (i in seq_len(iterations)) {
       if (progress) setTxtProgressBar(pb, i)
-      sampled <- sample(n_pairs_total, k)
-      idx1 <- all_pairs[1, sampled]; idx2 <- all_pairs[2, sampled]
+      if (!is.null(cf_cross_pairs) && ncol(cf_cross_pairs) >= k) {
+        sampled <- sample(ncol(cf_cross_pairs), k)
+        idx1 <- cf_cross_pairs[1, sampled]; idx2 <- cf_cross_pairs[2, sampled]
+      } else {
+        sampled <- sample(n_pairs_total, k)
+        idx1 <- all_pairs[1, sampled]; idx2 <- all_pairs[2, sampled]
+      }
       A_rand <- mat[, idx1, drop = FALSE]; B_rand <- mat[, idx2, drop = FALSE]
       if (align_signs) {
         ri <- pmax(idx1, idx2); ci <- pmin(idx1, idx2)
@@ -580,6 +776,7 @@ ReReReRe_F <- function(data,
                        align_signs = TRUE,
                        auto_z = FALSE,
                        min_r = 0.0,
+                       cross_factor_baseline = FALSE,
                        progress = FALSE) {
 
   # Delegate to ReReReRe with mode="efa_d"
@@ -591,5 +788,194 @@ ReReReRe_F <- function(data,
            auto_z = auto_z,
            mode = "efa_d",
            min_r = min_r,
+           cross_factor_baseline = cross_factor_baseline,
            progress = progress)
+}
+
+
+# ======================================================================
+# ReReReRe_F variants (experimental)
+# ======================================================================
+
+#' Variant A: Per-factor z, flagging by proportion of factors below threshold
+#'
+#' @param factor_z_threshold z-score threshold per factor (below = "failed")
+#' @param flag_thresholds proportion of failed factors to flag (vector for post-hoc sweep)
+#' @return data.frame with prop_low (proportion of factors with z < factor_z_threshold),
+#'         mean_z, var_z, and flag columns for each flag_threshold
+ReReReRe_F_proplow <- function(data, iterations = 50, align_signs = TRUE,
+                                factor_z_threshold = 1.0,
+                                cross_factor_baseline = FALSE) {
+  data <- data[, sapply(data, is.numeric), drop = FALSE]
+  mat <- as.matrix(data); N <- nrow(mat)
+
+  pf <- .compute_per_factor_z(mat, iterations = iterations, align_signs = align_signs,
+                                cross_factor_baseline = cross_factor_baseline)
+  if (is.null(pf)) return(NULL)
+
+  fz <- pf$factor_z_matrix
+  prop_low <- rowMeans(fz < factor_z_threshold, na.rm = TRUE)
+  mean_z <- rowMeans(fz, na.rm = TRUE)
+  var_z <- apply(fz, 1, var, na.rm = TRUE)
+
+  data.frame(prop_low = prop_low, mean_z = mean_z, var_z = var_z,
+             nF_detected = pf$nF_detected, n_factors_used = pf$n_factors_used)
+}
+
+
+#' Variant B: Per-factor z, using mean and variance as features
+#'
+#' Careless respondents have LOW mean_z and potentially HIGH or LOW var_z.
+#' Combined score: mean_z - lambda * sqrt(var_z)
+ReReReRe_F_meanvar <- function(data, iterations = 50, align_signs = TRUE,
+                                lambda = 1.0,
+                                cross_factor_baseline = FALSE) {
+  data <- data[, sapply(data, is.numeric), drop = FALSE]
+  mat <- as.matrix(data); N <- nrow(mat)
+
+  pf <- .compute_per_factor_z(mat, iterations = iterations, align_signs = align_signs,
+                                cross_factor_baseline = cross_factor_baseline)
+  if (is.null(pf)) return(NULL)
+
+  fz <- pf$factor_z_matrix
+  mean_z <- rowMeans(fz, na.rm = TRUE)
+  var_z <- apply(fz, 1, var, na.rm = TRUE)
+  combined <- mean_z - lambda * sqrt(pmax(var_z, 0))
+
+  data.frame(mean_z = mean_z, var_z = var_z, combined = combined,
+             nF_detected = pf$nF_detected, n_factors_used = pf$n_factors_used)
+}
+
+
+#' Variant C: Iterative EFA — run once, clean, re-EFA, re-score
+#'
+#' Round 1: EFA on full sample → z-scores → flag at lenient threshold
+#' Round 2: EFA on clean sample → re-score ALL respondents with clean structure
+ReReReRe_F_iterative <- function(data, iterations = 50, align_signs = TRUE,
+                                  initial_z_threshold = 2.0,
+                                  cross_factor_baseline = FALSE) {
+  data <- data[, sapply(data, is.numeric), drop = FALSE]
+  mat <- as.matrix(data); N <- nrow(mat)
+
+  # Round 1: full sample EFA
+  rr1 <- ReReReRe(data, corProp = 0.03, z_threshold = initial_z_threshold,
+                   iterations = iterations, align_signs = align_signs,
+                   mode = "efa_d", cross_factor_baseline = cross_factor_baseline)
+
+  flagged_r1 <- rr1$z_score <= initial_z_threshold
+  n_flagged <- sum(flagged_r1)
+
+  # Guard: don't remove too many (keep at least 50% of sample)
+  if (n_flagged >= N * 0.5 || n_flagged == 0) {
+    # No improvement possible, return round 1 results
+    return(rr1)
+  }
+
+  # Round 2: EFA on clean subsample
+  mat_clean <- mat[!flagged_r1, , drop = FALSE]
+
+  # Run EFA on clean data
+  pa2 <- tryCatch({
+    suppressMessages(suppressWarnings(
+      fa.parallel(mat_clean, fa = "fa", plot = FALSE, n.iter = 20)
+    ))
+  }, error = function(e) NULL)
+
+  nF2 <- if (!is.null(pa2) && !is.null(pa2$nfact) && pa2$nfact >= 1) pa2$nfact
+         else max(1, sum(eigen(cor(mat_clean, use="pairwise.complete.obs"),
+                                symmetric=TRUE, only.values=TRUE)$values > 1))
+  nF2 <- max(1, min(nF2, floor(ncol(mat_clean) / 2)))
+
+  efa2 <- tryCatch({
+    suppressWarnings(fa(mat_clean, nfactors = nF2, rotate = "oblimin", fm = "minres",
+                        scores = "none", warnings = FALSE))
+  }, error = function(e) NULL)
+
+  if (is.null(efa2)) return(rr1)  # fallback to round 1
+
+  # Use clean EFA to score ALL respondents
+  loadings2 <- as.matrix(efa2$loadings[])
+  primary_factor2 <- apply(abs(loadings2), 1, which.max)
+
+  # Re-run ReReReRe on full data using the clean factor structure
+  # We can't directly pass external_efa to ReReReRe, so we use .compute_per_factor_z
+  # with external_efa to get per-factor z-scores, then aggregate as mean_z
+
+  # But actually we want the global EFA-D score with clean factor pairs
+  # Rebuild pairs from clean EFA structure applied to full correlation matrix
+  raw_cor_full <- cor(mat, use = "pairwise.complete.obs")
+  item_max <- apply(mat, 2, max, na.rm = TRUE)
+  signMat <- sign(raw_cor_full)
+  signMat[upper.tri(signMat, diag = TRUE)] <- NA
+
+  # Generate within-factor pairs from clean EFA
+  nF2_actual <- ncol(loadings2)
+  pair_list <- list()
+  for (f in seq_len(nF2_actual)) {
+    items_f <- which(primary_factor2 == f)
+    if (length(items_f) < 2) next
+    combos <- combn(items_f, 2)
+    for (ci in seq_len(ncol(combos)))
+      pair_list[[length(pair_list) + 1]] <- c(combos[1, ci], combos[2, ci])
+  }
+
+  if (length(pair_list) == 0) return(rr1)
+
+  pair_mat <- do.call(rbind, pair_list)
+  idx_A <- pair_mat[, 1]; idx_B <- pair_mat[, 2]
+  pair_r <- numeric(length(idx_A))
+  for (j in seq_along(idx_A)) pair_r[j] <- raw_cor_full[idx_A[j], idx_B[j]]
+  pair_abs_r <- abs(pair_r); pair_sign <- sign(pair_r)
+  keep <- !is.na(pair_abs_r)
+  idx_A <- idx_A[keep]; idx_B <- idx_B[keep]
+  pair_abs_r <- pair_abs_r[keep]; pair_sign <- pair_sign[keep]
+  k <- length(idx_A)
+  weights <- pair_abs_r; weights[weights < 1e-6] <- 1e-6
+
+  A_coupled <- mat[, idx_A, drop = FALSE]; B_coupled <- mat[, idx_B, drop = FALSE]
+  if (align_signs) {
+    nf <- which(pair_sign < 0)
+    if (length(nf) > 0) B_coupled[, nf] <- rep(item_max[idx_B[nf]] + 1, each = N) - B_coupled[, nf]
+  }
+
+  rowCors <- rowCor_weighted(A_coupled, B_coupled, weights)
+
+  # Permutation baseline
+  J <- ncol(mat)
+  all_RIC <- matrix(NA_real_, nrow = N, ncol = iterations)
+  for (i in seq_len(iterations)) {
+    if (cross_factor_baseline && length(unique(primary_factor2)) >= 2) {
+      cf <- .sample_cross_factor_pairs(primary_factor2, k, J)
+      ri1 <- cf$idx1; ri2 <- cf$idx2
+    } else {
+      ri1 <- sample(J, k, replace = TRUE); ri2 <- sample(J, k, replace = TRUE)
+      same <- ri1 == ri2
+      while (any(same)) { ri2[same] <- sample(J, sum(same), replace = TRUE); same <- ri1 == ri2 }
+    }
+    Ar <- mat[, ri1, drop = FALSE]; Br <- mat[, ri2, drop = FALSE]
+    if (align_signs) {
+      ri <- pmax(ri1, ri2); ci <- pmin(ri1, ri2)
+      rs <- signMat[cbind(ri, ci)]; rs[is.na(rs)] <- 1
+      rn <- which(rs < 0)
+      if (length(rn) > 0) Br[, rn] <- rep(item_max[ri2[rn]] + 1, each = N) - Br[, rn]
+    }
+    all_RIC[, i] <- rowCor_weighted(Ar, Br, weights)
+  }
+
+  rand_means <- rowMeans(all_RIC, na.rm = TRUE)
+  rand_sds <- apply(all_RIC, 1, sd, na.rm = TRUE)
+  z_score <- ifelse(rand_sds > 0, (rowCors - rand_means) / rand_sds, 0)
+
+  data.frame(
+    result = rowMeans(all_RIC < rowCors, na.rm = TRUE),
+    z_score = z_score,
+    indCors = rowCors,
+    rand_mean = rand_means,
+    rand_sd = rand_sds,
+    flagged = z_score <= rr1$z_threshold_used[1],
+    z_threshold_used = rr1$z_threshold_used[1],
+    nFactors_detected = nF2,
+    mode_used = "efa_d_iterative",
+    n_pairs = k
+  )
 }

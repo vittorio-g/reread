@@ -1,0 +1,76 @@
+ALL VARIANTS | 2026-04-02 | 75 cond | 123.3 min
+
+=== ORACLE ALL ===
+          method oracle
+1      iterative  0.398
+2          efa_d  0.394
+3       efa_d_cf  0.390
+4            std  0.383
+5         std_cf  0.380
+6        pf_mean  0.379
+7  proplow_fz1.5  0.280
+8  proplow_fz1.0  0.280
+9   pf_comb_l0.5  0.277
+10 proplow_fz0.5  0.276
+11 proplow_fz2.0  0.264
+12  pf_comb_l1.0  0.111
+13  pf_comb_l1.5  0.061
+
+=== BY BIN ===
+      bin efa_d efa_d_cf iterative pf_comb_l0.5 pf_comb_l1.0 pf_comb_l1.5
+1     <30 0.207    0.193     0.196        0.167       0.0995       0.0774
+2   30-60 0.281    0.273     0.279        0.184       0.0970       0.0724
+3  60-100 0.379    0.374     0.407        0.269       0.1411       0.0709
+4 100-200 0.577    0.581     0.580        0.381       0.1139       0.0421
+5    >200 0.724    0.732     0.725        0.585       0.1015       0.0119
+  pf_mean   std std_cf
+1   0.198 0.196  0.187
+2   0.258 0.261  0.259
+3   0.355 0.324  0.321
+4   0.571 0.576  0.578
+5   0.705 0.832  0.824
+
+=== BY nF ===
+  nF efa_d efa_d_cf iterative pf_comb_l0.5 pf_comb_l1.0 pf_comb_l1.5 pf_mean
+1  4 0.233    0.211     0.218        0.159       0.0949       0.0723   0.213
+2  8 0.305    0.303     0.305        0.204       0.0889       0.0554   0.293
+3 12 0.394    0.383     0.404        0.247       0.1051       0.0649   0.373
+4 20 0.492    0.499     0.498        0.337       0.1127       0.0608   0.485
+5 30 0.547    0.554     0.566        0.437       0.1540       0.0518   0.529
+    std std_cf
+1 0.223  0.210
+2 0.267  0.271
+3 0.344  0.346
+4 0.505  0.496
+5 0.574  0.574
+
+=== CF EFFECT ===
+    method oracle
+1    efa_d  0.394
+2 efa_d_cf  0.390
+3      std  0.383
+4   std_cf  0.380
+
+=== PROPLOW ===
+         method oracle
+1 proplow_fz1.5  0.280
+2 proplow_fz1.0  0.280
+3 proplow_fz0.5  0.276
+4 proplow_fz2.0  0.264
+
+=== WINNERS ===
+  nF=4 ipf=3: std (0.185)
+  nF=4 ipf=6: efa_d (0.234)
+  nF=4 ipf=10: efa_d (0.297)
+  nF=8 ipf=3: efa_d_cf (0.224)
+  nF=8 ipf=6: pf_mean (0.306)
+  nF=8 ipf=10: iterative (0.404)
+  nF=12 ipf=3: iterative (0.254)
+  nF=12 ipf=6: iterative (0.428)
+  nF=12 ipf=10: iterative (0.531)
+  nF=20 ipf=3: iterative (0.284)
+  nF=20 ipf=6: std (0.542)
+  nF=20 ipf=10: iterative (0.698)
+  nF=30 ipf=3: iterative (0.390)
+  nF=30 ipf=6: efa_d_cf (0.599)
+  nF=30 ipf=10: std (0.832)
