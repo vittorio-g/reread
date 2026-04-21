@@ -146,9 +146,12 @@ for (g in seq_len(nrow(grid))) {
                            careless_levels = CARELESS_LEVELS)
     labels <- inj$labels$careless_pct >= 0.01
 
-    # coupled (current default)
+    # coupled (top-|r% pairs, rowCor_abs — the scale-invariant baseline)
+    # NB: explicit mode="coupled" — on the current ReReReRe.R, default
+    # mode="auto" picks "weighted" for <=60 items, which is the buggy formula.
+    # We want the true coupled baseline here, not weighted.
     rr_c <- ReReReRe(inj$data_corrupted, corProp = 0.03, iterations = ITER,
-                     align_signs = TRUE)
+                     align_signs = TRUE, mode = "coupled")
     z_c <- rr_c$z_score
 
     # weighted_v2
