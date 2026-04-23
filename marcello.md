@@ -1,4 +1,68 @@
-# Aggiornamenti per Marcello — 2026-04-02
+# Aggiornamenti per Marcello — 2026-04-21
+
+## Attacco alla corruzione parziale: variance_penalty + split-half
+
+**Problema identificato (2026-04-21):** sotto GT=corruzione>50% + auto-z, i pattern
+random/longstring/mixed a 60-80% di corruzione vengono detectati solo al 66-77%.
+Il motivo è la **dilution**: su 60% di item corrotti restano ~16% di coppie tutte
+pulite che alzano la coherence individuale, portando il z sopra soglia.
+
+**Due nuove mosse implementate:**
+
+### (1) variance_penalty — integrato in ReReReRe()
+
+Formula: `z_adjusted = z_raw - α * exp(-sd_respondent / β)` con α=3, β=0.5 default.
+
+Chi ha varianza interna bassa (straight-liner: sd=0) prende una penalty piena
+(−3.0 sullo z). Chi risponde normalmente (sd≥1.5) non è toccato.
+
+**Risultato sui dati simulati (N=12000):** MCC sale da **0.567 → 0.582** (+0.015).
+Guadagno concentrato su:
+- pure_straight: 0.84 → 0.93 (+0.09)
+- acquiescent: 0.84 → 0.93 (+0.09)
+
+Attivabile con `ReReReRe(data, variance_penalty = TRUE)`.
+
+### (2) score_split_half — nuovo file ReReReRe_SplitHalf.R
+
+Splitta le k coppie coupled in 2 metà, calcola z separato per ciascuna metà
+(con propria baseline permutativa), ripete B=5 volte con split diversi, e
+aggrega.
+
+**Due comportamenti molto diversi:**
+
+| Aggregazione | Sens | Spec | MCC |
+|---|:---:|:---:|:---:|
+| `"mean"` | 0.89 | 0.73 | **0.589** (best binary) |
+| `"min"` | 0.99 | 0.46 | 0.464 |
+
+**Per-pattern sensitivity sui careless "difficili" (corruption >50%):**
+
+| Pattern | std | std+VP | sh_mean | **sh_min** |
+|---------|:---:|:---:|:---:|:---:|
+| random | 0.66 | 0.68 | 0.79 | **0.99** |
+| longstring | 0.68 | 0.71 | 0.80 | **0.97** |
+| mixed | 0.68 | 0.68 | 0.81 | **0.98** |
+
+### Interpretazione
+
+**Split-half MIN non è un classificatore binario** — è un **estimatore continuo
+del grado di corruzione**. La curva di detection sale quasi linearmente dal
+60% di flagging a 10% corruzione fino al 99% a 60%+. Utile per ranking.
+
+**Split-half MEAN** è il classificatore binario migliore (+0.007 MCC su VP).
+
+### Raccomandazioni aggiornate
+
+- **Classificazione binaria:** `ReReReRe(data, auto_z=TRUE, variance_penalty=TRUE)` — MCC=0.582
+- **Se la corruzione parziale è la preoccupazione principale:** usare
+  `score_split_half(data, aggregation="mean")` — MCC=0.589
+- **Per score continuo di severity:** `score_split_half(data, aggregation="min")`
+  + soglia percentile (es. top-20%)
+
+---
+
+# Aggiornamenti precedenti — 2026-04-02
 
 ## Decisione architetturale: due versioni del ReReReRe
 

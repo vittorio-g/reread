@@ -33,6 +33,22 @@
 # +0.030 on acquiescent, 0.000 on random/longstring (no damage).
 # Defaults: vp_alpha=3.0, vp_beta=0.5.
 #
+# === SPLIT-HALF (2026-04-21) ===
+#
+# Available in ReReReRe_SplitHalf.R as score_split_half(). Splits the top-k%
+# coupled pairs into halves across B random splits and scores each half
+# separately. Two aggregation strategies:
+#   aggregation="min":  returns min z across all 2*B halves — catches partial
+#                        carelessness aggressively (sensitivity 0.97-0.99 on
+#                        random/longstring/mixed at corruption>50%) but flags
+#                        many low-corruption respondents (specificity 0.46).
+#                        Better used as a continuous "degree of carelessness"
+#                        score than a binary flag.
+#   aggregation="mean": returns mean z across halves — best binary classifier
+#                        overall (MCC=0.589 vs std=0.567, std+VP=0.582).
+#
+# Use when partial carelessness (60-80% corruption) is the main concern.
+#
 # === ARCHITECTURE (2026-04-01) ===
 #
 # ReReReRe() — STANDARD (default)

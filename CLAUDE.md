@@ -5,7 +5,7 @@ status: active
 priority: 4
 urgency: 3
 completion_percent: 80
-last_updated: "2026-04-02"
+last_updated: "2026-04-21"
 description: "Multiverse simulation study evaluating a permutation-based method (ReReReRe) for detecting careless respondents in questionnaire data."
 language: en
 tags:
@@ -30,10 +30,13 @@ next_steps:
 
 | File | Function | Purpose |
 |------|----------|---------|
-| `ReReReRe.R` | `ReReReRe()` + `ReReReRe_F()` + variants | Standard (weighted/coupled auto-switch) + Per-factor variant (EFA-based) + proplow/meanvar/iterative |
+| `ReReReRe.R` | `ReReReRe()` + `ReReReRe_F()` + variants | Standard (weighted/coupled auto-switch) + Per-factor variant (EFA-based) + proplow/meanvar/iterative + variance_penalty flag |
+| `ReReReRe_SplitHalf.R` | `score_split_half()` | Split-half z-scoring (min/mean/median aggregation) for partial carelessness |
 | `Synthetic_Good_Responses_2.R` | `simulated_good_responses()` | Generate clean CFA-based questionnaire data |
 | `Careless_machine_2.R` | `inject_careless()` | Inject careless responses (random/longstring/mixed) |
 | `Simulation_AllVariants.R` | All-variants comparison | 13 methods × 75 conditions, buone_idee.md fully tested |
+| `Simulation_VariancePenalty.R` | Variance penalty test | 5 patterns including pure_straight/acquiescent, α×β grid |
+| `Simulation_SplitHalf.R` | Split-half test | std vs VP vs split-half (min/mean), GT=corruption>50% |
 | `Simulation_Realistic_Corruption.R` | Realistic corruption sim | Std vs F with 10-100% corruption, GT >50% |
 
 ### archive/scripts/ (analysis scripts)
@@ -1054,6 +1057,57 @@ plot 09 shows this clearly.
 - `18_z_separation_by_nF.png` — z-score gap good vs careless
 
 ## Revision Log
+
+### 2026-04-21 — Split-half scoring + variance penalty (attack on partial carelessness)
+
+**Problem:** with auto-z on pure z-score, random/longstring/mixed carelessness at
+60-80% corruption is detected only 66-77% of the time. Overall MCC sits at 0.567
+under GT=corruption>50%. Fully-corrupted respondents are easy; partially corrupted
+ones dilute the signal because ~half their pairs are preserved.
+
+**Two new tools added:**
+
+1. **variance_penalty** (flag on ReReReRe()): `z_adj = z - α * exp(-sd_resp/β)`.
+   Pushes straight-liners and acquiescent respondents (near-zero within-person SD)
+   to strongly negative z. Defaults α=3, β=0.5. Adds +0.015 MCC overall
+   (0.567 → 0.582) at auto-z. Zero cost (post-hoc).
+
+2. **score_split_half()** (new file `ReReReRe_SplitHalf.R`): splits the top-k%
+   coupled pairs into random halves across B=5 splits, computes z per half with
+   its own permutation baseline, then aggregates. Two modes:
+   - `aggregation="mean"`: MCC=0.589, +0.022 over std. Best binary classifier.
+   - `aggregation="min"`: sensitivity 0.97-0.99 on hard patterns (random,
+     longstring, mixed), but FPR 0.54 — best used as a continuous "degree of
+     carelessness" score rather than a binary flag.
+
+**Per-pattern sensitivity @ auto-z + GT=corruption>50% (6 conditions × 4 reps,
+N=500 each, 50% careless, 5 pattern types × 10 corruption levels 10-100%):**
+
+| Pattern | std | std+VP | sh_mean | sh_min |
+|---------|-----|--------|---------|--------|
+| random | 0.66 | 0.68 | 0.79 | **0.99** |
+| longstring | 0.68 | 0.71 | 0.80 | **0.97** |
+| mixed | 0.68 | 0.68 | 0.81 | **0.98** |
+| acquiescent | 0.84 | 0.93 | 0.92 | 1.00 |
+| pure_straight | 1.00 | 1.00 | 1.00 | 1.00 |
+
+**Detection curve by corruption level (std vs split-half MIN):**
+
+At 10% corruption: std flags 25%, sh_min flags 60% (but these should NOT be flagged
+under GT=50%). At 60% corruption: std flags 55%, sh_min flags 96%. sh_min behaves
+essentially as a continuous estimator of corruption degree — useful for ranking,
+not for binary classification.
+
+**Recommendation:**
+- Default for classification: `ReReReRe()` with `auto_z=TRUE` and
+  `variance_penalty=TRUE` — MCC=0.582, sens=0.85, spec=0.76
+- For hard partial carelessness: call `score_split_half(data, aggregation="mean")`
+  on top of standard RR — MCC=0.589, +0.007 marginal
+- For continuous carelessness severity: use `score_split_half(data, aggregation="min")`
+  as a ranked score, apply percentile threshold rather than z
+
+Output: `sim_splithalf_results.csv`, `sim_varpen_results.csv`,
+`plot_splithalf_metrics.png`, `plot_splithalf_curves.png`, `plot_detection_*.png`.
 
 ### 2026-04-02 — All Variants Simulation: buone_idee.md fully tested
 
