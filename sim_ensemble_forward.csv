@@ -1,0 +1,6 @@
+"step","added","features","sens","spec","mcc"
+0,"z_rr (baseline)","z_rr",0.315,0.957,0.367
+1,"irv","z_rr+irv",0.396,0.971,0.483
+2,"d2","z_rr+irv+d2",0.501,0.962,0.551
+3,"longstring","z_rr+irv+d2+longstring",0.51,0.964,0.563
+4,"person_tot","z_rr+irv+d2+longstring+person_tot",0.523,0.963,0.571
