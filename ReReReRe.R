@@ -5,16 +5,33 @@
 #   ReReReRe_F() — per-factor variant using EFA (experimental)
 #
 # Returns per-respondent:
-#   result    - legacy percentile: P(random < coupled)
-#   z_score   - (coupled_cor - mean_random) / sd_random
-#   indCors   - raw coupled absolute correlation
-#   rand_mean - mean of random iteration correlations
-#   rand_sd   - sd of random iteration correlations
-#   flagged   - binary flag (z_score <= z_threshold)
+#   result       - legacy percentile: P(random < coupled)
+#   z_score      - (coupled_cor - mean_random) / sd_random, MINUS variance penalty if enabled
+#   z_score_raw  - z_score WITHOUT variance penalty (always reported for reference)
+#   indCors      - raw coupled absolute correlation
+#   rand_mean    - mean of random iteration correlations
+#   rand_sd      - sd of random iteration correlations
+#   flagged      - binary flag (z_score <= z_threshold)
 #   z_threshold_used - the z_threshold used for flagging (useful when auto_z=TRUE)
 #   nFactors_detected - number of factors detected by parallel analysis
-#   mode_used - "coupled", "weighted", or "efa_d"
-#   n_pairs   - number of item pairs used
+#   mode_used    - "coupled", "weighted", or "efa_d"
+#   n_pairs      - number of item pairs used
+#   variance_penalty_used - TRUE/FALSE
+#
+# === VARIANCE PENALTY (2026-04-21) ===
+#
+# Optional flag to detect straight-lining and acquiescent response patterns,
+# which the base z-score alone identifies only weakly. When variance_penalty=TRUE:
+#
+#   z_score = z_score_raw - vp_alpha * exp(-sd_respondent / vp_beta)
+#
+# A respondent with zero within-person SD (pure straight-liner) receives the full
+# penalty (vp_alpha), pushing their z-score strongly negative. Respondents with
+# normal response variance are essentially unaffected.
+#
+# Tuned on simulated data (α=3, β=0.5): +0.053 MCC on pure_straight,
+# +0.030 on acquiescent, 0.000 on random/longstring (no damage).
+# Defaults: vp_alpha=3.0, vp_beta=0.5.
 #
 # === ARCHITECTURE (2026-04-01) ===
 #
@@ -414,6 +431,9 @@ ReReReRe <- function(data, #any dataset with questionnaire data
                     mode="auto", # "auto" (default: weighted≤60, coupled>60), "coupled", "weighted", "efa_d"
                     min_r=0.0, # minimum |r| to include a pair in weighted mode (0 = all pairs)
                     cross_factor_baseline=FALSE, # use cross-factor only random pairs (requires EFA)
+                    variance_penalty=FALSE, # penalize z-score for low within-respondent SD (detects straight-lining/acquiescence)
+                    vp_alpha=3.0, # variance-penalty strength (only used if variance_penalty=TRUE)
+                    vp_beta=0.5,  # variance-penalty decay (only used if variance_penalty=TRUE)
                     progress = F){
 
   #keep only numeric values
@@ -729,13 +749,30 @@ ReReReRe <- function(data, #any dataset with questionnaire data
   rand_means <- rowMeans(all_RIC, na.rm = TRUE)
   rand_sds   <- apply(all_RIC, 1, sd, na.rm = TRUE)
 
-  z_score <- ifelse(rand_sds > 0,
-                    (rowCors - rand_means) / rand_sds,
-                    0)
+  z_score_raw <- ifelse(rand_sds > 0,
+                        (rowCors - rand_means) / rand_sds,
+                        0)
+
+  # --- Optional variance penalty (detects straight-lining / acquiescence) ---
+  # Rationale: a respondent whose within-person SD is near zero (e.g. all 7s)
+  # produces rowCor = 0 for any pair, so z_score collapses to 0 regardless of
+  # actual carelessness. Subtracting alpha * exp(-sd_resp / beta) pushes such
+  # respondents to strongly negative z, increasing detection confidence.
+  # Defaults (alpha=3, beta=0.5) tuned on simulated data (2026-04-21):
+  # +0.053 MCC on pure_straight, +0.030 on acquiescent, 0.000 on random/longstring.
+  if (isTRUE(variance_penalty)) {
+    sd_resp <- apply(as.matrix(data), 1, sd, na.rm = TRUE)
+    sd_resp[is.na(sd_resp)] <- 0
+    penalty <- vp_alpha * exp(-sd_resp / max(vp_beta, 1e-6))
+    z_score <- z_score_raw - penalty
+  } else {
+    z_score <- z_score_raw
+  }
 
   data.frame(
     result = corComparedIndex,     # legacy percentile score
-    z_score = z_score,             # z-score: SDs above random baseline
+    z_score = z_score,             # z-score (with variance_penalty applied if requested)
+    z_score_raw = z_score_raw,     # original z-score without penalty (for reference)
     indCors = rowCors,             # raw coupled/weighted coherence score
     rand_mean = rand_means,        # mean of random iterations
     rand_sd = rand_sds,            # sd of random iterations
@@ -743,7 +780,8 @@ ReReReRe <- function(data, #any dataset with questionnaire data
     z_threshold_used = z_threshold,    # threshold used
     nFactors_detected = nFactors_detected,  # from parallel analysis
     mode_used = mode_used,         # "efa_d", "coupled", or "weighted"
-    n_pairs = k                    # number of item pairs used
+    n_pairs = k,                   # number of item pairs used
+    variance_penalty_used = isTRUE(variance_penalty)
   )
 }
 
