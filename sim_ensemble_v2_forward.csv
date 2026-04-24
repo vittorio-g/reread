@@ -1,0 +1,8 @@
+"step","added","features","sens","spec","mcc"
+0,"z_rr (baseline)","z_rr",0.315,0.957,0.367
+1,"irv","z_rr+irv",0.396,0.971,0.483
+2,"d2","z_rr+irv+d2",0.501,0.962,0.551
+3,"z_rr_iter_efa","z_rr+irv+d2+z_rr_iter_efa",0.57,0.961,0.603
+4,"longstring","z_rr+irv+d2+z_rr_iter_efa+longstring",0.592,0.962,0.623
+5,"z_rr_iter_coupled","z_rr+irv+d2+z_rr_iter_efa+longstring+z_rr_iter_coupled",0.59,0.962,0.621
+6,"person_tot","z_rr+irv+d2+z_rr_iter_efa+longstring+z_rr_iter_coupled+person_tot",0.589,0.961,0.617
