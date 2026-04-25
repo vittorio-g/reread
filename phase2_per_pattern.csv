@@ -1,0 +1,13 @@
+"pattern","corr_bin","n","rate"
+"acquiescent",0.9,159,1
+"acquiescent",1,159,1
+"fatigue",0.9,155,0.916
+"fatigue",1,159,1
+"longstring",0.9,159,0.95
+"longstring",1,166,0.94
+"mixed",0.9,163,0.767
+"mixed",1,160,0.881
+"pure_straight",0.9,157,1
+"pure_straight",1,161,1
+"random",0.9,170,0.835
+"random",1,162,0.846
