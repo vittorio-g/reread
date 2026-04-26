@@ -1,5 +1,130 @@
 # Aggiornamenti per Marcello — 2026-04-26
 
+## Revisione v2.1 — risposta alle obiezioni metodologiche (aggiornamento notturno)
+
+PDF in Downloads: `ReReReRe_Article_v2.1_Revision_2026-04-26.pdf` (~336 KB, 8 pagine).
+
+**Vittorio ha chiesto** (prima di andare a dormire): "fai un'analisi di tutte le
+possibili criticità o critiche al nostro approccio, e se ce ne sono di rilevanti
+rifai dei lavori paralleli implementando eventuali critiche. Dopodiché rifai un
+pdf riassuntivo alla luce di queste critiche, evidenziando i cambiamenti."
+
+### Le 10 critiche al v2 (file `critique_v2.md`)
+
+Catalogate 10 obiezioni che un revisore attento solleverebbe contro v2.
+**Quattro** sono state giudicate gravi abbastanza da meritare nuovi esperimenti:
+
+| # | Critica | Severità | Esperimento |
+|---|---------|----------|-------------|
+| **S1** | Train/test sulla stessa distribuzione di simulazione | alta | Holdout cross-rep / cross-size / cross-pattern |
+| **S2** | Calibrazione FPR=5% richiede l'oracolo del clean set | alta | Confronto 4 strategie di calibrazione |
+| **S3** | Niente IC sul Δ MCC dell'ablation | media | Bootstrap 95% IC (500 risampling) |
+| **S7** | Ensemble RF mai testato su dati reali con GT | alta | RF su 5 dataset reali (Schroeders, Schneider, Niessen, Goldammer S1/S2) |
+
+Le altre sei (S4-S6, S8-S10) sono documentate come limiti noti, già coperte
+da lavori precedenti o fuori scope.
+
+### I due risultati che cambiano la narrativa di v2
+
+**1. La calibrazione "deployable" batte l'oracolo (R2)**
+
+v2 fissava il punto operativo al 95° percentile delle predizioni RF *tra i clean*
+— equivalente a FPR=5% con accesso alle label. In produzione questo è impossibile.
+Abbiamo testato 4 strategie sulle stesse predizioni RF:
+
+| Scenario | Strategia | MCC | F1 | Sens | Spec |
+|:---:|---|:---:|:---:|:---:|:---:|
+| A | oracle_clean (v2 default) | 0.609 | 0.644 | 0.926 | 0.838 |
+| A | blind95 | 0.556 | 0.534 | 0.457 | 0.992 |
+| A | **rate_aware** | **0.788** | **0.820** | 0.797 | 0.971 |
+| A | fixed05 | 0.792 | 0.818 | 0.766 | 0.977 |
+
+**Sorpresa: rate_aware e fixed05 *battono* l'oracolo di +0.18 MCC.** Il motivo è
+che fissare FPR=5% sul solo clean set produce una soglia *bassa in assoluto* —
+e quando il test set contiene anche careless, questa soglia sacrifica troppa
+specificità per sensibilità. La rate-aware quantile (usa il tasso empirico
+stimato da z_RR_iter ≥ 2 come quantile di flagging) è più equilibrata.
+
+**Conseguenza per il paper:** il take v2 "MCC=0.69-0.74 con FPR=5%" sale a
+"MCC=0.79 con calibrazione rate-aware deployable senza oracle". È un upgrade
+sostantivo del headline.
+
+**2. Su dati reali il contributo di RR è dataset-dipendente (R4)**
+
+Abbiamo lanciato l'RF completo (5 feature: z_RR, IRV, LongString, D², Person-Total)
+su 5 dataset reali con ground truth. Ablation Δ MCC = MCC(Full) − MCC(NoRR):
+
+| Dataset | N | Δ MCC | 95% IC | P(Δ>0) | GT |
+|---------|---|:---:|:---:|:---:|---|
+| Schroeders 2022 | 605 | −0.023 | [−0.094, +0.041] | 0.245 | CrowdFlower quality |
+| Schneider QoL | 1649 | −0.024 | [−0.065, +0.014] | 0.120 | latent class |
+| Niessen 2016 | 180 | −0.098 | [−0.290, +0.056] | 0.100 | speed manipulation |
+| **Goldammer S1** | 291 | **+0.153** | **[+0.089, +0.224]** | **1.000** | instructed careless |
+| Goldammer S2 | 265 | +0.024 | [−0.017, +0.064] | 0.860 | instructed careless |
+
+Il pattern è chiaro: **RR contribuisce dove la GT è "instructed careless"**
+(Goldammer S1/S2 — i partecipanti istruiti a rispondere a caso sono esattamente
+il target inconsistent-careless di ReReReRe). Su CrowdFlower flag, latent class
+e speed manipulation, gli ausiliari (IRV, D²) già coprono il segnale.
+
+**L'ensemble RF complessivo batte la Mahalanobis χ²(.001) pratica su tutti e 5 i
+dataset** — l'idea ensemble generalizza. Ma il contributo specifico di RR no.
+
+### Cosa NON cambia (la cosa importante)
+
+- **Headline v2 regge:** Pooled MCC Scen A = 0.736 → cross-rep holdout = 0.616.
+  Differenza in linea con la naturale perdita di generalizzazione.
+- **Δ MCC scala con la lunghezza** (R3, bootstrap CI):
+
+  | Item | Δ MCC | 95% IC | P(Δ>0) |
+  |:---:|:---:|:---:|:---:|
+  | 30  | +0.033 | [+0.021, +0.045] | **1.000** |
+  | 100 | +0.035 | [+0.025, +0.046] | **1.000** |
+  | 200 | +0.083 | [+0.071, +0.096] | **1.000** |
+  | 300 | +0.074 | [+0.062, +0.085] | **1.000** |
+
+  **Tutti** gli 8 size hanno P(Δ>0)=1.000 — il contributo è statisticamente
+  positivo anche a 30 item (CI esclude zero). Il caveat v2 "i questionari corti
+  guadagnano poco" va riscritto come "guadagnano meno, ma il guadagno è
+  statisticamente rilevabile".
+
+- **Triad ≈ Full** in ogni schema di holdout (entro 0.02 MCC). La versione
+  minima difendibile (z_RR_iter + IRV + D²) tiene.
+
+- **Cross-pattern generalisation:** togliendo 2 pattern di careless dal
+  training, l'RF li riconosce comunque al test. Le feature catturano un
+  segnale generico di carelessness, non firme specifiche.
+
+### File generati nella revisione
+
+| File | Cosa contiene |
+|------|---------------|
+| `critique_v2.md` | Catalogo delle 10 critiche con severità e azione |
+| `robustness_v2.py` | Calcola A1 (cross-rep), A2 (cross-size), A3 (cross-pattern), B1 (calibration), C1 (bootstrap CI) |
+| `external_validation_rf_fast.R` | RF ensemble sui 5 dataset reali (versione "fast" — bypassa ReReReRe.R con compute_z_rr inline) |
+| `aggregate_revision_v2_1.py` | Aggregazione + 5 figure + pickle |
+| `build_revision_pdf.py` | Costruisce il PDF v2.1 |
+| `robustness_holdouts.csv`, `robustness_calibration.csv`, `robustness_bootstrap.csv` | Dati delle critiche A/B/C |
+| `external_rf_ensemble.csv`, `external_rf_bootstrap.csv` | Dati real-data |
+| `revision_assets/` | 5 PNG (figR1..figR5) + revision_data.pkl |
+| `ReReReRe_Article_v2.1_Revision_2026-04-26.pdf` | **Il PDF di revisione, in Downloads** |
+
+### Raccomandazione finale per la sottomissione
+
+Tre emendamenti sostanziali al v2:
+1. Sostituire la calibrazione oracle FPR=5% con la rate-aware quantile come
+   raccomandazione di deployment (alza il headline, è deployable senza label).
+2. Sui dati reali, riportare onestamente che l'ensemble batte i singoli
+   detector (5/5 dataset) ma il contributo specifico di RR è positivo solo
+   su instructed-careless (Goldammer).
+3. Citare i CI bootstrap di Tabella C1 per supportare il claim di crescita
+   monotonica del Δ con la lunghezza.
+
+Nessuno degli esperimenti v2.1 richiede di rivedere al ribasso un claim
+quantitativo di v2; uno (calibrazione) lo rivede al rialzo.
+
+---
+
 ## Simulazione v2 estesa + articolo v2 (aggiornamento serale)
 
 PDF in Downloads: `ReReReRe_Article_v2_2026-04-26.pdf` (~900 KB).

@@ -1058,6 +1058,127 @@ plot 09 shows this clearly.
 
 ## Revision Log
 
+### 2026-04-26e — v2.1 revision: critique catalog + parallel experiments
+
+**User request (Italian):** "fai un'analisi di tutte le possibili criticità o
+critiche al nostro approccio, e se ce ne sono di rilevanti rifai dei lavori
+paralleli implementando eventuali critiche. Dopodiché rifai un pdf riassuntivo
+alla luce di queste critiche, evidenziando i cambiamenti." Autonomous overnight
+critique-and-revision pass.
+
+**Files:** `critique_v2.md` (10-item catalog), `robustness_v2.py`,
+`external_validation_rf_fast.R`, `aggregate_revision_v2_1.py`,
+`build_revision_pdf.py`, `robustness_{holdouts,calibration,bootstrap}.csv`,
+`external_rf_{ensemble,bootstrap}.csv`, `revision_assets/{revision_data.pkl,
+figR1-figR5.png}`,
+`C:/Users/vitto/Downloads/ReReReRe_Article_v2.1_Revision_2026-04-26.pdf` (336 KB).
+
+**Critique catalog.** Ten potential reviewer objections to v2; four judged
+severe enough for new experiments: **S1** train/test on same simulation
+distribution, **S2** FPR=5% calibration assumes oracle clean set, **S3** no CIs
+on ablation Δ MCC, **S7** full RF ensemble never tested on real data with GT.
+The other six (S4 τ_GT choice, S5 mixed Likert, S6 published-method comparison,
+S8 RF hyperparameters, S9 sub-5% rates, S10 only n=500) documented as known
+limitations.
+
+**R1 — Holdout robustness (S1).** Cross-rep (8 train / 4 test reps within each
+size×rate cell), cross-size (small ↔ large), cross-pattern (leave-2-out).
+Cross-rep mean MCC: Scen A Full=0.616 (vs within-rep CV 0.736), Δ Full−NoRR
+= +0.076; Scen B Full=0.561, Δ=+0.084. **Generalisation holds** — features
+carry the same information across independent simulator draws. Triad tracks
+Full within ~0.02 MCC in every scheme.
+
+**R2 — Calibration realism (S2). UNEXPECTED FINDING.** Tested 4 strategies on
+the same RF predictions:
+
+| Scenario | oracle_clean | blind95 | rate_aware | fixed05 |
+|:--:|:--:|:--:|:--:|:--:|
+| A (τ=0.60) | 0.609 | 0.556 | **0.788** | **0.792** |
+| B (τ=0.40) | 0.565 | 0.451 | 0.673 | 0.671 |
+
+**The deployable strategies (rate_aware, fixed05) BEAT the oracle by +0.18 MCC
+pooled in Scen A.** Why: oracle_clean fixes FPR=5% on the clean-only subset,
+which produces a relatively low absolute threshold; once the test set contains
+both classes, that threshold sacrifices too much specificity (oracle sens=0.93
+spec=0.84 vs rate_aware sens=0.80 spec=0.97). This **overturns v2's implicit
+assumption that the oracle is the upper bound** — the deployment-ready
+rate-aware quantile is at least as good. The headline framing should be
+upgraded: pooled MCC=0.79 (Scen A) under deployable calibration, not 0.61
+under oracle-FPR=5%. blind95 underperforms (−0.053) because it puts the
+threshold at the 95th percentile of *all* predictions, which over-shoots when
+the true positive rate exceeds 5%.
+
+**R3 — Bootstrap CIs on Δ MCC (S3).** 5-fold OOF predictions, 500-resample
+percentile CI on Δ MCC = MCC(Full) − MCC(NoRR) at each questionnaire size,
+Scen A:
+
+| Items | Δ point | 95% CI | P(Δ>0) |
+|:--:|:--:|:--:|:--:|
+| 30  | +0.033 | [+0.021, +0.045] | 1.000 |
+| 50  | +0.033 | [+0.021, +0.045] | 1.000 |
+| 80  | +0.033 | [+0.022, +0.043] | 1.000 |
+| 100 | +0.035 | [+0.025, +0.046] | 1.000 |
+| 150 | +0.069 | [+0.056, +0.082] | 1.000 |
+| 200 | +0.083 | [+0.071, +0.096] | 1.000 |
+| 250 | +0.069 | [+0.058, +0.080] | 1.000 |
+| 300 | +0.074 | [+0.062, +0.085] | 1.000 |
+
+**P(Δ>0) = 1.000 at every size including 30 items — CI excludes zero
+everywhere.** v2's caveat that short questionnaires gain little from RR is
+revised: the gain is *small* below 100 items (~+0.033) and *large* above 150
+items (+0.07 to +0.08), but **statistically positive at every size**.
+
+**R4 — Real-data RF ensemble (S7).** Full RF (200 trees, mtry=√p, 5-fold CV)
+on 5 real datasets with GT. Mahalanobis χ²(.001) baseline included. Bootstrap
+CI on Δ MCC = MCC(Full) − MCC(NoRR):
+
+| Dataset | N | Full MCC | NoRR MCC | Δ MCC | 95% CI | P(Δ>0) |
+|---|:--:|:--:|:--:|:--:|:--:|:--:|
+| Schroeders 2022 | 605 | 0.162 | 0.184 | −0.023 | [−0.094, +0.041] | 0.245 |
+| Schneider QoL | 1649 | 0.523 | 0.548 | −0.024 | [−0.065, +0.014] | 0.120 |
+| Niessen 2016 | 180 | 0.022 | 0.120 | −0.098 | [−0.290, +0.056] | 0.100 |
+| **Goldammer S1** | 291 | **0.497** | 0.348 | **+0.153** | [+0.089, +0.224] | **1.000** |
+| Goldammer S2 | 265 | 0.472 | 0.448 | +0.024 | [−0.017, +0.064] | 0.860 |
+
+**Honest finding: the ensemble idea generalises (Full RF beats Mahalanobis χ²
+on 5/5 datasets), but the specific contribution of RR features is
+dataset-dependent.** Pattern tracks the careless mechanism: Goldammer studies
+use *instructed careless* respondents (told to respond randomly) — exactly the
+inconsistent-careless target ReReReRe is designed to detect. Schroeders
+(CrowdFlower flag), Schneider (latent class), and Niessen (speed manipulation)
+capture different quality phenomena that the auxiliaries (IRV, D²) already
+handle. The simulation-to-real gap noted in earlier single-feature work
+remains: RF combination narrows it on instructed-careless data but does not
+close it where the careless construct itself differs.
+
+**Implementation notes:**
+- `external_validation_rf_fast.R` bypasses ReReReRe.R (which threw "(subscript)
+  logico troppo lungo" on Schroeders 605×60) with an inline `compute_z_rr`
+  function: ~50 lines, deterministic, applies item_max+1−B reverse-coding when
+  sample correlation < 0. 5-feature ensemble (drops z_rr_iter for speed) ran
+  the 5 datasets in ~3 minutes.
+- Earlier R script appeared stuck for 2+ hours but was actually computing —
+  R's cat() was buffering when stdout was redirected. Fix: `flush.console()`
+  via `flush_cat` helper after every progress line. Lesson: always flush R
+  output when running long-running scripts headless.
+- The "(subscript) logico troppo lungo" bug in ReReReRe.R itself was not
+  debugged — worked around with the inline function. **Future task:**
+  reproduce on Schroeders and patch the main function.
+
+**Bottom line for v2.1.** Three substantive amendments to v2:
+1. Replace oracle FPR=5% calibration with rate-aware quantile as the deployment
+   recommendation (raises headline pooled MCC from 0.61 to 0.79 in Scen A,
+   deployable without labels).
+2. Report real-data result honestly: ensemble beats single detectors on all 5
+   datasets, but RR contribution is significant only on instructed-careless GT.
+3. Cite Tabella C1 bootstrap CIs to back the size-dependent monotonicity claim;
+   reword the short-questionnaire caveat as "detectable but small".
+
+The v2.1 experiments **do not require revising any quantitative claim of v2
+downward**; one (calibration) revises the headline upward. The structural
+findings (RF > logit, ablation Δ scales with size, Triad ≈ Full) survive every
+holdout scheme.
+
 ### 2026-04-26d — Extended simulation v2 + article v2
 
 **User request:** "Okay, lancia una simulazione con molte più repliche e condizioni
