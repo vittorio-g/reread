@@ -1,0 +1,119 @@
+Messaggi di avvertimento:
+1: il pacchetto 'ggplot2' è stato creato con R versione 4.4.3 
+2: il pacchetto 'randomForest' è stato creato con R versione 4.4.3 
+3: il pacchetto 'pROC' è stato creato con R versione 4.4.3 
+4: il pacchetto 'PRROC' è stato creato con R versione 4.4.3 
+=== Phase 5b: re-evaluation at tau_GT = 0.6 (Scenario A) ===
+
+Scenario A subset: n=18242 (n_pos=3842, n_neg=14400)
+
+===========================================================
+ PHASE 5b — Multi-metric @ tau=0.60 (Scenario A)
+===========================================================
+
+    operating_point threshold  sens  spec   ppv   npv bal_acc youden_j g_mean
+             FPR=5%     0.310 0.882 0.950 0.826 0.968   0.916    0.832  0.916
+            FPR=10%     0.165 0.932 0.900 0.714 0.980   0.916    0.832  0.916
+ Youden's J optimal     0.202 0.919 0.916 0.744 0.977   0.917    0.835  0.917
+         F1 optimal     0.490 0.825 0.979 0.913 0.954   0.902    0.804  0.899
+        MCC optimal     0.510 0.819 0.981 0.919 0.953   0.900    0.800  0.896
+    f1    f2   mcc kappa   auc auprc
+ 0.853 0.870 0.813 0.812 0.976 0.942
+ 0.808 0.878 0.760 0.748 0.976 0.942
+ 0.822 0.878 0.776 0.768 0.976 0.942
+ 0.867 0.841 0.835 0.833 0.976 0.942
+ 0.867 0.838 0.836 0.833 0.976 0.942
+
+===========================================================
+ Classifier comparison: multi-metric @ FPR=5%
+===========================================================
+
+Caricamento del pacchetto richiesto: Matrix
+
+Caricamento pacchetto: 'Matrix'
+
+I seguenti oggetti sono mascherati da 'package:tidyr':
+
+    expand, pack, unpack
+
+Loaded glmnet 4.1-10
+Messaggio di avvertimento:
+il pacchetto 'glmnet' è stato creato con R versione 4.4.3 
+Messaggi di avvertimento:
+1: glm.fit: si sono verificate probabilità stimate numericamente pari a 0 o 1 
+2: glm.fit: si sono verificate probabilità stimate numericamente pari a 0 o 1 
+3: glm.fit: si sono verificate probabilità stimate numericamente pari a 0 o 1 
+4: glm.fit: si sono verificate probabilità stimate numericamente pari a 0 o 1 
+5: glm.fit: si sono verificate probabilità stimate numericamente pari a 0 o 1 
+ classifier threshold  sens spec   ppv   npv bal_acc youden_j g_mean    f1
+      logit     0.413 0.787 0.95 0.808 0.944   0.869    0.737  0.865 0.797
+     glmnet     0.411 0.788 0.95 0.808 0.944   0.869    0.738  0.865 0.798
+         RF     0.310 0.881 0.95 0.826 0.968   0.916    0.832  0.915 0.853
+    f2   mcc kappa   auc auprc
+ 0.791 0.744 0.744 0.952 0.892
+ 0.792 0.745 0.745 0.952 0.892
+ 0.869 0.812 0.812 0.976 0.942
+
+===========================================================
+ Ablation @ tau=0.60
+===========================================================
+
+                     config n_features has_RR threshold  sens  spec   ppv   npv
+          Full ensemble (6)          6   TRUE     0.310 0.882 0.950 0.825 0.968
+     Triad: iter+IRV+D2 (3)          3   TRUE     0.325 0.855 0.951 0.822 0.961
+  Without z_rr_iter_efa (5)          5   TRUE     0.345 0.832 0.950 0.817 0.955
+       Without ANY z_rr (4)          4  FALSE     0.360 0.697 0.952 0.794 0.922
+   Aux triad: IRV+D2+LS (3)          3  FALSE     0.200 0.699 0.951 0.792 0.922
+ Aux quad: IRV+D2+LS+PT (4)          4  FALSE     0.360 0.696 0.952 0.793 0.922
+       Only z_rr family (2)          2   TRUE     0.610 0.473 0.950 0.717 0.871
+ bal_acc youden_j g_mean    f1    f2   mcc kappa   auc auprc
+   0.916    0.832  0.916 0.853 0.870 0.813 0.812 0.976 0.942
+   0.903    0.805  0.901 0.838 0.848 0.794 0.793 0.968 0.927
+   0.891    0.782  0.889 0.824 0.829 0.777 0.777 0.964 0.917
+   0.824    0.648  0.814 0.742 0.714 0.681 0.679 0.902 0.829
+   0.825    0.650  0.815 0.743 0.716 0.681 0.679 0.891 0.826
+   0.824    0.648  0.814 0.742 0.714 0.680 0.678 0.903 0.831
+   0.711    0.423  0.670 0.570 0.507 0.499 0.483 0.879 0.695
+
+=== Δ MCC (Full - NoRR) = 0.813 - 0.681 = 0.132 ===
+
+=== Per-pattern detection (tau=0.60): full vs no-RR ===
+       pattern corruption   n rate_full rate_no_rr delta
+   acquiescent       0.70 129     0.961      0.899 0.062
+   acquiescent       0.71  26     0.923      0.731 0.192
+   acquiescent       0.79  26     0.962      0.923 0.039
+   acquiescent       0.80 127     1.000      0.976 0.024
+   acquiescent       0.90 159     1.000      1.000 0.000
+   acquiescent       1.00 159     1.000      1.000 0.000
+       fatigue       0.70 131     0.664      0.588 0.076
+       fatigue       0.71  30     0.667      0.500 0.167
+       fatigue       0.79  25     0.680      0.640 0.040
+       fatigue       0.80 129     0.791      0.721 0.070
+       fatigue       0.90 155     0.929      0.768 0.161
+       fatigue       1.00 159     0.994      0.981 0.013
+    longstring       0.70 134     0.866      0.612 0.254
+    longstring       0.71  30     0.700      0.500 0.200
+    longstring       0.79  30     0.633      0.500 0.133
+    longstring       0.80 133     0.947      0.737 0.210
+    longstring       0.90 159     0.950      0.786 0.164
+    longstring       1.00 166     0.940      0.807 0.133
+         mixed       0.70 130     0.838      0.415 0.423
+         mixed       0.71  24     0.375      0.292 0.083
+         mixed       0.79  27     0.444      0.259 0.185
+         mixed       0.80 138     0.790      0.442 0.348
+         mixed       0.90 163     0.773      0.521 0.252
+         mixed       1.00 160     0.887      0.519 0.368
+ pure_straight       0.70 128     0.992      0.969 0.023
+ pure_straight       0.71  26     1.000      0.923 0.077
+ pure_straight       0.79  26     1.000      1.000 0.000
+ pure_straight       0.80 132     1.000      1.000 0.000
+ pure_straight       0.90 157     1.000      1.000 0.000
+ pure_straight       1.00 161     1.000      1.000 0.000
+        random       0.70 140     0.779      0.350 0.429
+        random       0.71  28     0.393      0.250 0.143
+        random       0.79  26     0.385      0.192 0.193
+        random       0.80 137     0.803      0.307 0.496
+        random       0.90 170     0.847      0.335 0.512
+        random       1.00 162     0.827      0.352 0.475
+
+=== DONE Phase 5b (tau=0.60) ===

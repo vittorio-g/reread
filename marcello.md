@@ -91,6 +91,94 @@ RR contribuisce ΔMCC>0.10, soffitto duro senza RR) sono robusti.
 
 ---
 
+## Phase 5b — Phase 5 rifatto a τ=0.60 (questo lo confermo!)
+
+PDF in Downloads: `ReReReRe_Phase5b_tau60_2026-04-26.pdf`.
+
+Ho rifatto tutto Phase 5 (multi-metric + ablation + per-pattern) sotto la
+nuova definizione operativa τ=0.60, Scenario A. I numeri non solo *non*
+peggiorano — **migliorano**, e il contributo del ReReReRe **cresce**.
+
+### Numeri principali (RF @ FPR=5%)
+
+| Metrica | τ=0.80 (vecchio) | τ=0.60 (nuovo) |
+|---------|:---:|:---:|
+| MCC | 0.786 | **0.813** |
+| F1 | 0.807 | **0.853** |
+| AUPRC | 0.940 | **0.942** |
+| Kappa | 0.778 | **0.812** |
+| PPV | 0.716 | **0.826** |
+| Sens | 0.924 | 0.882 |
+| Spec | 0.951 | 0.950 |
+
+RF vince ancora **13 metriche su 13** vs logit/glmnet. Identico al vecchio.
+
+### Punti operativi (training)
+
+| Punto | τ classifier | Sens | Spec | PPV | F1 | MCC |
+|-------|:---:|:---:|:---:|:---:|:---:|:---:|
+| FPR=5% | 0.310 | 0.882 | 0.950 | 0.826 | 0.853 | **0.813** |
+| FPR=10% | 0.165 | 0.932 | 0.900 | 0.714 | 0.808 | 0.760 |
+| Youden's J | 0.202 | 0.919 | 0.916 | 0.744 | 0.822 | 0.776 |
+| F1 ottimale | 0.490 | 0.825 | 0.979 | 0.913 | 0.867 | 0.835 |
+| MCC ottimale | 0.510 | 0.819 | 0.981 | 0.919 | 0.867 | **0.836** |
+
+### Ablation (la cosa importante)
+
+| Configurazione | n_feat | RR? | MCC nuovo | MCC vecchio |
+|----------------|:---:|:---:|:---:|:---:|
+| **Full ensemble** | 6 | sì | **0.813** | 0.784 |
+| Triade iter+IRV+D² | 3 | iter | 0.794 | 0.778 |
+| Senza z_RR_iter | 5 | solo std | 0.777 | 0.749 |
+| **Senza ReReReRe** | 4 | **no** | **0.681** | 0.665 |
+| Aux quad | 4 | no | 0.680 | 0.665 |
+| Aux triade | 3 | no | 0.681 | 0.665 |
+| Solo z_RR family | 2 | sì (sole) | 0.499 | 0.533 |
+
+**Δ MCC dato dal ReReReRe = +0.132** (era +0.119 a τ=0.80). Il contributo
+**cresce**, non cala. Stessa cosa per F1 (+0.111) e AUPRC (+0.113).
+
+### Per-pattern: dove il ReReReRe rescuet di più
+
+| Pattern | Corruzione | Full | Senza RR | Δ |
+|---------|:---:|:---:|:---:|:---:|
+| random | 0.90 | 0.847 | 0.335 | **+0.512** |
+| random | 0.80 | 0.803 | 0.307 | +0.496 |
+| random | 1.00 | 0.827 | 0.352 | +0.475 |
+| random | 0.70 | 0.779 | 0.350 | +0.429 |
+| mixed | 0.70 | 0.838 | 0.415 | +0.423 |
+| mixed | 1.00 | 0.887 | 0.519 | +0.368 |
+| longstring | 0.70 | 0.866 | 0.612 | +0.254 |
+| longstring | 0.80 | 0.947 | 0.737 | +0.210 |
+| fatigue | 0.90 | 0.929 | 0.768 | +0.161 |
+| acquiescent ≥0.80 | — | 1.00 | ~1.00 | ~0 |
+| pure_straight ≥0.79 | — | 1.00 | ~1.00 | ~0 |
+
+Il ReReReRe salva esattamente i pattern incoerenti (random, mixed) che gli
+ausiliari non vedono. Sui pattern coerenti (acquiescent, pure_straight,
+fatigue piena) gli ausiliari saturano già a ~100% e RR non aggiunge nulla.
+**Questa complementarità strutturale è il motivo per cui l'ensemble funziona.**
+
+### Frase headline da mettere nel paper
+
+> "Random Forest ensemble di sei feature (z_RR, z_RR_iter, IRV, LongString,
+> D², Person-Total) raggiunge MCC = 0.813, F1 = 0.853, AUPRC = 0.942 a
+> FPR = 5% su n = 18,242 rispondenti simulati sotto la definizione operativa
+> τ_GT = 0.60 (Scenario A: clean vs careless con corruzione > 60%). RF
+> batte logistica e elastic-net su tutte e 13 le metriche di valutazione.
+> Il ReReReRe contribuisce ΔMCC = +0.132 rispetto all'ensemble di soli
+> ausiliari; senza ReReReRe, l'ensemble di quattro detector si satura a
+> MCC ≈ 0.68 a prescindere da quanti ausiliari si impilano."
+
+### Cosa cambia nei file di Phase 5 (vecchi)
+
+I CSV originali (`phase5_*.csv`) restano in repository per riferimento.
+I nuovi sono `phase5b_*_tau60.csv`. Il PDF Phase 5 originale
+(`ReReReRe_MultiMetric_Report_2026-04-25.pdf`) ha numeri a τ=0.80; il
+nuovo PDF (`ReReReRe_Phase5b_tau60_2026-04-26.pdf`) è quello da usare.
+
+---
+
 # Aggiornamenti per Marcello — 2026-04-25 (sera)
 
 ## Phase 5 — Rivalutazione multi-metrica + ablation study

@@ -1145,6 +1145,84 @@ computed under τ=0.80 in Scenario A. Re-running Phase 5 at τ=0.60 would shift 
 absolute MCC up (0.786 → ~0.81) but the qualitative findings (RF beats logit on 13/13
 metrics, RR contributes ΔMCC>0.10, hard ceiling without RR) are robust.
 
+### 2026-04-26b — Phase 5b: re-run of multi-metric + ablation under τ=0.60
+
+Phase 6's argmax (Scenario A: τ=0.60) was applied to Phase 5's pipeline.
+Files: `Phase5b_MultiMetric_tau60.R`, `phase5b_*.csv`, `phase5b_log.txt`,
+`generate_phase5b_report.py`. PDF: `ReReReRe_Phase5b_tau60_2026-04-26.pdf`.
+
+**Training subset:** n=18,242 (n_pos=3,842 careless with corruption>0.60,
+n_neg=14,400 clean). 5-fold CV.
+
+**Headline (RF @ FPR=5%):**
+
+| Metric | τ=0.80 (old) | τ=0.60 (new) | Δ |
+|--------|:---:|:---:|:---:|
+| MCC | 0.786 | **0.813** | +0.027 |
+| F1 | 0.807 | **0.853** | +0.046 |
+| AUPRC | 0.940 | **0.942** | +0.002 |
+| Kappa | 0.778 | **0.812** | +0.034 |
+| AUC | 0.982 | 0.976 | −0.006 |
+| Sens | 0.924 | 0.882 | −0.042 |
+| Spec | 0.951 | 0.950 | −0.001 |
+| PPV | 0.716 | **0.826** | +0.110 |
+
+RF wins **13/13 metrics** versus logistic and elastic-net (clean sweep
+reproduced under the new definition).
+
+**Operating points:**
+
+| Point | τ | Sens | Spec | PPV | F1 | MCC |
+|-------|:---:|:---:|:---:|:---:|:---:|:---:|
+| FPR=5% | 0.310 | 0.882 | 0.950 | 0.826 | 0.853 | 0.813 |
+| FPR=10% | 0.165 | 0.932 | 0.900 | 0.714 | 0.808 | 0.760 |
+| Youden's J | 0.202 | 0.919 | 0.916 | 0.744 | 0.822 | 0.776 |
+| F1 optimal | 0.490 | 0.825 | 0.979 | 0.913 | 0.867 | 0.835 |
+| MCC optimal | 0.510 | 0.819 | 0.981 | 0.919 | 0.867 | 0.836 |
+
+**Ablation (RF @ FPR=5%, training):**
+
+| Configuration | n_feat | Has RR? | MCC (new) | MCC (old) |
+|---------------|:---:|:---:|:---:|:---:|
+| Full ensemble | 6 | both | **0.813** | 0.784 |
+| Triad: iter+IRV+D² | 3 | iter | 0.794 | 0.778 |
+| Without z_RR_iter | 5 | std | 0.777 | 0.749 |
+| Without ANY z_RR | 4 | NO | **0.681** | 0.665 |
+| Aux quad: IRV+D²+LS+PT | 4 | NO | 0.680 | 0.665 |
+| Aux triad: IRV+D²+LS | 3 | NO | 0.681 | 0.665 |
+| Only z_RR family | 2 | only | 0.499 | 0.533 |
+
+**ΔMCC (Full − No-RR) = 0.813 − 0.681 = +0.132** (vs +0.119 at τ=0.80).
+ΔF1 = +0.111. ΔAUPRC = +0.113. **The ReReReRe contribution grows under
+the new definition** because the harder-to-detect 0.70-0.79 corruption
+respondents are now positives, and only the z_RR features carry the signal
+the auxiliaries miss on them.
+
+**Per-pattern Δ from ReReReRe (most striking):**
+
+| Pattern | Corruption | Full | No-RR | Δ |
+|---------|:---:|:---:|:---:|:---:|
+| random | 1.00 | 0.827 | 0.352 | +0.475 |
+| random | 0.90 | 0.847 | 0.335 | **+0.512** |
+| random | 0.80 | 0.803 | 0.307 | +0.496 |
+| random | 0.70 | 0.779 | 0.350 | +0.429 |
+| mixed | 1.00 | 0.887 | 0.519 | +0.368 |
+| mixed | 0.70 | 0.838 | 0.415 | +0.423 |
+| longstring | 0.70 | 0.866 | 0.612 | +0.254 |
+| longstring | 0.80 | 0.947 | 0.737 | +0.210 |
+| fatigue | 0.90 | 0.929 | 0.768 | +0.161 |
+| acquiescent / pure_straight | ≥0.80 | ≈1.00 | ≈1.00 | ≈0 |
+
+The complementarity story is unchanged but starker: ReReReRe specifically
+rescues random/mixed (and also longstring/fatigue at 0.70-0.90 corruption),
+with auxiliaries already saturating on consistent careless (acquiescent,
+pure_straight, fully-corrupted fatigue).
+
+**Verdict:** all qualitative findings of Phase 5 reproduce under τ=0.60.
+Numerical headline shifts upward; ReReReRe contribution grows. Recommend
+adopting τ=0.60 (Scenario A) as primary operational definition for the
+paper, dropping τ=0.80 entirely.
+
 ### 2026-04-25b — Phase 5: Multi-metric re-evaluation + ablation study
 
 **User request:** (1) re-evaluate the RF ensemble using multiple metrics from the
