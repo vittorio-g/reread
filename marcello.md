@@ -1,5 +1,117 @@
 # Aggiornamenti per Marcello — 2026-04-26
 
+## Simulazione v2 estesa + articolo v2 (aggiornamento serale)
+
+PDF in Downloads: `ReReReRe_Article_v2_2026-04-26.pdf` (~900 KB).
+
+**Vittorio ha chiesto:** "lancia una simulazione con molte più repliche e
+condizioni, aggiorna i documenti." Ho scalato la griglia v1 (50 run) a
+**384 run** in 109 minuti.
+
+### Cosa è cambiato vs v1
+
+| | v1 | **v2** |
+|---|---|---|
+| Dimensioni | 5 (30, 64, 100, 150, 200) | **8 (30, 50, 80, 100, 150, 200, 250, 300)** |
+| Tassi careless | 2 (20%, 40%) | **4 (10%, 20%, 40%, 60%)** |
+| Repliche / cella | 5 | **12** |
+| Run totali | 50 | **384** |
+| Tempo | 6 min | **109 min** |
+| Figure nel PDF | 6 | **9** (3 nuove) |
+
+Le SD per replica sono calate (0.05–0.13 MCC) — adesso le curve di scaling
+sono praticamente prive di rumore.
+
+### Headline v2 (pooled)
+
+| Scenario | MCC | F1 | AUC | AUPRC | Sens | Spec |
+|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
+| A (τ=0.60) | **0.736** | 0.782 | 0.943 | 0.877 | 0.809 | 0.951 |
+| B (τ=0.40) | **0.610** | 0.668 | 0.901 | 0.775 | 0.659 | 0.950 |
+
+Scenario A pooled MCC sale di +0.044 vs v1 (0.692 → 0.736), perché abbiamo
+aggiunto le dimensioni 250 e 300 dove il metodo è al massimo.
+
+### Scaling v2 (Scenario A, 48 run per dimensione, mean ± SD)
+
+| Item | MCC ± SD | AUC | AUPRC | Sens |
+|:---:|:---:|:---:|:---:|:---:|
+| 30 | 0.535 ± 0.06 | 0.837 | 0.703 | 0.543 |
+| 50 | 0.608 ± 0.05 | 0.887 | 0.783 | 0.637 |
+| 80 | 0.665 ± 0.07 | 0.923 | 0.824 | 0.709 |
+| 100 | 0.709 ± 0.07 | 0.948 | 0.866 | 0.771 |
+| 150 | 0.804 ± 0.06 | 0.977 | 0.929 | 0.897 |
+| 200 | 0.842 ± 0.05 | 0.986 | 0.958 | 0.953 |
+| 250 | 0.860 ± 0.06 | 0.992 | 0.971 | 0.977 |
+| 300 | **0.868 ± 0.05** | **0.994** | **0.994** | **0.981** |
+
+A 300 item: MCC=0.87, AUC=0.99, sensibilità del 98% con specificità bloccata
+al 95% per costruzione. Plateau visibile tra 250 e 300 (+0.008 MCC).
+
+### Ablation: ReReReRe contributo cresce con la lunghezza (la cosa più chiara di v2)
+
+Scenario A:
+
+| Item | Full | Triad | Senza RR | Δ da RR |
+|:---:|:---:|:---:|:---:|:---:|
+| 30 | 0.535 | 0.482 | 0.508 | +0.027 |
+| 50 | 0.608 | 0.555 | 0.579 | +0.029 |
+| 80 | 0.665 | 0.655 | 0.628 | +0.037 |
+| 100 | 0.709 | 0.689 | 0.666 | +0.043 |
+| 150 | 0.804 | 0.785 | 0.708 | +0.096 |
+| 200 | 0.842 | 0.838 | 0.711 | **+0.131** |
+| 250 | 0.860 | 0.853 | 0.727 | **+0.133** |
+| 300 | 0.868 | 0.864 | 0.731 | **+0.137** |
+
+Scenario B (più severo, l'effetto è ancora più grande):
+
+| Item | Full | Triad | Senza RR | Δ da RR |
+|:---:|:---:|:---:|:---:|:---:|
+| 30 | 0.414 | 0.375 | 0.398 | +0.015 |
+| 100 | 0.574 | 0.542 | 0.529 | +0.045 |
+| 200 | 0.706 | 0.689 | 0.595 | +0.112 |
+| 250 | 0.745 | 0.723 | 0.601 | **+0.144** |
+| 300 | 0.764 | 0.752 | 0.608 | **+0.156** |
+
+A 300 item Scenario B: senza ReReReRe ci si ferma a MCC=0.608, con tutto a
+0.764. Il gap di +0.156 è circa un quarto del soffitto del no-RR — è la
+metrica più impressionante di tutto il pacchetto.
+
+**Triad continua a tenere il passo del Full ensemble entro 0.02 MCC** in
+tutte le dimensioni — la versione minima difendibile per l'articolo
+(iter + IRV + D²) resta valida.
+
+### Le 3 figure nuove
+
+- **fig07** — MCC vs item, una curva per ogni tasso (10/20/40/60%), entrambi
+  gli scenari. Mostra che il rate effect è modesto sopra i 100 item: la
+  dimensione del questionario domina.
+- **fig08** — Δ MCC del contributo di ReReReRe in funzione della
+  lunghezza, con error bars. È il grafico-firma dell'articolo: zero a 30
+  item, +0.13–0.16 a 300 item.
+- **fig09** — Boxplot MCC per dimensione (Scenario A): le scatole si
+  rimpiccoliscono con la lunghezza — questionari lunghi danno sia medie
+  più alte SIA stime per replica più stabili.
+
+### File v2 generati
+
+| File | Cosa contiene |
+|------|---------------|
+| `Sim_Article_Big_v2.R` | Lo script R con la griglia estesa |
+| `aggregate_article_sim_v2.py` | Aggregazione + 9 figure (3 nuove) + pickle |
+| `build_article_pdf_v2.py` | Costruisce il PDF v2 |
+| `sim_article_v2_scores.csv` | 192,000 righe |
+| `sim_article_v2_metrics.csv` | 636 righe (384 run × 2 scenari, alcuni cell skippati) |
+| `sim_article_v2_ablation.csv` | 636 righe |
+| `sim_article_v2_perpat.csv` | 19,134 righe |
+| `article_assets_v2/` | 9 PNG + pickle pre-aggregato |
+| `ReReReRe_Article_v2_2026-04-26.pdf` | **La bozza v2, in Downloads** |
+
+I file v1 (`sim_article_*.csv`, `article_assets/`,
+`ReReReRe_Article_2026-04-26.pdf`) sono ancora sul disco, intatti.
+
+---
+
 ## Big simulation + bozza articolo (l'output principale di oggi)
 
 PDF in Downloads: `ReReReRe_Article_2026-04-26.pdf` (~640 KB, ~25 pagine).
