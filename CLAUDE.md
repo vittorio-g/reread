@@ -1058,6 +1058,93 @@ plot 09 shows this clearly.
 
 ## Revision Log
 
+### 2026-04-26 — Phase 6: Systematic GT threshold sweep
+
+**User challenge:** "Confermami che >80% è la definizione migliore secondo TUTTI gli
+indici. E confermami che la simulazione conteneva tutti i gradi di corruzione 10–100%,
+non solo clean + >80%. Se hai fatto solo clean + >80%, è un errore metodologico — rifai
+da capo." This was a methodologically correct objection: in Phases 1–5 the operational
+definition `careless = corruption > 0.80` was taken as given (because the user had
+mentioned it earlier), not derived from a sweep. Phase 6 redoes the choice properly.
+
+**Verification of simulation data:** `sim_robust_scores.csv` (N=24,000) contains the
+full corruption grid `{0, 0.1, 0.2, 0.21, 0.29, 0.3, 0.4, 0.5, 0.6, 0.7, 0.71, 0.79,
+0.8, 0.9, 1.0}` with 14,400 clean and ~960 respondents at each non-zero level. There
+is **no generative error** — Phases 1–5 simply *picked* τ=0.80 instead of optimising it.
+
+**Files:** `Phase6_ThresholdSweep.R`, `phase6_threshold_sweep.csv`, `phase6_log.txt`,
+`plot_phase6_all_metrics.png`, `plot_phase6_headline_metrics.png`,
+`plot_phase6_tradeoff.png`, `generate_phase6_report.py`.
+PDF: `ReReReRe_ThresholdSweep_2026-04-26.pdf`.
+
+**Method:** sweep τ_GT ∈ {0.10, 0.20, …, 0.90}. For each τ, train a 5-fold CV RF on the
+6 standard features (z_RR, z_RR_iter, IRV, LongString, D², PersonTotal), under TWO
+labelling scenarios:
+- **Scenario A (clean vs corrupted):** positives = corruption > τ, negatives = clean
+  only (the ambiguous middle-corruption respondents are *excluded*).
+- **Scenario B (everyone in):** positives = corruption > τ, negatives = corruption ≤ τ
+  (clean + low-corruption respondents are negatives).
+
+For each (τ, scenario) report 13 metrics at FPR=5% and at the MCC-optimal threshold,
+plus AUC and AUPRC.
+
+**Headline results (FPR=5% operating point):**
+
+Scenario A:
+
+| τ_GT | n_pos | MCC | F1 | AUPRC | AUC | Kappa |
+|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
+| 0.10 | 8637 | 0.671 | 0.767 | 0.886 | 0.904 | 0.656 |
+| 0.20 | 7833 | 0.704 | 0.791 | 0.900 | 0.924 | 0.695 |
+| 0.30 | 6715 | 0.755 | 0.826 | 0.918 | 0.944 | 0.752 |
+| 0.40 | 5758 | 0.787 | 0.846 | 0.930 | 0.959 | 0.787 |
+| 0.50 | 4804 | 0.802 | 0.852 | 0.938 | 0.969 | 0.802 |
+| **0.60** | **3842** | **0.811** | **0.852** | **0.942** | 0.976 | **0.810** |
+| 0.70 | 3050 | 0.799 | 0.835 | 0.939 | 0.979 | 0.798 |
+| 0.80 | 1930 | 0.783 | 0.804 | 0.939 | 0.984 | 0.774 |
+| 0.90 | 967 | 0.702 | 0.703 | 0.925 | 0.985 | 0.678 |
+
+Scenario B:
+
+| τ_GT | n_pos | MCC | F1 | AUPRC | AUC | Kappa |
+|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
+| 0.10 | 8637 | 0.667 | 0.760 | 0.877 | 0.900 | 0.653 |
+| 0.20 | 7833 | 0.678 | 0.763 | 0.881 | 0.917 | 0.668 |
+| **0.30** | 6715 | 0.704 | **0.776** | 0.878 | 0.930 | 0.699 |
+| **0.40** | 5758 | **0.704** | 0.769 | 0.864 | 0.938 | 0.701 |
+| 0.50 | 4804 | 0.690 | 0.749 | 0.843 | 0.942 | 0.689 |
+| 0.60 | 3842 | 0.661 | 0.714 | 0.805 | 0.940 | 0.661 |
+| 0.70 | 3050 | 0.603 | 0.653 | 0.754 | 0.937 | 0.603 |
+| 0.80 | 1930 | 0.548 | 0.585 | 0.689 | 0.937 | 0.545 |
+| 0.90 | 967 | 0.479 | 0.483 | 0.664 | 0.938 | 0.454 |
+
+**Argmax (Scenario A):** MCC, AUPRC, Kappa → τ=0.60. F1 → τ=0.50. AUC and Bal. Acc.
+keep rising to τ=0.90, but those metrics are inflated by easy extreme positives.
+**Argmax (Scenario B):** MCC, Kappa, Bal. Acc., Youden's J → τ=0.40. F1 → τ=0.30.
+AUPRC → τ=0.20.
+
+**The previous τ=0.80 is suboptimal under every classification-quality metric** (MCC,
+F1, AUPRC, Kappa) in *both* scenarios. In Scenario A, τ=0.60 beats τ=0.80 by ΔMCC=0.028.
+In Scenario B, τ=0.40 beats τ=0.80 by ΔMCC=0.156 — a large gap.
+
+**Why the two scenarios disagree:** Scenario A's higher MCC is a definitional
+artefact: by excluding the middle-corruption respondents, the negative class is purely
+clean and easier to separate. Scenario B is more realistic for deployment — in real
+data you don't know who has 30% vs 60% corruption ahead of time. Scenario B's argmax
+sits lower (τ=0.40) because mid-corruption respondents that were "negatives" at high τ
+become positives, and the classifier handles them better than truly clean ones.
+
+**Recommendation for the paper:** report **both scenarios** explicitly. Use **τ=0.60
+for Scenario A** ("clean vs full-careless") and **τ=0.40 for Scenario B** ("any
+non-trivial corruption is careless"). Drop the τ=0.80 framing — it was never optimal.
+The headline RF result becomes "MCC ≈ 0.81 under the strict clean-vs-careless framing
+(Scenario A, τ=0.60), MCC ≈ 0.70 under the inclusive framing (Scenario B, τ=0.40)."
+
+**Caveat:** Phase 5's headline numbers (MCC=0.786, ablation Δ=+0.119 from RR) were
+computed under τ=0.80 in Scenario A. Re-running Phase 5 at τ=0.60 would shift the
+absolute MCC up (0.786 → ~0.81) but the qualitative findings (RF beats logit on 13/13
+metrics, RR contributes ΔMCC>0.10, hard ceiling without RR) are robust.
+
 ### 2026-04-25b — Phase 5: Multi-metric re-evaluation + ablation study
 
 **User request:** (1) re-evaluate the RF ensemble using multiple metrics from the

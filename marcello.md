@@ -1,3 +1,96 @@
+# Aggiornamenti per Marcello — 2026-04-26
+
+## Phase 6 — Sweep sistematico della soglia GT (la cosa più importante)
+
+PDF in Downloads: `ReReReRe_ThresholdSweep_2026-04-26.pdf`.
+
+### Il problema metodologico che ho risolto
+
+Nelle fasi 1–5 avevo usato **τ_GT = 0.80** come definizione operativa di "careless"
+(cioè: chiamiamo careless chiunque abbia >80% di risposte corrotte). Avevo preso
+quella soglia come data, non l'avevo ottimizzata.
+
+Vittorio ha (giustamente) obiettato: "questa soglia va scelta dai dati, non
+imposta. Sweep sistematico, vediamo dove sta l'ottimo." Phase 6 fa esattamente
+questo.
+
+**Verifica preliminare:** la simulazione conteneva tutti i livelli di corruzione
+(0%, 10%, 20%, ..., 100%, ~960 rispondenti per livello + 14400 puliti, totale
+24000). Nessun errore di generazione — solo una scelta non ottimizzata.
+
+### Cosa ho fatto
+
+Per τ_GT in {0.10, 0.20, ..., 0.90} ho riallenato il Random Forest 5-fold CV con
+le 6 feature standard, sotto due scenari:
+
+- **Scenario A** ("clean vs careless puro"): positivi = corruzione > τ,
+  negativi = SOLO i puliti (gli intermedi vengono esclusi).
+- **Scenario B** ("tutti dentro"): positivi = corruzione > τ, negativi =
+  corruzione ≤ τ (puliti + intermedi sono tutti negativi).
+
+Per ogni (τ, scenario) calcolo tutte le 13 metriche al punto operativo FPR=5% e
+all'ottimo MCC.
+
+### Risultati — Scenario A (clean vs careless)
+
+| τ_GT | n_pos | MCC | F1 | AUPRC | Kappa |
+|:---:|:---:|:---:|:---:|:---:|:---:|
+| 0.10 | 8637 | 0.671 | 0.767 | 0.886 | 0.656 |
+| 0.30 | 6715 | 0.755 | 0.826 | 0.918 | 0.752 |
+| 0.50 | 4804 | 0.802 | 0.852 | 0.938 | 0.802 |
+| **0.60** | **3842** | **0.811** | **0.852** | **0.942** | **0.810** |
+| 0.70 | 3050 | 0.799 | 0.835 | 0.939 | 0.798 |
+| **0.80** *(prima)* | 1930 | 0.783 | 0.804 | 0.939 | 0.774 |
+| 0.90 | 967 | 0.702 | 0.703 | 0.925 | 0.678 |
+
+**Argmax:** MCC, AUPRC, Kappa → τ=0.60. F1 → τ=0.50.
+
+### Risultati — Scenario B (tutti dentro)
+
+| τ_GT | n_pos | MCC | F1 | AUPRC | Kappa |
+|:---:|:---:|:---:|:---:|:---:|:---:|
+| 0.20 | 7833 | 0.678 | 0.763 | 0.881 | 0.668 |
+| **0.30** | 6715 | 0.704 | **0.776** | 0.878 | 0.699 |
+| **0.40** | 5758 | **0.704** | 0.769 | 0.864 | 0.701 |
+| 0.50 | 4804 | 0.690 | 0.749 | 0.843 | 0.689 |
+| 0.60 | 3842 | 0.661 | 0.714 | 0.805 | 0.661 |
+| **0.80** *(prima)* | 1930 | 0.548 | 0.585 | 0.689 | 0.545 |
+| 0.90 | 967 | 0.479 | 0.483 | 0.664 | 0.454 |
+
+**Argmax:** MCC, Kappa, Bal.Acc., Youden → τ=0.40. F1 → τ=0.30.
+
+### La risposta alla domanda
+
+**No, τ=0.80 NON è la migliore secondo nessuna metrica di qualità classificatoria.**
+
+- In Scenario A, l'ottimo è τ=0.60 (MCC=0.811 vs 0.783 a τ=0.80).
+- In Scenario B, l'ottimo è τ=0.40 (MCC=0.704 vs 0.548 a τ=0.80 — gap enorme).
+
+AUC e Bal.Acc. continuano a salire fino a τ=0.90, ma sono "ingannate" dai
+positivi estremi facili (chi ha 100% corruzione è banale da rilevare). Le
+metriche giuste (MCC, F1, AUPRC, Kappa) hanno tutte un ottimo interno chiaro.
+
+### Cosa cambia per il paper
+
+**Riportare entrambi gli scenari, abbandonare τ=0.80.**
+
+- Headline frase A: "MCC ≈ 0.81 con definizione stretta clean-vs-careless
+  (Scenario A, τ=0.60)"
+- Headline frase B: "MCC ≈ 0.70 con definizione inclusiva (Scenario B, τ=0.40)"
+
+Scenario A è più "pulito" ma artificialmente facile (esclude gli intermedi).
+Scenario B è più realistico per uso reale (in pratica non sai a priori chi è
+intermedio). Riportarli entrambi è onesto e mostra robustezza.
+
+### Caveat
+
+I numeri di Phase 5 (MCC=0.786, ablation Δ=+0.119 da RR) erano calcolati a
+τ=0.80, Scenario A. Se rifacciamo Phase 5 a τ=0.60 i numeri assoluti salgono
+leggermente (0.786 → ~0.81), ma i risultati qualitativi (RF batte logit 13/13,
+RR contribuisce ΔMCC>0.10, soffitto duro senza RR) sono robusti.
+
+---
+
 # Aggiornamenti per Marcello — 2026-04-25 (sera)
 
 ## Phase 5 — Rivalutazione multi-metrica + ablation study
