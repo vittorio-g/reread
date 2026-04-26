@@ -1058,6 +1058,104 @@ plot 09 shows this clearly.
 
 ## Revision Log
 
+### 2026-04-25b — Phase 5: Multi-metric re-evaluation + ablation study
+
+**User request:** (1) re-evaluate the RF ensemble using multiple metrics from the
+careless-detection literature, not just MCC; (2) explicitly quantify whether
+ReReReRe contributes meaningfully to the ensemble or whether the auxiliary
+detectors alone (IRV, LongString, D², Person-Total) achieve similar performance.
+
+**Files:** `Phase5_MultiMetric.R`, `phase5_*.csv`, `plot_phase5_*.png`,
+`generate_multimetric_report.py`, `generate_rf_methodology.py`.
+PDFs: `ReReReRe_MultiMetric_Report_2026-04-25.pdf`,
+`ReReReRe_RandomForest_Methodology_2026-04-25.pdf`.
+
+**Multi-metric classifier comparison (13 metrics, 5-fold CV, Scenario A,
+n=16,330, FPR=5%):**
+
+| Metric | Logit | glmnet | RF | Δ (RF-best linear) |
+|--------|-------|--------|-----|----------|
+| MCC | 0.730 | 0.730 | **0.786** | +0.056 |
+| F1 | 0.761 | 0.761 | **0.807** | +0.046 |
+| F2 | 0.808 | 0.809 | **0.874** | +0.065 |
+| AUPRC | 0.884 | 0.884 | **0.940** | +0.056 |
+| AUC | 0.969 | 0.969 | **0.982** | +0.013 |
+| Kappa | 0.725 | 0.725 | **0.778** | +0.053 |
+| Bal. Acc. | 0.897 | 0.897 | **0.938** | +0.041 |
+| Youden's J | 0.793 | 0.794 | **0.875** | +0.081 |
+| G-mean | 0.895 | 0.895 | **0.938** | +0.043 |
+| PPV | 0.693 | 0.693 | **0.716** | +0.023 |
+| NPV | 0.978 | 0.978 | **0.989** | +0.011 |
+| Sens | 0.843 | 0.844 | **0.924** | +0.080 |
+| Spec | 0.950 | 0.950 | **0.951** | +0.001 |
+
+**RF wins 13/13 metrics — clean sweep.** Multi-metric re-evaluation strengthens
+rather than overturns the original MCC-based conclusion. There is no metric on
+which a linear classifier is preferable.
+
+**Ablation study (7 configurations):**
+
+| Config | n_feat | Has RR? | MCC | F1 | AUPRC |
+|--------|:---:|:---:|:---:|:---:|:---:|
+| Full ensemble | 6 | both | **0.784** | **0.805** | **0.941** |
+| Triad: iter+IRV+D² | 3 | iter | 0.778 | 0.801 | 0.927 |
+| Without z_RR_iter_EFA | 5 | std only | 0.749 | 0.777 | 0.907 |
+| Without ANY z_RR | 4 | NO | 0.665 | 0.705 | 0.811 |
+| Aux quad: IRV+D²+LS+PT | 4 | NO | 0.665 | 0.705 | 0.811 |
+| Aux triad: IRV+D²+LS | 3 | NO | 0.665 | 0.705 | 0.803 |
+| Only z_RR family | 2 | only | 0.533 | 0.586 | 0.659 |
+
+**ReReReRe contribution: Δ MCC = +0.119, Δ F1 = +0.100, Δ AUPRC = +0.130.**
+This is far above any reasonable "publication threshold" for an effect.
+**Verdict: ReReReRe is essential, not redundant.**
+
+**Two structural findings:**
+
+1. **iterative-EFA carries the signal.** The 3-feature triad iter+IRV+D²
+   reaches MCC=0.778, only 0.006 below the full 6-feature ensemble. Standard
+   z_RR on top of iter adds essentially nothing. The minimal defensible
+   ReReReRe-aware ensemble is just iter+IRV+D².
+
+2. **Hard ceiling at MCC≈0.665 without ReReReRe.** All three no-RR
+   configurations land at *exactly* the same MCC. Adding more auxiliaries
+   beyond IRV+D²+LS does not help once z_RR_iter is gone. Auxiliary detectors
+   saturate at this performance.
+
+**Per-pattern contribution of ReReReRe (full ensemble vs no-RR ablation):**
+
+| Pattern | Corruption | Full | No-RR | Δ from RR |
+|---------|:---:|:---:|:---:|:---:|
+| random | 100% | 0.846 | 0.352 | **+0.494** |
+| random | 90% | 0.835 | 0.365 | **+0.470** |
+| mixed | 100% | 0.881 | 0.500 | **+0.381** |
+| mixed | 90% | 0.767 | 0.497 | **+0.270** |
+| longstring | 90% | 0.950 | 0.761 | +0.189 |
+| fatigue | 90% | 0.916 | 0.761 | +0.155 |
+| longstring | 100% | 0.940 | 0.807 | +0.133 |
+| fatigue | 100% | 1.000 | 1.000 | 0 |
+| pure_straight | both | 1.000 | 1.000 | 0 |
+| acquiescent | both | 1.000 | 1.000 | 0 |
+
+ReReReRe specifically rescues **inconsistent careless** patterns (random,
+mixed) where auxiliaries are blind. On consistent patterns (straight-lining,
+acquiescence, fully-corrupted fatigue), the auxiliaries already detect
+perfectly and ReReReRe adds nothing. This complementarity is the structural
+reason the ensemble works.
+
+**Five operating points calibrated (training, n=16,330):**
+
+| Point | τ | Sens | Spec | PPV | F1 | MCC |
+|-------|:---:|:---:|:---:|:---:|:---:|:---:|
+| FPR=5% | 0.150 | 0.927 | 0.951 | 0.717 | 0.809 | 0.788 |
+| FPR=10% | 0.065 | 0.958 | 0.903 | 0.570 | 0.714 | 0.696 |
+| Youden J optimal | 0.148 | 0.929 | 0.949 | 0.711 | 0.805 | 0.785 |
+| F1 optimal | 0.420 | 0.846 | 0.988 | 0.905 | 0.874 | 0.859 |
+| MCC optimal | 0.510 | 0.819 | 0.992 | 0.934 | 0.873 | 0.859 |
+
+**Validation on independent fresh data confirms generalisation:** at the
+training-distribution rate (40% careless), validation MCC=0.785 reproduces
+training MCC=0.786 within 0.001.
+
 ### 2026-04-25 — Publication-grade optimization: RF + ensemble + Scenario A
 
 **Goal:** establish a publication-ready MCC for full carelessness (corruption>80%).

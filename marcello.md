@@ -1,3 +1,89 @@
+# Aggiornamenti per Marcello — 2026-04-25 (sera)
+
+## Phase 5 — Rivalutazione multi-metrica + ablation study
+
+Due nuovi documenti PDF in Downloads:
+- `ReReReRe_RandomForest_Methodology_2026-04-25.pdf` — spiega passo-passo cos'è e perché si usa la Random Forest dentro l'ensemble, con risultati ablation
+- `ReReReRe_MultiMetric_Report_2026-04-25.pdf` — rivalutazione su 13 metriche (MCC, F1, F2, AUPRC, AUC, Kappa, Bal.Acc, Youden's J, G-mean, Sens, Spec, PPV, NPV)
+
+### Risultato 1: la rivalutazione multi-metrica conferma tutto
+
+Random Forest vince **13 metriche su 13** rispetto a logistic e glmnet (clean sweep).
+Niente da rivedere — l'MCC era allineato al resto. Tabella sintetica:
+
+| Metrica | Logit | glmnet | RF | Δ |
+|---------|:---:|:---:|:---:|:---:|
+| MCC | 0.730 | 0.730 | **0.786** | +0.056 |
+| F1 | 0.761 | 0.761 | **0.807** | +0.046 |
+| AUPRC | 0.884 | 0.884 | **0.940** | +0.056 |
+| Kappa | 0.725 | 0.725 | **0.778** | +0.053 |
+| Sens | 0.843 | 0.844 | **0.924** | +0.080 |
+| AUC | 0.969 | 0.969 | **0.982** | +0.013 |
+
+### Risultato 2 (la domanda chiave): il ReReReRe contribuisce davvero?
+
+Ablation con 7 configurazioni dell'ensemble. Domanda: il ReReReRe (z_RR + z_RR_iter)
+serve davvero, o l'ensemble di soli detector ausiliari (IRV, LongString, D², PT)
+funziona altrettanto bene?
+
+| Configurazione | n_feat | ReReReRe? | MCC | F1 | AUPRC |
+|---------|:---:|:---:|:---:|:---:|:---:|
+| Full ensemble | 6 | sì (entrambi) | **0.784** | **0.805** | **0.941** |
+| Triade iter+IRV+D² | 3 | sì (solo iter) | 0.778 | 0.801 | 0.927 |
+| Senza z_RR_iter | 5 | sì (solo std) | 0.749 | 0.777 | 0.907 |
+| **Senza ReReReRe** | 4 | **NO** | **0.665** | 0.705 | 0.811 |
+| Aux quad: IRV+D²+LS+PT | 4 | NO | 0.665 | 0.705 | 0.811 |
+| Aux triade: IRV+D²+LS | 3 | NO | 0.665 | 0.705 | 0.803 |
+| Solo z_RR family | 2 | sì (soli) | 0.533 | 0.586 | 0.659 |
+
+**Risposta: SÌ, il ReReReRe contribuisce.** Δ MCC = +0.119, Δ F1 = +0.100,
+Δ AUPRC = +0.130. Sono tutti effetti grandi e consistenti.
+
+**Tre osservazioni strutturali:**
+
+1. **L'iterativo-EFA porta tutto il peso.** La triade `iter+IRV+D²` (3 feature)
+   raggiunge MCC=0.778, solo 0.006 sotto l'ensemble completo. Il z_RR standard
+   sopra l'iter non aggiunge nulla.
+
+2. **Soffitto duro a MCC≈0.665 senza ReReReRe.** Tutte e tre le configurazioni
+   no-RR atterrano *esattamente* allo stesso MCC. Aggiungere altri ausiliari
+   non aiuta più una volta che z_RR_iter è assente.
+
+3. **Il ReReReRe da solo non basta.** Solo z_RR (2 feature) → MCC=0.533. È
+   necessario ma non sufficiente.
+
+### Risultato 3: dove esattamente ReReReRe contribuisce?
+
+| Pattern | Corruzione | Full | No-RR | Δ da RR |
+|---------|:---:|:---:|:---:|:---:|
+| **random** | 100% | 0.846 | 0.352 | **+0.494** |
+| **random** | 90% | 0.835 | 0.365 | **+0.470** |
+| **mixed** | 100% | 0.881 | 0.500 | **+0.381** |
+| **mixed** | 90% | 0.767 | 0.497 | **+0.270** |
+| longstring | 90% | 0.950 | 0.761 | +0.189 |
+| fatigue | 90% | 0.916 | 0.761 | +0.155 |
+| longstring | 100% | 0.940 | 0.807 | +0.133 |
+| pure_straight, acquiescent, fatigue 100% | — | 1.000 | 1.000 | 0 |
+
+ReReReRe **salva specificamente i pattern incoerenti** (random, mixed). Sui
+pattern consistenti (straight-lining, acquiescenza) gli ausiliari sono già
+perfetti e ReReReRe non aggiunge nulla. Questa **complementarietà strutturale**
+è la ragione per cui l'ensemble funziona — non è un caso, è un'architettura.
+
+### Bottom line per la pubblicazione
+
+> "L'ensemble Random Forest a 6 detector raggiunge MCC=0.786 (FPR=5%) sulla
+> detection di carelessness piena. Random Forest domina i classificatori
+> lineari su tutte e 13 le metriche valutate. Lo studio di ablazione mostra
+> che il contributo unico di ReReReRe è di +0.119 MCC: il modulo è
+> indispensabile, in particolare per i pattern incoerenti (random,
+> mixed) che gli altri detector non vedono."
+
+Tutti i file CSV sono in `phase5_*.csv`. Plot in `plot_phase5_*.png`.
+Script: `Phase5_MultiMetric.R`.
+
+---
+
 # Aggiornamenti per Marcello — 2026-04-25
 
 ## Ottimizzazione publication-ready: MCC 0.78 con RF + ensemble + Scenario A
