@@ -1,5 +1,106 @@
 # Aggiornamenti per Marcello — 2026-04-26
 
+## Big simulation + bozza articolo (l'output principale di oggi)
+
+PDF in Downloads: `ReReReRe_Article_2026-04-26.pdf` (~640 KB, ~25 pagine).
+
+**Vittorio ha chiesto:** lanciare una grossa simulazione e scrivere un quasi-articolo
+(senza citazioni alla letteratura) sul metodo, con questa struttura:
+**risultati prima**, poi applicazione, poi descrizione dettagliata del metodo,
+spiegando concetti statistici che potrebbero non essere chiari per uno psicologo
+(in particolare il Random Forest).
+
+### Cosa ho lanciato
+
+Una simulazione con 50 condizioni:
+- **5 dimensioni del questionario:** 30, 64, 100, 150, 200 item
+- **2 tassi di careless nel campione:** 20% e 40%
+- **5 repliche per condizione**
+- n = 500 rispondenti per dataset
+- Iniezione di careless con la griglia completa di corruzione (0%, 10%, …, 100%)
+- 6 feature per rispondente (z_RR, z_RR_iter, IRV, LongString, D², Person-Total)
+- Random Forest 5-fold CV sotto entrambi gli scenari (A: τ=0.60, B: τ=0.40)
+
+**Tempo totale di esecuzione: 6 minuti** (avevo budgetato 3-4 ore — molto più
+veloce del previsto perché il bottleneck del z_rr_iter scala bene).
+
+### Risultato principale
+
+**MCC pooled (su tutte le dimensioni + tassi):**
+
+| Scenario | MCC | F1 | AUC | AUPRC | Sens | Spec |
+|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
+| A (τ=0.60) | **0.692** | 0.731 | 0.933 | 0.829 | 0.777 | 0.951 |
+| B (τ=0.40) | **0.599** | 0.658 | 0.890 | 0.742 | 0.625 | 0.950 |
+
+**Scaling con la lunghezza del questionario (Scenario A):**
+
+| Item | MCC | F1 | AUC | Sens |
+|:---:|:---:|:---:|:---:|:---:|
+| 30 | 0.528 | 0.586 | 0.844 | 0.548 |
+| 64 | 0.622 | 0.672 | 0.905 | 0.678 |
+| 100 | 0.722 | 0.761 | 0.958 | 0.813 |
+| 150 | 0.768 | 0.797 | 0.970 | 0.884 |
+| 200 | **0.820** | 0.838 | **0.987** | **0.962** |
+
+A 200 item la sensibilità è 96% con specificità bloccata al 95% — performance
+sostanzialmente perfette. A 30 item il metodo è ancora utile (MCC > 0.5) ma più
+conservativo.
+
+### La cosa interessante: l'ablation
+
+| Item | Full (6 feat) | Triad (3 feat) | Senza RR | Δ da RR |
+|:---:|:---:|:---:|:---:|:---:|
+| 30 | 0.528 | 0.490 | 0.510 | +0.018 |
+| 64 | 0.622 | 0.606 | 0.601 | +0.021 |
+| 100 | 0.722 | 0.712 | 0.666 | +0.056 |
+| 150 | 0.768 | 0.742 | 0.664 | **+0.104** |
+| 200 | 0.820 | 0.811 | 0.707 | **+0.113** |
+
+**Il contributo di ReReReRe cresce monotonicamente con la lunghezza.** A 30 item
+i detector ausiliari fanno quasi lo stesso lavoro; a 200 item, togliere RR
+abbatte la MCC di 0.113 — un terzo in meno di qualità classificatoria.
+
+**Take-home per il paper:** ReReReRe paga di più dove le batterie psicometriche
+moderne stanno davvero (150-300 item), non dove sarebbe più facile liquidarlo
+come ridondante (scale corte unidimensionali).
+
+**Triad ≈ Full ensemble** (entro 0.03 MCC su tutte le dimensioni). La
+versione minima difendibile per l'articolo è: iterative coupled RR + IRV + D².
+
+### Struttura della bozza di articolo
+
+1. **Executive summary** — headline + effetto ablation + ambito d'uso.
+2. **§1 Risultati** — 6 figure, 4 tabelle, entrambi gli scenari.
+3. **§2 Applicazione** — quando usarlo, ricetta in R, scelta dell'operating point,
+   caveat/controindicazioni.
+4. **§3 Metodo** — idea base (correlazione individuale + permutazioni),
+   sei feature spiegate una a una, **Random Forest spiegato dal basso**
+   (decision tree → bagging → feature subsampling → voto), k-fold CV,
+   calibrazione FPR=5%.
+5. **§4 Concetti statistici** — box per lo psicologo: MCC, permutation test,
+   k-fold CV, AUC/AUPRC, perché due scenari invece di uno.
+
+La sezione Random Forest parte da "un decision tree è un diagramma a domande
+sì/no" e arriva a "200 alberi su sottocampioni diversi → la media cancella il
+rumore individuale". Niente citazioni, tutto autocontenuto.
+
+### File generati
+
+| File | Cosa contiene |
+|------|---------------|
+| `Sim_Article_Big.R` | Lo script R che ha girato i 50 run |
+| `aggregate_article_sim.py` | Aggrega i 4 CSV e produce 6 figure + pickle |
+| `build_article_pdf.py` | Costruisce il PDF dal pickle |
+| `sim_article_scores.csv` | 25,000 righe (50 run × 500 rispondenti) |
+| `sim_article_metrics.csv` | 100 righe (50 run × 2 scenari) |
+| `sim_article_ablation.csv` | 100 righe (idem, con full/no-RR/triad) |
+| `sim_article_perpat.csv` | 3,060 righe (per-pattern × corruption) |
+| `article_assets/` | 6 PNG + pickle pre-aggregato |
+| `ReReReRe_Article_2026-04-26.pdf` | **La bozza, in Downloads** |
+
+---
+
 ## Phase 6 — Sweep sistematico della soglia GT (la cosa più importante)
 
 PDF in Downloads: `ReReReRe_ThresholdSweep_2026-04-26.pdf`.

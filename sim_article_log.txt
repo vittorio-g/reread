@@ -1,0 +1,451 @@
+Messaggi di avvertimento:
+1: il pacchetto 'randomForest' è stato creato con R versione 4.4.3 
+2: il pacchetto 'pROC' è stato creato con R versione 4.4.3 
+3: il pacchetto 'PRROC' è stato creato con R versione 4.4.3 
+This is lavaan 0.6-19
+lavaan is FREE software! Please report any bugs.
+Messaggio di avvertimento:
+il pacchetto 'lavaan' è stato creato con R versione 4.4.2 
+
+Caricamento pacchetto: 'magrittr'
+
+Il seguente oggetto è mascherato da 'package:rlang':
+
+    set_names
+
+
+Caricamento pacchetto: 'psych'
+
+Il seguente oggetto è mascherato da 'package:lavaan':
+
+    cor2cov
+
+Il seguente oggetto è mascherato da 'package:randomForest':
+
+    outlier
+
+
+Caricamento pacchetto: 'mice'
+
+Il seguente oggetto è mascherato da 'package:stats':
+
+    filter
+
+I seguenti oggetti sono mascherati da 'package:base':
+
+    cbind, rbind
+
+Total runs: 50 (5 sizes x 2 rates x 5 reps)
+
+[1/50] size=30 (nF=6, ipf=5) rate=0.20 rep=1 ...
+  clean done (0.2s)
+  inject done (0.2s)
+  z_rr done (4.8s)
+  z_rr_iter done (0.2s)
+  aux done (0.1s)
+  -> done. elapsed 0.1 min, ETA 6 min
+
+[2/50] size=30 (nF=6, ipf=5) rate=0.20 rep=2 ...
+  clean done (0.1s)
+  inject done (0.1s)
+  z_rr done (4.2s)
+  z_rr_iter done (0.1s)
+  aux done (0.1s)
+  -> done. elapsed 0.2 min, ETA 5 min
+
+[3/50] size=30 (nF=6, ipf=5) rate=0.20 rep=3 ...
+  clean done (0.1s)
+  inject done (0.1s)
+  z_rr done (4.8s)
+  z_rr_iter done (0.1s)
+  aux done (0.1s)
+  -> done. elapsed 0.3 min, ETA 5 min
+
+[4/50] size=30 (nF=6, ipf=5) rate=0.20 rep=4 ...
+  clean done (0.1s)
+  inject done (0.1s)
+  z_rr done (4.3s)
+  z_rr_iter done (0.2s)
+  aux done (0.1s)
+  -> done. elapsed 0.4 min, ETA 5 min
+
+[5/50] size=30 (nF=6, ipf=5) rate=0.20 rep=5 ...
+  clean done (0.1s)
+  inject done (0.1s)
+  z_rr done (4.4s)
+  z_rr_iter done (0.1s)
+  aux done (0.1s)
+  -> done. elapsed 0.5 min, ETA 5 min
+  [checkpoint saved at idx=5]
+
+[6/50] size=30 (nF=6, ipf=5) rate=0.40 rep=1 ...
+  clean done (0.1s)
+  inject done (0.1s)
+  z_rr done (4.6s)
+  z_rr_iter done (0.1s)
+  aux done (0.1s)
+  -> done. elapsed 0.7 min, ETA 5 min
+
+[7/50] size=30 (nF=6, ipf=5) rate=0.40 rep=2 ...
+  clean done (0.1s)
+  inject done (0.1s)
+  z_rr done (4.6s)
+  z_rr_iter done (0.1s)
+  aux done (0.0s)
+  -> done. elapsed 0.8 min, ETA 5 min
+
+[8/50] size=30 (nF=6, ipf=5) rate=0.40 rep=3 ...
+  clean done (0.1s)
+  inject done (0.1s)
+  z_rr done (4.5s)
+  z_rr_iter done (0.1s)
+  aux done (0.1s)
+  -> done. elapsed 0.9 min, ETA 5 min
+
+[9/50] size=30 (nF=6, ipf=5) rate=0.40 rep=4 ...
+  clean done (0.1s)
+  inject done (0.1s)
+  z_rr done (4.6s)
+  z_rr_iter done (0.1s)
+  aux done (0.0s)
+  -> done. elapsed 1.0 min, ETA 5 min
+
+[10/50] size=30 (nF=6, ipf=5) rate=0.40 rep=5 ...
+  clean done (0.1s)
+  inject done (0.1s)
+  z_rr done (4.6s)
+  z_rr_iter done (0.1s)
+  aux done (0.1s)
+  -> done. elapsed 1.1 min, ETA 4 min
+  [checkpoint saved at idx=10]
+
+[11/50] size=64 (nF=8, ipf=8) rate=0.20 rep=1 ...
+  clean done (0.2s)
+  inject done (0.1s)
+  z_rr done (0.2s)
+  z_rr_iter done (0.6s)
+  aux done (0.1s)
+  -> done. elapsed 1.1 min, ETA 4 min
+
+[12/50] size=64 (nF=8, ipf=8) rate=0.20 rep=2 ...
+  clean done (0.2s)
+  inject done (0.1s)
+  z_rr done (0.2s)
+  z_rr_iter done (0.4s)
+  aux done (0.1s)
+  -> done. elapsed 1.2 min, ETA 4 min
+
+[13/50] size=64 (nF=8, ipf=8) rate=0.20 rep=3 ...
+  clean done (0.1s)
+  inject done (0.1s)
+  z_rr done (0.4s)
+  z_rr_iter done (0.4s)
+  aux done (0.1s)
+  -> done. elapsed 1.2 min, ETA 3 min
+
+[14/50] size=64 (nF=8, ipf=8) rate=0.20 rep=4 ...
+  clean done (0.2s)
+  inject done (0.1s)
+  z_rr done (0.2s)
+  z_rr_iter done (0.4s)
+  aux done (0.1s)
+  -> done. elapsed 1.3 min, ETA 3 min
+
+[15/50] size=64 (nF=8, ipf=8) rate=0.20 rep=5 ...
+  clean done (0.2s)
+  inject done (0.1s)
+  z_rr done (0.2s)
+  z_rr_iter done (0.4s)
+  aux done (0.1s)
+  -> done. elapsed 1.3 min, ETA 3 min
+  [checkpoint saved at idx=15]
+
+[16/50] size=64 (nF=8, ipf=8) rate=0.40 rep=1 ...
+  clean done (0.2s)
+  inject done (0.2s)
+  z_rr done (0.2s)
+  z_rr_iter done (0.3s)
+  aux done (0.1s)
+  -> done. elapsed 1.3 min, ETA 3 min
+
+[17/50] size=64 (nF=8, ipf=8) rate=0.40 rep=2 ...
+  clean done (0.2s)
+  inject done (0.2s)
+  z_rr done (0.2s)
+  z_rr_iter done (0.4s)
+  aux done (0.1s)
+  -> done. elapsed 1.4 min, ETA 3 min
+
+[18/50] size=64 (nF=8, ipf=8) rate=0.40 rep=3 ...
+  clean done (0.2s)
+  inject done (0.2s)
+  z_rr done (0.2s)
+  z_rr_iter done (0.5s)
+  aux done (0.1s)
+  -> done. elapsed 1.4 min, ETA 3 min
+
+[19/50] size=64 (nF=8, ipf=8) rate=0.40 rep=4 ...
+  clean done (0.1s)
+  inject done (0.2s)
+  z_rr done (0.2s)
+  z_rr_iter done (0.4s)
+  aux done (0.1s)
+  -> done. elapsed 1.5 min, ETA 2 min
+
+[20/50] size=64 (nF=8, ipf=8) rate=0.40 rep=5 ...
+  clean done (0.2s)
+  inject done (0.2s)
+  z_rr done (0.2s)
+  z_rr_iter done (0.4s)
+  aux done (0.1s)
+  -> done. elapsed 1.5 min, ETA 2 min
+  [checkpoint saved at idx=20]
+
+[21/50] size=100 (nF=10, ipf=10) rate=0.20 rep=1 ...
+  clean done (0.3s)
+  inject done (0.2s)
+  z_rr done (0.5s)
+  z_rr_iter done (1.1s)
+  aux done (0.1s)
+  -> done. elapsed 1.6 min, ETA 2 min
+
+[22/50] size=100 (nF=10, ipf=10) rate=0.20 rep=2 ...
+  clean done (0.3s)
+  inject done (0.2s)
+  z_rr done (0.4s)
+  z_rr_iter done (1.1s)
+  aux done (0.1s)
+  -> done. elapsed 1.6 min, ETA 2 min
+
+[23/50] size=100 (nF=10, ipf=10) rate=0.20 rep=3 ...
+  clean done (0.3s)
+  inject done (0.2s)
+  z_rr done (0.5s)
+  z_rr_iter done (1.1s)
+  aux done (0.1s)
+  -> done. elapsed 1.7 min, ETA 2 min
+
+[24/50] size=100 (nF=10, ipf=10) rate=0.20 rep=4 ...
+  clean done (0.3s)
+  inject done (0.2s)
+  z_rr done (0.5s)
+  z_rr_iter done (1.1s)
+  aux done (0.1s)
+  -> done. elapsed 1.8 min, ETA 2 min
+
+[25/50] size=100 (nF=10, ipf=10) rate=0.20 rep=5 ...
+  clean done (0.3s)
+  inject done (0.1s)
+  z_rr done (0.4s)
+  z_rr_iter done (1.1s)
+  aux done (0.1s)
+  -> done. elapsed 1.8 min, ETA 2 min
+  [checkpoint saved at idx=25]
+
+[26/50] size=100 (nF=10, ipf=10) rate=0.40 rep=1 ...
+  clean done (0.3s)
+  inject done (0.3s)
+  z_rr done (0.5s)
+  z_rr_iter done (1.0s)
+  aux done (0.1s)
+  -> done. elapsed 1.9 min, ETA 2 min
+
+[27/50] size=100 (nF=10, ipf=10) rate=0.40 rep=2 ...
+  clean done (0.3s)
+  inject done (0.3s)
+  z_rr done (1.2s)
+  z_rr_iter done (1.7s)
+  aux done (0.2s)
+  -> done. elapsed 2.0 min, ETA 2 min
+
+[28/50] size=100 (nF=10, ipf=10) rate=0.40 rep=3 ...
+  clean done (0.8s)
+  inject done (0.6s)
+  z_rr done (0.8s)
+  z_rr_iter done (1.6s)
+  aux done (0.2s)
+  -> done. elapsed 2.1 min, ETA 2 min
+
+[29/50] size=100 (nF=10, ipf=10) rate=0.40 rep=4 ...
+  clean done (0.5s)
+  inject done (0.6s)
+  z_rr done (0.7s)
+  z_rr_iter done (1.6s)
+  aux done (0.2s)
+  -> done. elapsed 2.2 min, ETA 2 min
+
+[30/50] size=100 (nF=10, ipf=10) rate=0.40 rep=5 ...
+  clean done (0.4s)
+  inject done (0.5s)
+  z_rr done (0.6s)
+  z_rr_iter done (1.5s)
+  aux done (0.1s)
+  -> done. elapsed 2.3 min, ETA 2 min
+  [checkpoint saved at idx=30]
+
+[31/50] size=150 (nF=15, ipf=10) rate=0.20 rep=1 ...
+  clean done (1.2s)
+  inject done (0.5s)
+  z_rr done (1.9s)
+  z_rr_iter done (3.5s)
+  aux done (0.3s)
+  -> done. elapsed 2.4 min, ETA 1 min
+
+[32/50] size=150 (nF=15, ipf=10) rate=0.20 rep=2 ...
+  clean done (0.9s)
+  inject done (0.4s)
+  z_rr done (1.6s)
+  z_rr_iter done (3.3s)
+  aux done (0.3s)
+  -> done. elapsed 2.6 min, ETA 1 min
+
+[33/50] size=150 (nF=15, ipf=10) rate=0.20 rep=3 ...
+  clean done (1.0s)
+  inject done (0.3s)
+  z_rr done (1.8s)
+  z_rr_iter done (3.2s)
+  aux done (0.2s)
+  -> done. elapsed 2.7 min, ETA 1 min
+
+[34/50] size=150 (nF=15, ipf=10) rate=0.20 rep=4 ...
+  clean done (1.2s)
+  inject done (0.3s)
+  z_rr done (1.6s)
+  z_rr_iter done (3.3s)
+  aux done (0.2s)
+  -> done. elapsed 2.9 min, ETA 1 min
+
+[35/50] size=150 (nF=15, ipf=10) rate=0.20 rep=5 ...
+  clean done (0.9s)
+  inject done (0.4s)
+  z_rr done (1.6s)
+  z_rr_iter done (3.2s)
+  aux done (0.4s)
+  -> done. elapsed 3.0 min, ETA 1 min
+  [checkpoint saved at idx=35]
+
+[36/50] size=150 (nF=15, ipf=10) rate=0.40 rep=1 ...
+  clean done (1.1s)
+  inject done (0.6s)
+  z_rr done (1.6s)
+  z_rr_iter done (3.1s)
+  aux done (0.2s)
+  -> done. elapsed 3.1 min, ETA 1 min
+
+[37/50] size=150 (nF=15, ipf=10) rate=0.40 rep=2 ...
+  clean done (1.0s)
+  inject done (0.6s)
+  z_rr done (1.7s)
+  z_rr_iter done (3.3s)
+  aux done (0.2s)
+  -> done. elapsed 3.3 min, ETA 1 min
+
+[38/50] size=150 (nF=15, ipf=10) rate=0.40 rep=3 ...
+  clean done (0.9s)
+  inject done (0.6s)
+  z_rr done (1.5s)
+  z_rr_iter done (3.3s)
+  aux done (0.3s)
+  -> done. elapsed 3.4 min, ETA 1 min
+
+[39/50] size=150 (nF=15, ipf=10) rate=0.40 rep=4 ...
+  clean done (0.9s)
+  inject done (0.7s)
+  z_rr done (1.7s)
+  z_rr_iter done (3.6s)
+  aux done (0.3s)
+  -> done. elapsed 3.6 min, ETA 1 min
+
+[40/50] size=150 (nF=15, ipf=10) rate=0.40 rep=5 ...
+  clean done (1.0s)
+  inject done (0.6s)
+  z_rr done (1.5s)
+  z_rr_iter done (3.2s)
+  aux done (0.3s)
+  -> done. elapsed 3.7 min, ETA 1 min
+  [checkpoint saved at idx=40]
+
+[41/50] size=200 (nF=20, ipf=10) rate=0.20 rep=1 ...
+  clean done (1.8s)
+  inject done (0.8s)
+  z_rr done (3.0s)
+  z_rr_iter done (5.8s)
+  aux done (0.4s)
+  -> done. elapsed 4.0 min, ETA 1 min
+
+[42/50] size=200 (nF=20, ipf=10) rate=0.20 rep=2 ...
+  clean done (2.0s)
+  inject done (0.5s)
+  z_rr done (2.7s)
+  z_rr_iter done (5.7s)
+  aux done (0.3s)
+  -> done. elapsed 4.2 min, ETA 1 min
+
+[43/50] size=200 (nF=20, ipf=10) rate=0.20 rep=3 ...
+  clean done (1.8s)
+  inject done (0.4s)
+  z_rr done (2.7s)
+  z_rr_iter done (5.5s)
+  aux done (0.4s)
+  -> done. elapsed 4.4 min, ETA 1 min
+
+[44/50] size=200 (nF=20, ipf=10) rate=0.20 rep=4 ...
+  clean done (2.1s)
+  inject done (0.4s)
+  z_rr done (2.6s)
+  z_rr_iter done (5.4s)
+  aux done (0.5s)
+  -> done. elapsed 4.6 min, ETA 1 min
+
+[45/50] size=200 (nF=20, ipf=10) rate=0.20 rep=5 ...
+  clean done (1.8s)
+  inject done (0.4s)
+  z_rr done (2.7s)
+  z_rr_iter done (5.6s)
+  aux done (0.5s)
+  -> done. elapsed 4.8 min, ETA 1 min
+  [checkpoint saved at idx=45]
+
+[46/50] size=200 (nF=20, ipf=10) rate=0.40 rep=1 ...
+  clean done (2.1s)
+  inject done (1.0s)
+  z_rr done (2.7s)
+  z_rr_iter done (5.3s)
+  aux done (0.4s)
+  -> done. elapsed 5.1 min, ETA 0 min
+
+[47/50] size=200 (nF=20, ipf=10) rate=0.40 rep=2 ...
+  clean done (1.8s)
+  inject done (1.0s)
+  z_rr done (2.7s)
+  z_rr_iter done (5.6s)
+  aux done (0.4s)
+  -> done. elapsed 5.3 min, ETA 0 min
+
+[48/50] size=200 (nF=20, ipf=10) rate=0.40 rep=3 ...
+  clean done (2.1s)
+  inject done (1.3s)
+  z_rr done (2.9s)
+  z_rr_iter done (5.3s)
+  aux done (0.3s)
+  -> done. elapsed 5.5 min, ETA 0 min
+
+[49/50] size=200 (nF=20, ipf=10) rate=0.40 rep=4 ...
+  clean done (1.8s)
+  inject done (0.9s)
+  z_rr done (2.9s)
+  z_rr_iter done (5.7s)
+  aux done (0.4s)
+  -> done. elapsed 5.7 min, ETA 0 min
+
+[50/50] size=200 (nF=20, ipf=10) rate=0.40 rep=5 ...
+  clean done (1.8s)
+  inject done (0.8s)
+  z_rr done (2.6s)
+  z_rr_iter done (5.1s)
+  aux done (0.4s)
+  -> done. elapsed 6.0 min, ETA 0 min
+  [checkpoint saved at idx=50]
+
+=== DONE Sim_Article_Big.R ===
+Total elapsed: 6.0 minutes
