@@ -1058,6 +1058,40 @@ plot 09 shows this clearly.
 
 ## Revision Log
 
+### 2026-04-27 — Integrated paper v3 (rate-aware default, bootstrap CIs, holdouts)
+
+**User request (Italian):** "Mi piacciono molto le critiche e le soluzioni. Ora confeziona
+un nuovo paper con tutti i risultati implementando le critiche. Non stare a citare
+esplicitamente questa critica che tanto è tutto lavoro interno." Single integrated
+paper presenting the post-revision pipeline as a unified study, with no mention of
+v2/critique/revision artefacts.
+
+**Files:** `build_paper_v3.py`, `paper_assets_v3/{fig_scale_rate_aware.png,
+fig_ablation_curves.png}`, `C:/Users/vitto/Downloads/ReReReRe_Paper_2026-04-27.pdf`
+(640 KB, 14 pages).
+
+**Structure (7 sections + concepts box):**
+1. Headline — design + pooled rate-aware metrics + per-size scaling, both scenarios
+2. Contribution of ReReReRe — ablation by size + bootstrap 95% CI on Δ MCC at every size
+3. Detection profile across the six injected careless patterns
+4. Robustness — cross-rep / cross-size / cross-pattern holdouts, calibration choice
+5. Application — when to use, R recipe (6 lines), four canonical operating points, caveats
+6. Method — permutation principle, five auxiliary detectors, Random Forest for psychologists
+7. Statistical concepts — MCC, bootstrap percentile CI, 5-fold CV, AUC/AUPRC, two scenarios
+
+**Headline numbers (rate-aware deployable calibration):**
+
+| Scenario | Pooled MCC | F1 | Sens | Spec |
+|:---:|:---:|:---:|:---:|:---:|
+| A (τ=0.60) | **0.788** | 0.820 | 0.797 | 0.971 |
+| B (τ=0.40) | **0.673** | 0.730 | 0.704 | 0.945 |
+
+**Per-size scaling (rate-aware, Scen A):** 30 items=0.570, 50=0.658, 80=0.710,
+100=0.749, 150=0.849, 200=0.897, 250=0.930, **300=0.943**.
+
+The integrated paper is the canonical artefact going forward; v2 and the v2.1
+revision PDF stay on disk as work artefacts.
+
 ### 2026-04-26e — v2.1 revision: critique catalog + parallel experiments
 
 **User request (Italian):** "fai un'analisi di tutte le possibili criticità o

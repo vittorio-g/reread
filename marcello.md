@@ -1,6 +1,22 @@
-# Aggiornamenti per Marcello — 2026-04-26
+# Aggiornamenti per Marcello — 2026-04-27
 
-## Revisione v2.1 — risposta alle obiezioni metodologiche (aggiornamento notturno)
+## Paper integrato
+
+PDF in Downloads: **`ReReReRe_Paper_2026-04-27.pdf`** (~640 KB, 14 pagine).
+
+Versione integrata che incorpora tutti i miglioramenti emersi dalla revisione
+metodologica come parte di un singolo studio coerente: design simulativo
+8 size × 4 rate × 12 repliche, calibrazione rate-aware come default,
+IC bootstrap sull'ablation, holdout robustness. La validazione su dati reali
+è esplicitamente rimandata in attesa della raccolta dati di Vittorio.
+
+**Headline:** in Scenario A (clean vs full-careless, τ=0.60) MCC pooled = **0.788**
+sotto calibrazione rate-aware (deployable, no labels). Scaling da MCC=0.570 a
+30 item fino a MCC=0.943 a 300 item. Contributo di ReReReRe statisticamente
+positivo a tutte le size testate (P(Δ>0)=1.000), piccolo sotto 100 item
+(~+0.033 MCC) e grande sopra 150 item (+0.07–+0.08).
+
+## Revisione v2.1 — risposta alle obiezioni metodologiche (aggiornamento notturno precedente)
 
 PDF in Downloads: `ReReReRe_Article_v2.1_Revision_2026-04-26.pdf` (~336 KB, 8 pagine).
 
