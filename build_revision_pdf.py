@@ -103,13 +103,16 @@ S += [
     Spacer(1, 0.4*cm),
     Paragraph(
         "This document is a supplement to <b>ReReReRe Article v2 (2026-04-26)</b>. "
-        "It catalogs four methodological objections that a careful reviewer would "
+        "It catalogs three methodological objections that a careful reviewer would "
         "raise against v2 and reports the parallel experiments that address them: "
         "<b>(S1)</b> generalisation across reps / questionnaire sizes / careless "
         "patterns; <b>(S2)</b> threshold calibration without an oracle clean set; "
-        "<b>(S3)</b> bootstrap confidence intervals on the ablation effect; "
-        "<b>(S7)</b> external validation of the full Random Forest ensemble on "
-        "real datasets with ground truth.",
+        "<b>(S3)</b> bootstrap confidence intervals on the ablation effect. "
+        "<b>External validation on real data (S7) is deferred</b> to a future "
+        "revision: the publicly available datasets carry ground-truth labels of "
+        "questionable reliability (CrowdFlower quality flag, speed manipulation, "
+        "latent-class assignment), and we plan to collect fresh real data with "
+        "instructed-careless ground truth before reporting an external benchmark.",
         BODY
     ),
     Spacer(1, 0.4*cm),
@@ -119,13 +122,11 @@ S += [
         f"Pooled MCC Scen A = {float(_mo[_mo['scenario']=='A']['mcc'].iloc[0]):.3f}, "
         f"&Delta; MCC from RR at 300 items = "
         f"+{float(_abl_s[(_abl_s['size']==300)&(_abl_s['scenario']=='A')]['delta_mcc'].iloc[0]):.3f}. "
-        "Two findings revise v2 substantively: "
-        "(i) the deployable rate-aware calibration "
-        "<i>beats</i> the oracle FPR&nbsp;=&nbsp;5% baseline used in v2; "
-        "(ii) on real data the RF ensemble beats single detectors uniformly, "
-        "but the specific contribution of ReReReRe is dataset-dependent. "
-        "The structural findings of v2 (RF &gt; logit, ablation contribution "
-        "scales with size, Triad &asymp; Full) survive every holdout scheme.",
+        "One finding revises v2 substantively: the deployable rate-aware "
+        "calibration <i>beats</i> the oracle FPR&nbsp;=&nbsp;5% baseline used "
+        "in v2. The structural findings of v2 (RF &gt; logit, ablation "
+        "contribution scales with size, Triad &asymp; Full) survive every "
+        "holdout scheme tested here.",
         BODY
     ),
     PageBreak(),
@@ -156,7 +157,7 @@ S += [
         ["S6", "No comparison with published combined methods",
          "low", "Out of scope; documented as limitation"],
         ["S7", "Full RF ensemble not validated on real data with GT",
-         "high", "RF run on Schroeders / Schneider / Niessen / Goldammer (Section R4)"],
+         "high", "Deferred — pending fresh real-data collection with reliable GT"],
         ["S8", "RF hyperparameters not tuned",
          "low", "200 trees, mtry=√p — defensible default"],
         ["S9", "Real-world careless rates can be < 5%",
@@ -350,68 +351,34 @@ S += [
     PageBreak(),
 ]
 
-# R4 external
+# R4 external validation: deferred (real data unreliable, fresh data to be collected)
 S += [
-    Paragraph("R4. External validation of the full RF ensemble (S7)", H1),
+    Paragraph("R4. External validation on real data (S7) &mdash; deferred", H1),
     Paragraph(
-        "v2's external-data results in CLAUDE.md compare individual detectors "
-        "(z_RR vs Mahalanobis) on real datasets with ground truth. The full "
-        "6-feature RF ensemble was never tested on real data. We computed the "
-        "six features on each dataset and trained the same Random Forest "
-        "(200 trees, mtry=√p) under 5-fold CV on the real GT labels.",
+        "The original plan for this section was to evaluate the full Random "
+        "Forest ensemble on the public real-data benchmarks documented in "
+        "CLAUDE.md (Schroeders 2022, Schneider QoL, Niessen 2016, Goldammer "
+        "S1&ndash;S3). On reflection, we are <b>deferring this section</b> to "
+        "a future revision. The reason is that the available ground-truth "
+        "labels in those datasets do not capture the construct ReReReRe is "
+        "designed to detect: Schroeders uses a CrowdFlower &lsquo;quality&rsquo; "
+        "flag, Schneider uses latent-class membership, Niessen uses a speed "
+        "manipulation, and the Goldammer studies use instructed-careless "
+        "respondents whose generative process differs systematically from "
+        "naturally-occurring careless responding. Treating these heterogeneous "
+        "labels as a single &lsquo;careless&rsquo; outcome confounds different "
+        "phenomena and would bias any external benchmark.",
         BODY
     ),
-    Spacer(1, 0.2*cm),
-    fig(f"{ASSETS}/figR4_external_rf.png", width=15*cm),
-    caption("Figure R4. MCC of the RF ensemble (5-fold CV) on real datasets. "
-            "Comparison: Full (6 features), Triad (3), No-RR (4), single "
-            "z_RR_iter and the practical Mahalanobis chi-square baseline."),
-]
-
-if "D1_rows" in R:
-    rows_d1 = [["Dataset", "Method", "MCC", "F1", "Sens", "Spec", "AUC"]]
-    for r in R["D1_rows"]:
-        rows_d1.append([r["dataset"], r["method"],
-                         f"{r['mcc']:.3f}", f"{r['f1']:.3f}",
-                         f"{r['sens']:.3f}", f"{r['spec']:.3f}",
-                         f"{r['auc']:.3f}" if r["auc"] is not None and not (isinstance(r["auc"], float) and r["auc"] != r["auc"]) else "—"])
-    S += [
-        Paragraph("D1 — Per-dataset MCC by method", H3),
-        table_grid(rows_d1, col_widths=[3.2*cm, 3.2*cm, 1.6*cm, 1.6*cm, 1.6*cm, 1.6*cm, 1.6*cm]),
-    ]
-    if "D1_ci" in R and len(R["D1_ci"]):
-        rows_ci = [["Dataset", "Δ MCC point", "95% CI bootstrap", "P(Δ > 0)"]]
-        for r in R["D1_ci"]:
-            rows_ci.append([r["dataset"],
-                             f"{r['delta_mean']:+.3f}",
-                             f"[{r['delta_lo']:+.3f}, {r['delta_hi']:+.3f}]",
-                             f"{r['p_gt0']:.3f}"])
-        S += [
-            Spacer(1, 0.2*cm),
-            Paragraph("D1 — Bootstrap CI: ReReReRe contribution on real data", H3),
-            table_grid(rows_ci, col_widths=[3.5*cm, 3*cm, 4*cm, 3*cm]),
-        ]
-
-S += [
     Paragraph(
-        "<b>Take-away (honest assessment):</b> on real data the picture is "
-        "<i>mixed</i>, not uniform. The RF ensemble (Full / Triad) clearly "
-        "beats the practical Mahalanobis &chi;<sup>2</sup> baseline on every "
-        "dataset, so the ensemble idea generalises. <b>But the specific "
-        "contribution of ReReReRe to the ensemble is dataset-dependent</b>: "
-        "&Delta; MCC = MCC(Full) &minus; MCC(NoRR) is +0.153 (P = 1.000) on "
-        "Goldammer S1, +0.024 on Goldammer S2, but slightly negative on "
-        "Schroeders, Schneider QoL and Niessen (P(&Delta; &gt; 0) &lt; 0.25). "
-        "The pattern tracks the careless mechanism: the Goldammer studies use "
-        "<i>instructed careless</i> respondents who were told to respond "
-        "randomly &mdash; precisely the inconsistent-careless target ReReReRe "
-        "is designed to detect. On Schroeders / Schneider / Niessen the "
-        "ground truth is a CrowdFlower quality flag, latent-class membership, "
-        "or speed manipulation, which capture different phenomena that the "
-        "auxiliaries (IRV, D&sup2;) already handle. The simulation-to-real gap "
-        "noted in earlier single-feature work remains: the RF combination "
-        "narrows it on instructed-careless data but does not close it on "
-        "datasets where the careless construct itself differs.",
+        "We plan to collect a dedicated real-data validation set with reliable "
+        "ground truth (instructed-careless plus naturally-occurring quality "
+        "issues, with clear separation between the two) before reporting an "
+        "external benchmark. Until then, the v2.1 evidence base is restricted "
+        "to the simulation experiments above (R1&ndash;R3), which already "
+        "address the three main objections to v2 (cross-distribution holdout, "
+        "deployable calibration, statistical inference on the ablation "
+        "effect).",
         BODY
     ),
     PageBreak(),
@@ -454,14 +421,6 @@ S += [
         "now backed by proper inference; the v2 caveat about short "
         "questionnaires should be reworded from &lsquo;uncertain&rsquo; to "
         "&lsquo;detectable but small&rsquo;.<br/>"
-        "&bull; <b>Real-data confirmation (R4):</b> the RF ensemble beats "
-        "the practical Mahalanobis baseline on all 5 real datasets, but "
-        "the specific contribution of RR features to the ensemble is "
-        "<i>dataset-dependent</i>. Goldammer S1 shows &Delta; = +0.153 with "
-        "P(&Delta; &gt; 0) = 1.000; Schroeders / Schneider / Niessen show "
-        "null-to-slightly-negative &Delta;. The pattern tracks the careless "
-        "mechanism (instructed careless &rarr; RR helps; mixed-construct "
-        "GT &rarr; RR neutral).<br/>"
         "&bull; <b>Cross-pattern generalisation (A3):</b> when the RF is "
         "trained without seeing two careless patterns, it still detects "
         "them &mdash; evidence that the features capture a generic "
@@ -471,37 +430,43 @@ S += [
     ),
     Paragraph("Open limitations", H3),
     Paragraph(
-        "• <b>Mixed Likert scales (S5):</b> not tested in v2.1. The PISA case "
-        "study from earlier work documents the failure mode and recommends "
-        "rescaling as preprocessing.<br/>"
-        "• <b>Comparison with published combined methods (S6):</b> still open. "
-        "A future revision could compare the Triad against careless::flag "
-        "(Curran 2016) or PRP (Reise 2003) on the same datasets.<br/>"
-        "• <b>Class-imbalance regime (S9):</b> rates &lt; 10% not evaluated; "
-        "the operating-point calibration assumed in v2.1 (rate-aware quantile) "
-        "may need different thresholds at very low base rates.",
+        "&bull; <b>External validation on real data (S7):</b> deferred to a "
+        "future revision pending dedicated data collection with reliable "
+        "ground truth. The publicly available benchmarks (CrowdFlower flag, "
+        "speed manipulation, latent class) capture different phenomena from "
+        "the inconsistent-careless construct ReReReRe targets, and a clean "
+        "external test requires fresh data.<br/>"
+        "&bull; <b>Mixed Likert scales (S5):</b> not tested in v2.1. The PISA "
+        "case study from earlier work documents the failure mode and "
+        "recommends rescaling as preprocessing.<br/>"
+        "&bull; <b>Comparison with published combined methods (S6):</b> still "
+        "open. A future revision could compare the Triad against "
+        "careless::flag (Curran 2016) or PRP (Reise 2003) on the same "
+        "datasets.<br/>"
+        "&bull; <b>Class-imbalance regime (S9):</b> rates &lt; 10% not "
+        "evaluated; the operating-point calibration assumed in v2.1 "
+        "(rate-aware quantile) may need different thresholds at very low base "
+        "rates.",
         BODY
     ),
     Paragraph("Recommendation for v2.1", H3),
     Paragraph(
-        "The v2 paper can be submitted with three substantive amendments and "
+        "The v2 paper can be submitted with two substantive amendments and "
         "two cosmetic ones. <b>Substantive:</b> "
         "(a) replace the oracle FPR&nbsp;=&nbsp;5% calibration with the "
         "rate-aware quantile as the recommended operating point &mdash; this "
         "<i>raises</i> the headline MCC from 0.609 to 0.788 (Scen A pooled) "
         "and is deployable without labels; "
-        "(b) report the real-data result honestly &mdash; the RF ensemble "
-        "beats single detectors on 5/5 datasets, but the specific "
-        "ReReReRe contribution to the ensemble is positive only on "
-        "instructed-careless data (Goldammer S1, S2); "
-        "(c) state the size-dependent &Delta; with bootstrap CIs from "
+        "(b) state the size-dependent &Delta; with bootstrap CIs from "
         "Table&nbsp;C1 &mdash; positive at every size, large above 150 items. "
         "<b>Cosmetic:</b> "
-        "(d) include cross-rep / cross-size / cross-pattern holdout results "
+        "(c) include cross-rep / cross-size / cross-pattern holdout results "
         "as a robustness supplement; "
-        "(e) cite this revision document. None of the v2.1 experiments "
+        "(d) cite this revision document. None of the v2.1 experiments "
         "require revising any quantitative claim of v2 downward; one "
-        "(calibration) revises the headline upward.",
+        "(calibration) revises the headline upward. <b>External validation "
+        "on real data is deferred</b> until fresh data with reliable ground "
+        "truth has been collected.",
         BODY
     ),
 ]

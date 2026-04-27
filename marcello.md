@@ -12,19 +12,21 @@ pdf riassuntivo alla luce di queste critiche, evidenziando i cambiamenti."
 ### Le 10 critiche al v2 (file `critique_v2.md`)
 
 Catalogate 10 obiezioni che un revisore attento solleverebbe contro v2.
-**Quattro** sono state giudicate gravi abbastanza da meritare nuovi esperimenti:
+**Tre** sono state affrontate con esperimenti paralleli; **S7** (validazione su
+dati reali) è stata <b>rimandata</b> in attesa di raccolta dati reali con ground
+truth affidabile:
 
 | # | Critica | Severità | Esperimento |
 |---|---------|----------|-------------|
 | **S1** | Train/test sulla stessa distribuzione di simulazione | alta | Holdout cross-rep / cross-size / cross-pattern |
 | **S2** | Calibrazione FPR=5% richiede l'oracolo del clean set | alta | Confronto 4 strategie di calibrazione |
 | **S3** | Niente IC sul Δ MCC dell'ablation | media | Bootstrap 95% IC (500 risampling) |
-| **S7** | Ensemble RF mai testato su dati reali con GT | alta | RF su 5 dataset reali (Schroeders, Schneider, Niessen, Goldammer S1/S2) |
+| **S7** | Ensemble RF mai testato su dati reali con GT | alta | **Rimandato** — i dataset pubblici disponibili (Schroeders/Schneider/Niessen/Goldammer) hanno GT inaffidabile (CrowdFlower flag, speed manipulation, latent class, instructed careless). Aspettiamo di raccogliere dati reali nostri. |
 
 Le altre sei (S4-S6, S8-S10) sono documentate come limiti noti, già coperte
 da lavori precedenti o fuori scope.
 
-### I due risultati che cambiano la narrativa di v2
+### Il risultato che cambia la narrativa di v2
 
 **1. La calibrazione "deployable" batte l'oracolo (R2)**
 
@@ -49,26 +51,14 @@ stimato da z_RR_iter ≥ 2 come quantile di flagging) è più equilibrata.
 "MCC=0.79 con calibrazione rate-aware deployable senza oracle". È un upgrade
 sostantivo del headline.
 
-**2. Su dati reali il contributo di RR è dataset-dipendente (R4)**
-
-Abbiamo lanciato l'RF completo (5 feature: z_RR, IRV, LongString, D², Person-Total)
-su 5 dataset reali con ground truth. Ablation Δ MCC = MCC(Full) − MCC(NoRR):
-
-| Dataset | N | Δ MCC | 95% IC | P(Δ>0) | GT |
-|---------|---|:---:|:---:|:---:|---|
-| Schroeders 2022 | 605 | −0.023 | [−0.094, +0.041] | 0.245 | CrowdFlower quality |
-| Schneider QoL | 1649 | −0.024 | [−0.065, +0.014] | 0.120 | latent class |
-| Niessen 2016 | 180 | −0.098 | [−0.290, +0.056] | 0.100 | speed manipulation |
-| **Goldammer S1** | 291 | **+0.153** | **[+0.089, +0.224]** | **1.000** | instructed careless |
-| Goldammer S2 | 265 | +0.024 | [−0.017, +0.064] | 0.860 | instructed careless |
-
-Il pattern è chiaro: **RR contribuisce dove la GT è "instructed careless"**
-(Goldammer S1/S2 — i partecipanti istruiti a rispondere a caso sono esattamente
-il target inconsistent-careless di ReReReRe). Su CrowdFlower flag, latent class
-e speed manipulation, gli ausiliari (IRV, D²) già coprono il segnale.
-
-**L'ensemble RF complessivo batte la Mahalanobis χ²(.001) pratica su tutti e 5 i
-dataset** — l'idea ensemble generalizza. Ma il contributo specifico di RR no.
+**Sui dati reali (S7) — rimandato.** Avevo iniziato a girare l'ensemble RF
+sui dataset pubblici (Schroeders, Schneider, Niessen, Goldammer S1/S2) ma
+abbiamo deciso di toglierlo dalla revisione: quei ground truth non sono
+affidabili (CrowdFlower flag, speed manipulation, latent class, instructed
+careless — costrutti diversi mescolati insieme). Aspettiamo di raccogliere
+dati reali nostri con GT più pulita prima di pubblicare un benchmark esterno.
+I file CSV/figure/script restano sul disco come traccia di lavoro, ma non
+vengono citati nel PDF v2.1.
 
 ### Cosa NON cambia (la cosa importante)
 
@@ -101,24 +91,26 @@ dataset** — l'idea ensemble generalizza. Ma il contributo specifico di RR no.
 |------|---------------|
 | `critique_v2.md` | Catalogo delle 10 critiche con severità e azione |
 | `robustness_v2.py` | Calcola A1 (cross-rep), A2 (cross-size), A3 (cross-pattern), B1 (calibration), C1 (bootstrap CI) |
-| `external_validation_rf_fast.R` | RF ensemble sui 5 dataset reali (versione "fast" — bypassa ReReReRe.R con compute_z_rr inline) |
-| `aggregate_revision_v2_1.py` | Aggregazione + 5 figure + pickle |
+| `aggregate_revision_v2_1.py` | Aggregazione + figure + pickle |
 | `build_revision_pdf.py` | Costruisce il PDF v2.1 |
 | `robustness_holdouts.csv`, `robustness_calibration.csv`, `robustness_bootstrap.csv` | Dati delle critiche A/B/C |
-| `external_rf_ensemble.csv`, `external_rf_bootstrap.csv` | Dati real-data |
-| `revision_assets/` | 5 PNG (figR1..figR5) + revision_data.pkl |
-| `ReReReRe_Article_v2.1_Revision_2026-04-26.pdf` | **Il PDF di revisione, in Downloads** |
+| `revision_assets/` | Figure (figR1..figR5) + revision_data.pkl |
+| `ReReReRe_Article_v2.1_Revision_2026-04-26.pdf` | **Il PDF di revisione (7 pagine), in Downloads** |
+
+I file `external_validation_rf_fast.R` / `external_rf_*.csv` / `figR4_external_rf.png`
+sono ancora sul disco ma non più citati: documentano un tentativo di lavoro su
+S7 che è stato rimandato in attesa di dati reali con GT affidabile.
 
 ### Raccomandazione finale per la sottomissione
 
-Tre emendamenti sostanziali al v2:
+Due emendamenti sostanziali al v2:
 1. Sostituire la calibrazione oracle FPR=5% con la rate-aware quantile come
    raccomandazione di deployment (alza il headline, è deployable senza label).
-2. Sui dati reali, riportare onestamente che l'ensemble batte i singoli
-   detector (5/5 dataset) ma il contributo specifico di RR è positivo solo
-   su instructed-careless (Goldammer).
-3. Citare i CI bootstrap di Tabella C1 per supportare il claim di crescita
+2. Citare i CI bootstrap di Tabella C1 per supportare il claim di crescita
    monotonica del Δ con la lunghezza.
+
+La validazione esterna su dati reali (S7) è rimandata a una revisione futura,
+quando avremo raccolto dati reali con ground truth affidabile.
 
 Nessuno degli esperimenti v2.1 richiede di rivedere al ribasso un claim
 quantitativo di v2; uno (calibrazione) lo rivede al rialzo.

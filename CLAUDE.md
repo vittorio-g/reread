@@ -1073,13 +1073,17 @@ critique-and-revision pass.
 figR1-figR5.png}`,
 `C:/Users/vitto/Downloads/ReReReRe_Article_v2.1_Revision_2026-04-26.pdf` (336 KB).
 
-**Critique catalog.** Ten potential reviewer objections to v2; four judged
-severe enough for new experiments: **S1** train/test on same simulation
-distribution, **S2** FPR=5% calibration assumes oracle clean set, **S3** no CIs
-on ablation Δ MCC, **S7** full RF ensemble never tested on real data with GT.
-The other six (S4 τ_GT choice, S5 mixed Likert, S6 published-method comparison,
-S8 RF hyperparameters, S9 sub-5% rates, S10 only n=500) documented as known
-limitations.
+**Critique catalog.** Ten potential reviewer objections to v2; three addressed
+with parallel experiments here, one (**S7** real-data validation) deferred:
+**S1** train/test on same simulation distribution, **S2** FPR=5% calibration
+assumes oracle clean set, **S3** no CIs on ablation Δ MCC. **S7 deferred**
+because the publicly available real-data benchmarks (Schroeders, Schneider,
+Niessen, Goldammer) have unreliable ground truth (CrowdFlower flag, speed
+manipulation, latent class, instructed careless — heterogeneous constructs);
+fresh real data with reliable GT will be collected before reporting an
+external benchmark. The other six (S4 τ_GT choice, S5 mixed Likert, S6
+published-method comparison, S8 RF hyperparameters, S9 sub-5% rates, S10 only
+n=500) documented as known limitations.
 
 **R1 — Holdout robustness (S1).** Cross-rep (8 train / 4 test reps within each
 size×rate cell), cross-size (small ↔ large), cross-pattern (leave-2-out).
@@ -1128,30 +1132,22 @@ everywhere.** v2's caveat that short questionnaires gain little from RR is
 revised: the gain is *small* below 100 items (~+0.033) and *large* above 150
 items (+0.07 to +0.08), but **statistically positive at every size**.
 
-**R4 — Real-data RF ensemble (S7).** Full RF (200 trees, mtry=√p, 5-fold CV)
-on 5 real datasets with GT. Mahalanobis χ²(.001) baseline included. Bootstrap
-CI on Δ MCC = MCC(Full) − MCC(NoRR):
+**R4 — External real-data validation (S7): DEFERRED.** Initial RF run on
+Schroeders/Schneider/Niessen/Goldammer S1-S2 was completed (files
+`external_validation_rf_fast.R`, `external_rf_ensemble.csv`,
+`external_rf_bootstrap.csv`, `figR4_external_rf.png` remain on disk as work
+artefacts) but **excluded from the v2.1 PDF/writeup** by design decision
+(2026-04-27). Rationale: the public benchmarks have unreliable ground-truth
+labels — CrowdFlower quality flag (Schroeders), latent class (Schneider),
+speed manipulation (Niessen), instructed careless (Goldammer) — i.e.
+heterogeneous constructs that don't isolate the inconsistent-careless target
+ReReReRe is built for. Treating them as a uniform "careless" outcome would
+bias an external benchmark in either direction. **Future plan:** collect a
+dedicated real-data validation set with reliable GT (instructed-careless
+plus naturally-occurring quality issues, with clear separation between the
+two) before reporting an external benchmark in a future revision.
 
-| Dataset | N | Full MCC | NoRR MCC | Δ MCC | 95% CI | P(Δ>0) |
-|---|:--:|:--:|:--:|:--:|:--:|:--:|
-| Schroeders 2022 | 605 | 0.162 | 0.184 | −0.023 | [−0.094, +0.041] | 0.245 |
-| Schneider QoL | 1649 | 0.523 | 0.548 | −0.024 | [−0.065, +0.014] | 0.120 |
-| Niessen 2016 | 180 | 0.022 | 0.120 | −0.098 | [−0.290, +0.056] | 0.100 |
-| **Goldammer S1** | 291 | **0.497** | 0.348 | **+0.153** | [+0.089, +0.224] | **1.000** |
-| Goldammer S2 | 265 | 0.472 | 0.448 | +0.024 | [−0.017, +0.064] | 0.860 |
-
-**Honest finding: the ensemble idea generalises (Full RF beats Mahalanobis χ²
-on 5/5 datasets), but the specific contribution of RR features is
-dataset-dependent.** Pattern tracks the careless mechanism: Goldammer studies
-use *instructed careless* respondents (told to respond randomly) — exactly the
-inconsistent-careless target ReReReRe is designed to detect. Schroeders
-(CrowdFlower flag), Schneider (latent class), and Niessen (speed manipulation)
-capture different quality phenomena that the auxiliaries (IRV, D²) already
-handle. The simulation-to-real gap noted in earlier single-feature work
-remains: RF combination narrows it on instructed-careless data but does not
-close it where the careless construct itself differs.
-
-**Implementation notes:**
+**Implementation notes (relevant for any future S7 work):**
 - `external_validation_rf_fast.R` bypasses ReReReRe.R (which threw "(subscript)
   logico troppo lungo" on Schroeders 605×60) with an inline `compute_z_rr`
   function: ~50 lines, deterministic, applies item_max+1−B reverse-coding when
@@ -1165,19 +1161,18 @@ close it where the careless construct itself differs.
   debugged — worked around with the inline function. **Future task:**
   reproduce on Schroeders and patch the main function.
 
-**Bottom line for v2.1.** Three substantive amendments to v2:
+**Bottom line for v2.1.** Two substantive amendments to v2:
 1. Replace oracle FPR=5% calibration with rate-aware quantile as the deployment
    recommendation (raises headline pooled MCC from 0.61 to 0.79 in Scen A,
    deployable without labels).
-2. Report real-data result honestly: ensemble beats single detectors on all 5
-   datasets, but RR contribution is significant only on instructed-careless GT.
-3. Cite Tabella C1 bootstrap CIs to back the size-dependent monotonicity claim;
+2. Cite Tabella C1 bootstrap CIs to back the size-dependent monotonicity claim;
    reword the short-questionnaire caveat as "detectable but small".
 
-The v2.1 experiments **do not require revising any quantitative claim of v2
-downward**; one (calibration) revises the headline upward. The structural
-findings (RF > logit, ablation Δ scales with size, Triad ≈ Full) survive every
-holdout scheme.
+External validation on real data is deferred until fresh data with reliable
+ground truth is collected. The v2.1 experiments **do not require revising any
+quantitative claim of v2 downward**; one (calibration) revises the headline
+upward. The structural findings (RF > logit, ablation Δ scales with size,
+Triad ≈ Full) survive every holdout scheme.
 
 ### 2026-04-26d — Extended simulation v2 + article v2
 
