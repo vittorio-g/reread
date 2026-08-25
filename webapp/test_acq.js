@@ -3,7 +3,7 @@
  * person's raw mean response (on a mixed-keyed scale a yea-sayer scores high on both regular and
  * reverse items -> high raw mean). We refit the logistic ensemble WITH vs WITHOUT acq (5-fold CV)
  * on simulated data (with acquiescent distractors) and report weighted-MCC + distractor handling. */
-const R=require("./site/rerere.js"); const W=R.WEIGHTS; const fs=require("fs"); const rng=R._rng(9911);
+const R=require("./site/reread.js"); const W=R.WEIGHTS; const fs=require("fs"); const rng=R._rng(9911);
 const src=fs.readFileSync("sim_v2.js","utf8");
 eval(src.slice(src.indexOf("function gauss"), src.indexOf("function scoreDataset")));  // helpers
 // ---- assemble one big labelled sim sample (120 items, 15% careless + 15% distractors) ----

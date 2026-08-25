@@ -1,6 +1,6 @@
 /* Does the careless component form its own KDE mode? Counts prominent peaks of the eta
  * distribution and checks whether the right-most peak coincides with the attentive one. */
-const R=require("./site/rerere.js"); const W=R.WEIGHTS; const fs=require("fs");
+const R=require("./site/reread.js"); const W=R.WEIGHTS; const fs=require("fs");
 let SEED=99; const rng=()=>{SEED=(SEED*1103515245+12345)&0x7fffffff;return SEED/0x7fffffff;};
 const mn=a=>a.reduce((s,v)=>s+v,0)/a.length;
 const med=a=>{const s=[...a].sort((x,y)=>x-y);const h=s.length>>1;return s.length%2?s[h]:(s[h-1]+s[h])/2;};

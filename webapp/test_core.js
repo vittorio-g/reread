@@ -1,4 +1,4 @@
-/* test_core.js — Node validation of rerere.js
+/* test_core.js — Node validation of reread.js
  * 1. Synthetic: factor-structured data + injected random careless -> z must
  *    separate them (AUC > 0.8) and diagnostic must say ok/marginal.
  * 2. No-structure data -> diagnostic must warn (weak/no_structure).
@@ -7,7 +7,7 @@
  */
 const fs = require("fs");
 const path = require("path");
-const R = require("./site/rerere.js");
+const R = require("./site/reread.js");
 
 function mulberry(seed) { return R._rng(seed); }
 

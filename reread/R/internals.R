@@ -1,4 +1,4 @@
-# Internal helpers -- a faithful R port of the shipped rerere.js engine.
+# Internal helpers -- a faithful R port of the shipped reread.js engine.
 # None of these are exported. Semantics match the browser tool so that the
 # deterministic components reproduce its scores exactly (the permutation
 # baseline matches to Monte Carlo error).

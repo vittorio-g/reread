@@ -6,7 +6,7 @@
  * per-pair orientation flips and full column permutations, and (2) test a swap-INVARIANT
  * coherence: sign-aligned mean cross-product of standardized items, mean_t(zA_t * zB_t),
  * which is symmetric to swapping and to column order. Compare stability AND validity. */
-const R = require("./site/rerere.js"); const fs = require("fs");
+const R = require("./site/reread.js"); const fs = require("fs");
 const auc = (s, y) => { let po = [], ne = []; for (let i = 0; i < y.length; i++)(y[i] ? po : ne).push(s[i]);
   if (!po.length || !ne.length) return NaN; let c = 0; for (const a of po) for (const b of ne) c += a > b ? 1 : a === b ? 0.5 : 0; return c / (po.length * ne.length); };
 const spearman = (x, y) => { const n = x.length, rx = rank(x), ry = rank(y); let sx = 0, sy = 0, sxx = 0, syy = 0, sxy = 0;
@@ -16,7 +16,7 @@ function rank(a) { const idx = a.map((v, i) => [v, i]).sort((p, q) => p[0] - q[0
   for (let k = 0; k < idx.length;) { let j = k; while (j < idx.length && idx[j][0] === idx[k][0]) j++; const avg = (k + j - 1) / 2 + 1; for (let t = k; t < j; t++) r[idx[t][1]] = avg; k = j; } return r; }
 const sd = a => { const m = a.reduce((s, v) => s + v, 0) / a.length; return Math.sqrt(a.reduce((s, v) => s + (v - m) * (v - m), 0) / a.length); };
 
-// ---- faithful pipeline pieces (mirror rerere.js) ----
+// ---- faithful pipeline pieces (mirror reread.js) ----
 function prepare(M, n, J) {
   const max = new Float64Array(J), min = new Float64Array(J), med = new Float64Array(J);
   for (let j = 0; j < J; j++) { const col = []; for (let i = 0; i < n; i++) { const v = M[i * J + j]; if (Number.isFinite(v)) col.push(v); }

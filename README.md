@@ -19,7 +19,7 @@ Person–Total in a fixed-weight, profile-gated ensemble.
 | Path | What it is |
 |---|---|
 | `reread/` | The R package. `reread()` is the one-call entry point; `auto_flag()` is the label-free calibration; `rc_index()` the index alone. |
-| `webapp/site/` | The browser tool served at <https://ca.re-re.re> — `rerere.js` is the reference engine, and everything runs client-side. |
+| `webapp/site/` | The browser tool served at <https://ca.re-re.re> — `reread.js` is the reference engine, and everything runs client-side. |
 | `webapp/` | Analysis scripts for the three studies, the external benchmarks, and the simulation. |
 | `thesis/`, `paper_assets_v3/`, `article_assets_v3/` | Figures and assets for the manuscript and thesis. |
 | `archive/` | Superseded simulation runs and reports, kept for the record. |

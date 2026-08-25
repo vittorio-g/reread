@@ -1,7 +1,7 @@
 /* exp_m6_auc.js — broader AUC parity check: shipped |cor(A,B)| vs swap-invariant ICC,
  * baseline z (fixed null), across the GT benchmark datasets. Confirms the ICC preserves
  * detection everywhere (the swap-invariance was already shown in exp_m6_swap.js). */
-const R = require("./site/rerere.js"); const fs = require("fs");
+const R = require("./site/reread.js"); const fs = require("fs");
 const auc = (s, y) => { let po = [], ne = []; for (let i = 0; i < y.length; i++)(y[i] ? po : ne).push(s[i]);
   if (!po.length || !ne.length) return NaN; let c = 0; for (const a of po) for (const b of ne) c += a > b ? 1 : a === b ? 0.5 : 0; return c / (po.length * ne.length); };
 function rank(a){const idx=a.map((v,i)=>[v,i]).sort((p,q)=>p[0]-q[0]);const r=new Array(a.length);for(let k=0;k<idx.length;){let j=k;while(j<idx.length&&idx[j][0]===idx[k][0])j++;const av=(k+j-1)/2+1;for(let t=k;t<j;t++)r[idx[t][1]]=av;k=j;}return r;}

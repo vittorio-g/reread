@@ -9,7 +9,7 @@
  * (top-k eigenvectors, item assigned to its dominant factor, keyed by loading sign)
  * so every dataset gets all 9 indices uniformly.
  * Correlations downstream are SPEARMAN, so only orientation sign matters (no z needed). */
-const R = require("./site/rerere.js");
+const R = require("./site/reread.js");
 const fs = require("fs");
 const D = "../Dataset/gt_benchmark_candidates";
 

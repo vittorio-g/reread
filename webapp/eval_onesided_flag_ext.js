@@ -2,7 +2,7 @@
  * external Study-2 datasets. NOTE: their "ground truth" is a proxy criterion (attention checks,
  * self-report, speeding), not a true careless label, so MCC here is a RELATIVE comparison of two
  * thresholding rules on identical scores and identical labels, not an absolute quality figure. */
-const R=require("./site/rerere.js"); const W=R.WEIGHTS; const fs=require("fs"); const rng=R._rng(20260717);
+const R=require("./site/reread.js"); const W=R.WEIGHTS; const fs=require("fs"); const rng=R._rng(20260717);
 const N_CAP=4000, ITER=200, Z=2.5, D="../Dataset/";
 const SETS=[
  ["Kay S2","core",D+"gt_benchmark_candidates/kay_idris_idria/kay_matrix_s2.csv",D+"gt_benchmark_candidates/kay_idris_idria/kay_labels_s2.csv"],

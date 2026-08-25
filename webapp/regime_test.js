@@ -6,7 +6,7 @@
  * We also report pi_PT and the bracket [pi_rc, pi_PT], and compare against each dataset's
  * ground-truth positive rate (a PROXY for the true careless rate, not the truth itself).
  */
-const R=require("./site/rerere.js"); const W=R.WEIGHTS; const fs=require("fs"); const rng=R._rng(20260717);
+const R=require("./site/reread.js"); const W=R.WEIGHTS; const fs=require("fs"); const rng=R._rng(20260717);
 const N_CAP=4000, ITER=200;
 const D="../Dataset/";
 const SETS=[

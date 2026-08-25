@@ -2,7 +2,7 @@
  * Evaluates fixed-z cuts and adaptive rules on BOTH simulated (weighted-MCC, realistic careless
  * + distractors) and the real study data (MCC, extreme careless). A good single default must do
  * well on both. */
-const R=require("./site/rerere.js"); const W=R.WEIGHTS; const fs=require("fs"); const rng=R._rng(7788);
+const R=require("./site/reread.js"); const W=R.WEIGHTS; const fs=require("fs"); const rng=R._rng(7788);
 const src=fs.readFileSync("sim_v2.js","utf8");
 eval(src.slice(src.indexOf("function gauss"), src.indexOf("function scoreDataset")));  // genClean, inject2, uWeight, wmcc, mcc, gateOK, ...
 function getEta(out,J){const n=out.length,mat=new Float64Array(n*J);for(let i=0;i<n;i++)for(let j=0;j<J;j++)mat[i*J+j]=out[i][j];

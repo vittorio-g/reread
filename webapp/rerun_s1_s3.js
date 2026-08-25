@@ -1,7 +1,7 @@
 /* rerun_s1_s3.js — full re-evaluation of Study 1 (real) and Study 3 (simulated) under the
  * updated engine (HWHM sigma, B1 global mode, B3 tail-OR gate, piEstimable, heavyContamination).
  * Reports at each true rate: auto-flag MCC, pi-hat, estimable count, heavy-warning count. */
-const R = require("./site/rerere.js"); const W = R.WEIGHTS; const fs = require("fs");
+const R = require("./site/reread.js"); const W = R.WEIGHTS; const fs = require("fs");
 let SEED = 606; const rng = () => { SEED = (SEED*1103515245+12345)&0x7fffffff; return SEED/0x7fffffff; };
 function gauss(){let u=0,v=0;while(!u)u=rng();while(!v)v=rng();return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v);}
 const K5=5, THR=[-0.84,-0.25,0.25,0.84];

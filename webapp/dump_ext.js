@@ -1,6 +1,6 @@
 /* dump_ext.js — for each external GT dataset: subsample (cap, seed fixed, prevalence preserved),
  * dump the exact matrix + labels + shipped rr/eta scores on identical rows, for the R benchmark. */
-const R=require("./site/rerere.js"); const W=R.WEIGHTS; const fs=require("fs"); const rng=R._rng(20260714);
+const R=require("./site/reread.js"); const W=R.WEIGHTS; const fs=require("fs"); const rng=R._rng(20260714);
 const N_CAP=4000, ITER=200, OUT="ext_bench";
 if(!fs.existsSync(OUT)) fs.mkdirSync(OUT);
 const D="../Dataset/", SETS=[

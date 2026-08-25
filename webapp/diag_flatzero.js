@@ -3,7 +3,7 @@
  * several rates, print the eta distribution, the one-sided fit (m, sigma, cut), the tail count,
  * every gate component (dBIC, w, sep, tailP), and the raw piHat BEFORE clamping.
  */
-const R = require("./site/rerere.js"); const W = R.WEIGHTS; const fs = require("fs");
+const R = require("./site/reread.js"); const W = R.WEIGHTS; const fs = require("fs");
 let SEED = 555; const rng = () => { SEED = (SEED*1103515245+12345)&0x7fffffff; return SEED/0x7fffffff; };
 const Z = 2.5, PHI1 = 0.8413447;
 const D = "../Dataset/gt_benchmark_candidates";

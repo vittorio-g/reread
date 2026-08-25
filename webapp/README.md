@@ -14,7 +14,7 @@ webapp/
 │   ├── index.html      UI + styles
 │   ├── app.js          UI logic (drag&drop, table, histogram, downloads)
 │   ├── worker.js       Web Worker wrapper (keeps UI responsive)
-│   └── rerere.js       core algorithm library (browser + Node)
+│   └── reread.js       core algorithm library (browser + Node)
 ├── test_core.js        Node test-suite (synthetic + fidelity vs R pipeline)
 └── README.md
 ```

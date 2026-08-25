@@ -11,7 +11,7 @@
  *   node clean_envelope_ab.js   -> clean_envelope_ab.csv
  */
 const fs = require("fs");
-const NEW = require("./site/rerere.js");
+const NEW = require("./site/reread.js");
 const OLD = require("./_engine_gated.js");
 
 const rng = NEW._rng(4242);          // same seed as clean_envelope.js

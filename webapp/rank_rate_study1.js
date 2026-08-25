@@ -6,7 +6,7 @@
  * RECOMPUTED on every mixture (never reuse full-sample scores).
  * Pools: 70 careful, 87 careless -> rates up to ~90% by thinning the careful side. */
 const fs = require("fs");
-const R = require("./site/rerere.js");
+const R = require("./site/reread.js");
 
 const M = R.parseCSV(fs.readFileSync("_study_matrix.csv", "utf8"));
 const y = R.parseCSV(fs.readFileSync("_study_labels.csv", "utf8")).rows.map(r => Number(r[0]));

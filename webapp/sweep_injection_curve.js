@@ -5,7 +5,7 @@
  * >=REPS independent resamples per point; we report the mean estimated prevalence (pi-hat).
  * Output: injection_curve.csv  (dataset, target, true_prev, pi_mean, pi_sd, flag_mean, n)
  */
-const R = require("./site/rerere.js"); const W = R.WEIGHTS; const fs = require("fs");
+const R = require("./site/reread.js"); const W = R.WEIGHTS; const fs = require("fs");
 let SEED = 777001; const rng = () => { SEED = (SEED*1103515245+12345)&0x7fffffff; return SEED/0x7fffffff; };
 const REPS = 10, ITER = 100, NCAP = 1400, NMIN = 180;
 const TARGETS = [0.01,0.03,0.05,0.08,0.12,0.16,0.20,0.25,0.30,0.35,0.40];

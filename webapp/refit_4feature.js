@@ -4,7 +4,7 @@
  * acquiescent distractors (label 0, made from copies of the real careful respondents), so the
  * model learns to spare acquiescent yea-sayers while still flagging the real careless.
  * Outputs 4-feature weights + a no-harm check on the pure study (LOO) + acq benefit. */
-const R=require("./site/rerere.js"); const W=R.WEIGHTS; const fs=require("fs"); const rng=R._rng(2026714);
+const R=require("./site/reread.js"); const W=R.WEIGHTS; const fs=require("fs"); const rng=R._rng(2026714);
 const src=fs.readFileSync("sim_v2.js","utf8");
 eval(src.slice(src.indexOf("function gauss"), src.indexOf("function scoreDataset")));  // applyPattern, ACQ_CORR, mcc, ...
 const Ms=R.parseCSV(fs.readFileSync("_study_matrix.csv","utf8")), J=Ms.header.length;

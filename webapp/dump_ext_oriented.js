@@ -2,7 +2,7 @@
  * features (O.longstring, O.person_total) and the per-dataset gate g, so the
  * weight-robustness analysis (rounding / perturbation / fixed-vs-refit) can be
  * repeated on the EXTERNAL datasets. Output: ext_bench_oriented/. */
-const R=require("./site/rerere.js"); const W=R.WEIGHTS; const fs=require("fs"); const rng=R._rng(20260714);
+const R=require("./site/reread.js"); const W=R.WEIGHTS; const fs=require("fs"); const rng=R._rng(20260714);
 const N_CAP=4000, ITER=200, OUT="ext_bench_oriented";
 if(!fs.existsSync(OUT)) fs.mkdirSync(OUT);
 const D="../Dataset/", SETS=[

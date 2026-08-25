@@ -1,7 +1,7 @@
 /* sweep_injection_conv.js — injection sweep with CONVERGENT-GT careless pools (>=2 independent
  * families) instead of check-only pools. Prediction: certified careless -> slopes closer to 1.
  * Prints band (<=25%) and full OLS slopes on estimable resamples directly. */
-const R = require("./site/rerere.js"); const W = R.WEIGHTS; const fs = require("fs");
+const R = require("./site/reread.js"); const W = R.WEIGHTS; const fs = require("fs");
 let SEED = 515151; const rng = () => { SEED = (SEED*1103515245+12345)&0x7fffffff; return SEED/0x7fffffff; };
 const REPS = 10, ITER = 100, NCAP = 1200, NMIN = 180;
 const TARGETS = [0.02,0.05,0.08,0.12,0.16,0.20,0.25,0.30,0.35,0.40];

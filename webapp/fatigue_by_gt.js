@@ -11,7 +11,7 @@
  */
 const fs = require("fs");
 const path = require("path");
-const R = require("./site/rerere.js");
+const R = require("./site/reread.js");
 
 const ITERS = 100, NMAX = 4000;
 const EXT = "ext_bench2";

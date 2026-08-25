@@ -5,7 +5,7 @@
  * so the FE analysis can attribute the eta state signal to its components.
  * Output: waves/panel.csv (pid,wave,rc,eta,longstring,person_total,flag,nvalid).
  * rc and eta must be bit-identical to the score_waves.js panel. */
-const R = require("./site/rerere.js");
+const R = require("./site/reread.js");
 const fs = require("fs");
 const path = require("path");
 

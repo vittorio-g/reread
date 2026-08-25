@@ -14,7 +14,7 @@
  */
 const fs = require("fs");
 const path = require("path");
-const R = require("./site/rerere.js");
+const R = require("./site/reread.js");
 
 const ITERS = 150, NMAX = 3000, RAND = 5;
 const rng = R._rng(20260806);

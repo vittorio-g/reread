@@ -4,7 +4,7 @@
  * Design: all 70 attentive respondents + k real careless resampled, achievable rates
  * k/(70+k) from ~5% to 50%; 200 resamples per rate; MCC/precision/recall of the automatic
  * flags at both settings, plus the oracle-threshold MCC for reference. */
-const R=require("./site/rerere.js"); const W=R.WEIGHTS; const fs=require("fs"); const rng=R._rng(31459);
+const R=require("./site/reread.js"); const W=R.WEIGHTS; const fs=require("fs"); const rng=R._rng(31459);
 const Ms=R.parseCSV(fs.readFileSync("_study_matrix.csv","utf8")), J=Ms.header.length;
 const allR=Ms.rows.map(r=>r.map(v=>{const x=Number(v);return Number.isFinite(x)?x:NaN;}));
 const y=R.parseCSV(fs.readFileSync("_study_labels.csv","utf8")).rows.map(r=>Number(r[0]));

@@ -12,7 +12,7 @@
  * quality metric). Injection: fixed-proportion mixing of REAL respondents, REPS resamples per
  * target rate; every resample is written out so the analysis can bootstrap over them.
  */
-const R = require("./site/rerere.js"); const W = R.WEIGHTS; const fs = require("fs");
+const R = require("./site/reread.js"); const W = R.WEIGHTS; const fs = require("fs");
 let SEED = 909090; const rng = () => { SEED = (SEED*1103515245+12345)&0x7fffffff; return SEED/0x7fffffff; };
 const REPS = 10, ITER = 100, NCAP = 1200, NMIN = 180;
 const TARGETS = [0.02,0.05,0.08,0.12,0.16,0.20,0.25,0.30,0.35,0.40];

@@ -1,5 +1,5 @@
 /* worker.js — runs the ReReRe ensemble computation off the main thread. */
-importScripts("rerere.js");
+importScripts("reread.js");
 
 onmessage = function (ev) {
   const { csvText, opts } = ev.data;

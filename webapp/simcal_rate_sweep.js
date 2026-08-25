@@ -14,7 +14,7 @@
  *   node simcal_rate_sweep.js        -> simcal_rate_sweep.csv
  */
 const fs = require("fs");
-const R = require("./site/rerere.js");
+const R = require("./site/reread.js");
 
 const CAL = JSON.parse(fs.readFileSync("sim_calib.json", "utf8"));
 const Wsim = CAL.weights, Zsim = CAL.zBest, Wship = R.WEIGHTS;

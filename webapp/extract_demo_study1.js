@@ -59,7 +59,7 @@ for (let i = 0; i < M.rows.length; i++) {
 /* ---- run the shipped engine on the real responses, here and now ---- */
 const ctx = { self: {}, console };
 vm.createContext(ctx);
-vm.runInContext(fs.readFileSync(path.join(HERE, "site", "rerere.js"), "utf8"), ctx);
+vm.runInContext(fs.readFileSync(path.join(HERE, "site", "reread.js"), "utf8"), ctx);
 const R = ctx.self.ReReRe;
 
 /* the app's default Advanced settings, so the published numbers are exactly

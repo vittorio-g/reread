@@ -5,7 +5,7 @@
  * (ensembleFeatures, seed=1, iterations=150), take O.rr (careless-oriented,
  * robust-standardized within sample) and the gated eta, and pool everything
  * into waves/panel.csv (pid,wave,rc,eta,flag,nvalid). */
-const R = require("./site/rerere.js");
+const R = require("./site/reread.js");
 const fs = require("fs");
 const path = require("path");
 

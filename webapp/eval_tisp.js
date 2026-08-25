@@ -6,7 +6,7 @@
  * Reports AUC (ensemble, rc, Person-Total, LongString) and MCC under the deployed automatic
  * rule (Standard and High) plus the oracle best threshold.
  */
-const R = require("./site/rerere.js"); const W = R.WEIGHTS; const fs = require("fs");
+const R = require("./site/reread.js"); const W = R.WEIGHTS; const fs = require("fs");
 const DIR = "../Dataset/gt_benchmark_candidates/tisp/";
 const P = R.parseCSV(fs.readFileSync(DIR + "_matrix.csv", "utf8"));
 const J = P.header.length;

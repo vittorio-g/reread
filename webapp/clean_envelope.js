@@ -15,7 +15,7 @@
  *   node clean_envelope.js   -> clean_envelope.json, clean_envelope.csv
  */
 const fs = require("fs");
-const R = require("./site/rerere.js");
+const R = require("./site/reread.js");
 
 const rng = R._rng(4242);
 function gauss() { let u = 0, v = 0; while (u === 0) u = rng(); while (v === 0) v = rng(); return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v); }

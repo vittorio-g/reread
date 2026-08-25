@@ -9,7 +9,7 @@
  *   node study1_gateless.js   -> study1_gateless.csv
  */
 const fs = require("fs");
-const NEW = require("./site/rerere.js");
+const NEW = require("./site/reread.js");
 const OLD = require("./_engine_gated.js");
 
 const M = NEW.parseCSV(fs.readFileSync("_study_matrix.csv", "utf8"));

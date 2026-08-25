@@ -4,7 +4,7 @@
  * rather than within-person coherence, and eta becomes multimodal for geographic reasons.
  * Test: score TISP pooled vs Germany-only, and decompose eta's variance by country.
  */
-const R = require("./site/rerere.js"); const W = R.WEIGHTS; const fs = require("fs");
+const R = require("./site/reread.js"); const W = R.WEIGHTS; const fs = require("fs");
 const DIR = "../Dataset/gt_benchmark_candidates/tisp/";
 function score(sfx) {
   const P = R.parseCSV(fs.readFileSync(DIR + "_matrix" + sfx + ".csv", "utf8"));

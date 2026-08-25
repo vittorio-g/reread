@@ -2,7 +2,7 @@
  * the external dump (ext_bench_oriented): robust-z, higher = more careless.
  * Output: _study_oriented.csv with y,rr,longstring,person_total  */
 const fs = require("fs");
-const R = require("./site/rerere.js");
+const R = require("./site/reread.js");
 
 const M = R.parseCSV(fs.readFileSync("_study_matrix.csv", "utf8"));
 const L = R.parseCSV(fs.readFileSync("_study_labels.csv", "utf8"));

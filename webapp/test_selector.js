@@ -1,7 +1,7 @@
 /* test_selector.js — use calibrated pi-hat to AUTO-SELECT Standard vs High (not to place the cut).
  * Per resample: if piHat < theta -> Standard cut, else High cut. Compare to always-Std, always-High,
  * and the per-resample envelope max(Std,High) (=perfect selector upper bound). Real study sweep. */
-const R=require("./site/rerere.js"); const W=R.WEIGHTS; const fs=require("fs"); const rng=R._rng(31459);
+const R=require("./site/reread.js"); const W=R.WEIGHTS; const fs=require("fs"); const rng=R._rng(31459);
 const Ms=R.parseCSV(fs.readFileSync("_study_matrix.csv","utf8")), J=Ms.header.length;
 const allR=Ms.rows.map(r=>r.map(v=>{const x=Number(v);return Number.isFinite(x)?x:NaN;}));
 const y=R.parseCSV(fs.readFileSync("_study_labels.csv","utf8")).rows.map(r=>Number(r[0]));

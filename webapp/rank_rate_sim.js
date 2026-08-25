@@ -4,7 +4,7 @@
  * Engine recomputed per dataset (pair selection / reference profile are sample-level, and
  * that is exactly what contamination attacks). Generator ported from sim_rr_scaling.js. */
 const fs = require("fs");
-const R = require("./site/rerere.js");
+const R = require("./site/reread.js");
 const rng = R._rng(20260728);
 
 function gauss(){let u=0,v=0;while(u===0)u=rng();while(v===0)v=rng();return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v);}

@@ -1,4 +1,4 @@
-const fs=require("fs");const R=require("./site/rerere.js");
+const fs=require("fs");const R=require("./site/reread.js");
 const Ms=R.parseCSV(fs.readFileSync("_study_matrix.csv","utf8"));
 const J=Ms.header.length, allRows=Ms.rows.map(r=>r.map(Number));
 const y=R.parseCSV(fs.readFileSync("_study_labels.csv","utf8")).rows.map(r=>Number(r[0]));

@@ -11,7 +11,7 @@
  * The test reuses m and sigma from the SAME one-sided fit that places the cut, so the gate and the
  * threshold are finally the same object. Compared here against the shipped mixture gate.
  */
-const R = require("./site/rerere.js"); const W = R.WEIGHTS; const fs = require("fs");
+const R = require("./site/reread.js"); const W = R.WEIGHTS; const fs = require("fs");
 const Z = 2.5, P0 = 0.006209665;                       // 1 - Phi(2.5)
 
 /* upper-tail binomial p-value, computed in log space */

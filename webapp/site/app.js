@@ -1,5 +1,5 @@
-/* app.js — UI logic for the CaReReRe web tool. All local, no network.
- * (JS namespace stays `ReReRe` for back-compat; user-facing name is CaReReRe.) */
+/* app.js — UI logic for the reread web tool. All local, no network.
+ * (JS namespace stays `ReReRe` for back-compat; user-facing name is reread.) */
 (function () {
   "use strict";
   const $ = id => document.getElementById(id);
@@ -50,7 +50,7 @@
       sensitivity: sensSetting()
     };
     const mr = manualRate();
-    if (mr != null) o.prevalence = mr;      // else: automatic two-groups calibration
+    if (mr != null) o.prevalence = mr;      // else: automatic attentive-mode calibration
     return o;
   }
   /* re-derive flag cutoff & flags from the ensemble probability + a target
@@ -146,7 +146,7 @@
   $("sheetModal").addEventListener("click", e => { if (e.target === $("sheetModal")) hideSheetPicker(); });
 
   /* ---------------- demo ----------------
-   * The CaReReRe validation sample (Study 1): a real five-instrument battery
+   * The reread validation sample (Study 1): a real five-instrument battery
    * answered by real people, some of whom were instructed to answer carelessly
    * on a known share of it. Nothing is injected or simulated — the ground truth
    * was collected, and it travels in the row id.
@@ -162,7 +162,7 @@
     if (!D || !D.res) { setError("Demo data failed to load — please refresh."); return; }
     const scales = m.scales ? Object.entries(m.scales).map(([k, v]) => v + " " + k).join(", ") : "";
     const rate = Math.round(100 * m.careless / m.n);
-    $("fileInfo").textContent = "demo: the CaReReRe validation sample — " + m.n +
+    $("fileInfo").textContent = "demo: the reread validation sample — " + m.n +
       " real respondents × " + m.items + " items (" + scales + "). " + m.careful +
       " answered honestly; " + m.careless + " were instructed to answer carelessly on part of the " +
       "battery (" + m.byGroup["careless_50"] + " on 50%, " + m.byGroup["careless_75"] + " on 75%, " +
@@ -226,7 +226,7 @@
         ? " <i>Ensemble partners are partially down-weighted — the item-mean profile is fairly flat, so the score leans on rr.</i>"
         : " <i>Ensemble partners are off — item means are too flat to trust LongString / Person-Total here, so the score is rr alone.</i>";
     banner.innerHTML = "<b>" + icon + " Structure diagnostic: " + d.level.replace("_", " ") +
-      "</b> (rr signal strength " + d.signal_strength.toFixed(2) + "× noise, top-pair mean |r| = " +
+      "</b> (coherence signal strength " + d.signal_strength.toFixed(2) + "× noise, top-pair mean |r| = " +
       d.top_mean_r.toFixed(2) + ") — " + d.advice + partnerNote;
 
     // applicability guide (from the ensemble operating-envelope analysis)
@@ -248,34 +248,39 @@
       : "";
   }
 
-  /* Applicability guide — thresholds from the ENSEMBLE operating-envelope
-   * analysis (AUC careful vs careless, subsampling items × respondents on the
-   * n=84 study data; the ensemble adds ~+0.135 AUC over rr alone):
-   *   reliable (AUC ~0.88+): >=45 items AND >=50 respondents
-   *   usable   (AUC ~0.80) : >=20 items AND >=40 respondents
-   *   otherwise: below the validated envelope -> exploratory ranking only. */
+  /* Applicability guide — thresholds from the length envelope measured in the
+   * controlled simulation, at the SHIPPED cut (severity-weighted MCC, and the
+   * ablation that isolates rc's contribution):
+   *   >=120 items: wMCC ~.90+, rc's contribution positive with CI excluding 0
+   *   >= 60 items: wMCC ~.72, rc's contribution indistinguishable from zero
+   *   < 60 items : rc's contribution turns NEGATIVE at 30 items -> partners only.
+   * Respondent floors follow the clean-data envelope, whose false-flag tail is
+   * worst on small samples. */
   function setApplicability(n, J) {
     const el = $("applicability");
     let cls, msg;
-    if (J >= 45 && n >= 50) {
+    if (J >= 120 && n >= 200) {
       cls = "ok";
       msg = "<b>" + ICO.check + " Within the validated envelope</b> (" + J + " items, " + n +
-        " respondents). In our validation study the CaReReRe ensemble gives reliable detection here " +
-        "(AUC ≈ 0.88–0.95).";
-    } else if (J >= 20 && n >= 40) {
+        " respondents). This is the regime where the coherence index earns its place: in the " +
+        "controlled simulation the ensemble reaches a severity-weighted MCC around 0.90 here, and " +
+        "removing <i>rc</i> costs about 0.12 of it.";
+    } else if (J >= 60 && n >= 100) {
       cls = "marginal";
-      msg = "<b>" + ICO.warn + " Usable but modest</b> (" + J + " items, " + n + " respondents). " +
-        "This range gave AUC ≈ 0.80 for the ensemble — detection works but is less sharp. " +
-        "For reliable results aim for ≥ 45 items and ≥ 50 respondents.";
+      msg = "<b>" + ICO.warn + " Usable, but <i>rc</i> adds little</b> (" + J + " items, " + n +
+        " respondents). The ensemble still detects (severity-weighted MCC ≈ 0.72 around 60 items), " +
+        "but at this length the coherence index contributes no more than its partners do. " +
+        "For its full benefit aim for ≥ 120 items.";
     } else {
       cls = "weak";
       const why = [];
-      if (J < 20) why.push("only " + J + " items (≥ 20 recommended, ≥ 45 for reliable)");
-      if (n < 40) why.push("only " + n + " respondents (≥ 40 recommended, ≥ 50 for reliable)");
+      if (J < 60) why.push("only " + J + " items (≥ 60 to be usable, ≥ 120 recommended)");
+      if (n < 100) why.push("only " + n + " respondents (≥ 100 to be usable, ≥ 200 recommended)");
       msg = "<b>" + ICO.warn + " Below the validated envelope:</b> " + why.join(" and ") + ". " +
-        "The cross-item structure the ensemble relies on is too thin here — treat the scores as an " +
-        "<b>exploratory ranking</b>, not a hard flag, and corroborate with other evidence " +
-        "(response times, attention checks).";
+        "The cross-item structure the ensemble relies on is too thin here — on batteries this short " +
+        "the coherence index was measured to <b>subtract</b> from the decision rather than add to it. " +
+        "Treat the scores as an <b>exploratory ranking</b>, not a hard flag, and lean on other " +
+        "evidence (response times, attention checks).";
     }
     el.className = "banner " + cls;
     el.innerHTML = msg;
@@ -443,7 +448,7 @@
   /* ---------------- downloads ---------------- */
   function resultsCsv(onlyFlagged) {
     const { res, ids } = lastResult;
-    const header = "id,careless_prob,careless_prob_se,flagged,borderline,rr,longstring,person_total,irv,d2,n_missing";
+    const header = "id,careless_prob,careless_prob_se,flagged,borderline,rc,longstring,person_total,irv,d2,n_missing";
     const lines = [header];
     ids.forEach((id, i) => {
       if (onlyFlagged && !res.flagged[i]) return;
@@ -473,7 +478,7 @@
   });
 
   /* live re-flag when the manual rate changes — no recompute, only the cut moves.
-   * Blank field => automatic two-groups calibration; a value => top-share. */
+   * Blank field => automatic attentive-mode calibration; a value => top-share. */
   function reflag(res) {
     const mr = manualRate();
     if (mr != null) {

@@ -6,7 +6,7 @@
  *  (d) the number of coupled pairs k (is the 15-pair floor active?).
  */
 const fs = require("fs");
-const R = require("./site/rerere.js");
+const R = require("./site/reread.js");
 
 const M = R.parseCSV(fs.readFileSync("_study_matrix.csv", "utf8"));
 const y = R.parseCSV(fs.readFileSync("_study_labels.csv", "utf8")).rows.map(r => Number(r[0]));

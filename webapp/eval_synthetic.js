@@ -25,7 +25,7 @@
  *
  * Comparators: one-sided 1sigma (solution 1) and the shipped mixture. Output: synthetic_eval.csv
  */
-const R=require("./site/rerere.js"); const W=R.WEIGHTS; const fs=require("fs");
+const R=require("./site/reread.js"); const W=R.WEIGHTS; const fs=require("fs");
 let SEED=7717; const rng=()=>{SEED=(SEED*1103515245+12345)&0x7fffffff;return SEED/0x7fffffff;};
 function gaussR(){let u=0,v=0;while(!u)u=rng();while(!v)v=rng();return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v);}
 const mn=a=>a.length?a.reduce((s,v)=>s+v,0)/a.length:NaN;

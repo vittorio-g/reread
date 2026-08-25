@@ -1,7 +1,7 @@
 /* dump_feats_ext.js — dump ALL oriented features (including the two that carry zero weight in the
  * shipped model, IRV and Mahalanobis D^2) for every external dataset, so we can test whether adding
  * them to the ensemble helps. Writes <dir>/_feats.csv with y1,y2 where available. */
-const R = require("./site/rerere.js"); const fs = require("fs");
+const R = require("./site/reread.js"); const fs = require("fs");
 const D = "../Dataset/gt_benchmark_candidates";
 const SETS = [
   ["TISP",      D + "/tisp",               ["_labels.csv"]],

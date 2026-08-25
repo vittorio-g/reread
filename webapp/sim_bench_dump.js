@@ -1,7 +1,7 @@
 /* sim_bench_dump.js — dump simulated datasets (matrix + labels + factor/reverse structure +
  * shipped rr/eta scores) across questionnaire lengths, for the Study-3 competitive benchmark in R.
  * Reuses the exact generative model of sim_shipped.js. */
-const R=require("./site/rerere.js"); const W=R.WEIGHTS; const fs=require("fs"); const rng=R._rng(20260709);
+const R=require("./site/reread.js"); const W=R.WEIGHTS; const fs=require("fs"); const rng=R._rng(20260709);
 const OUT="sim_bench"; if(!fs.existsSync(OUT)) fs.mkdirSync(OUT);
 function gauss(){let u=0,v=0;while(u===0)u=rng();while(v===0)v=rng();return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v);}
 function qnorm(p){const a=[-3.969683028665376e+01,2.209460984245205e+02,-2.759285104469687e+02,1.383577518672690e+02,-3.066479806614716e+01,2.506628277459239e+00];

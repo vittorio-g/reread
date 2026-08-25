@@ -2,7 +2,7 @@
  * The shipped acceptance test is:
  *    (bic1 - bic2 > 2) && pi > 0.01 && pi < 0.7 && separation > 1.0
  * Print each component per dataset so we can see which condition is the binding one. */
-const R = require("./site/rerere.js"); const W = R.WEIGHTS; const fs = require("fs");
+const R = require("./site/reread.js"); const W = R.WEIGHTS; const fs = require("fs");
 const D = "../Dataset/gt_benchmark_candidates";
 const SETS = [
   ["TISP",        D + "/tisp",                 "_labels.csv"],

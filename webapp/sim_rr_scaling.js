@@ -2,7 +2,7 @@
  * (logistic triad rr+LongString+Person-Total, two-groups automatic calibration),
  * not the legacy 5-feature random forest. Reports MCC vs questionnaire length under
  * BOTH sensitivity settings (Standard z=2.5, High z=1.5) and the rr ablation. */
-const R=require("./site/rerere.js");
+const R=require("./site/reread.js");
 const W=R.WEIGHTS;
 const rng=R._rng(20260709);
 

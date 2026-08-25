@@ -5,7 +5,7 @@
  * Part B: the collected study (n=157), LOO with/without acq — check acq does NOT harm real careless
  *          detection (the study has no acquiescent distractors, so this is a no-regression check). */
 global.self=global; require("./site/demo_data.js"); const csv0=global.RERERE_DEMO_BASE;
-const R=require("./site/rerere.js"); const W=R.WEIGHTS; const fs=require("fs"); const rng=R._rng(4242);
+const R=require("./site/reread.js"); const W=R.WEIGHTS; const fs=require("fs"); const rng=R._rng(4242);
 const src=fs.readFileSync("sim_v2.js","utf8");
 eval(src.slice(src.indexOf("function gauss"), src.indexOf("function scoreDataset")));  // inject2, uWeight, wmcc, mcc, ...
 function featRows(out,J){

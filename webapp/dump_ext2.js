@@ -1,7 +1,7 @@
 /* dump_ext2.js — external competitive benchmark on the SAME datasets as Study 2 tables
  * (tab:ext core + tab:ltpa boundary) that have archived matrix+labels. Full n (cap 6000,
  * prevalence preserved). Dumps matrix + labels + shipped rr/eta on identical rows for R. */
-const R=require("./site/rerere.js"); const W=R.WEIGHTS; const fs=require("fs"); const rng=R._rng(20260715);
+const R=require("./site/reread.js"); const W=R.WEIGHTS; const fs=require("fs"); const rng=R._rng(20260715);
 const N_CAP=Infinity, ITER=200, OUT="ext_bench2"; if(!fs.existsSync(OUT)) fs.mkdirSync(OUT);  // full n for reproducible Table 3
 const G="../Dataset/gt_benchmark_candidates/", L="../Dataset/learning_to_pay_attention/";
 const SETS=[

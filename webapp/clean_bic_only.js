@@ -13,7 +13,7 @@
  *   node clean_bic_only.js   -> clean_bic_only.csv
  */
 const fs = require("fs");
-const R = require("./site/rerere.js");
+const R = require("./site/reread.js");
 const Z = 2.5, P_TAIL = 0.0062, TAIL_ALPHA = 1e-6;
 function lgamma(x) {
   const c = [76.18009172947146, -86.50532032941677, 24.01409824083091, -1.231739572450155, 0.1208650973866179e-2, -0.5395239384953e-5];

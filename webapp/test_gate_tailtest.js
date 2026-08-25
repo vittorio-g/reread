@@ -3,7 +3,7 @@
  *          where careless respondents demonstrably exist, and what MCC follows?
  *  PART B: genuinely CLEAN simulated data - false-alarm rate (the property the gate protects).
  */
-const R = require("./site/rerere.js"); const W = R.WEIGHTS; const fs = require("fs");
+const R = require("./site/reread.js"); const W = R.WEIGHTS; const fs = require("fs");
 const { tailGate } = require("./gate_tailtest.js");
 const ALPHA = Number(process.argv[2] || 0.01);
 let SEED = 987; const rng = () => { SEED = (SEED*1103515245+12345)&0x7fffffff; return SEED/0x7fffffff; };

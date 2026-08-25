@@ -14,7 +14,7 @@
  *   node diag_gate_rc.js   -> diag_gate_rc.csv
  */
 const fs = require("fs"), path = require("path");
-const R = require("./site/rerere.js");
+const R = require("./site/reread.js");
 const DIR = "ext_bench2";
 const ORDER = ["kay_s2","warning300","kay_s1","opsy_16pf","smarvus","kay_s6","kay_s5","douglas","krause","duckworth"];
 const LABEL = { kay_s2:"Kay S2", warning300:"warning IPIP", kay_s1:"Kay S1", opsy_16pf:"opsy 16PF",

@@ -16,15 +16,15 @@
  *                            training rows, then score the held-out respondent.
  * The gap A - B is the optimistic bias the reviewer worries about.
  *
- * The feature engine is reimplemented here VERBATIM from webapp/site/rerere.js and
+ * The feature engine is reimplemented here VERBATIM from webapp/site/reread.js and
  * validated (VALIDATION block) against the shipped R.run() on the full sample, so
  * the numbers are the shipped method's, not an approximation.
  */
 const fs = require("fs");
 const path = require("path");
-const R = require("./site/rerere.js");   // shipped lib: parseCSV, detectColumns, buildMatrix, run, _rng
+const R = require("./site/reread.js");   // shipped lib: parseCSV, detectColumns, buildMatrix, run, _rng
 
-/* ---- verbatim internals copied from rerere.js (kept identical) ---- */
+/* ---- verbatim internals copied from reread.js (kept identical) ---- */
 function colStats(M, n, J) {
   const max = new Float64Array(J).fill(-Infinity), min = new Float64Array(J).fill(Infinity), median = new Float64Array(J), buf = [];
   for (let j = 0; j < J; j++) {
@@ -57,7 +57,7 @@ function correlationPairs(P, n, J) {
   for (let a = 0; a < J; a++) for (let b = a + 1; b < J; b++, p++) { let s = 0; for (let i = 0; i < n; i++) s += Z[i * J + a] * Z[i * J + b]; pa[p] = a; pb[p] = b; pr[p] = (sd[a] > 0 && sd[b] > 0) ? s / (n - 1) : 0; }
   return { pa, pb, pr, nPairs };
 }
-function indCors(P, minP, n, J, pa, pb, pr, idx) {  // swap-invariant ICC (matches rerere.js)
+function indCors(P, minP, n, J, pa, pb, pr, idx) {  // swap-invariant ICC (matches reread.js)
   const k = idx.length, out = new Float64Array(n);
   for (let i = 0; i < n; i++) {
     let sAB = 0, sSq = 0, sSum = 0;

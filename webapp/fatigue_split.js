@@ -20,7 +20,7 @@
  */
 const fs = require("fs");
 const path = require("path");
-const R = require("./site/rerere.js");
+const R = require("./site/reread.js");
 
 const ITERS = 100, NMAX = 2500, RAND_SPLITS = 10, SEED = 20260806;
 const rng = R._rng(SEED);

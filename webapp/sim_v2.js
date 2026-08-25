@@ -3,7 +3,7 @@
  * Distractors kept IN the data with label 0: acquiescent (response style) + fatigue (partial, <=50%).
  * Flagging methods compared: Standard(z2.5), High(z1.5), A(pi top-share), B(Bayes posterior>0.5).
  * References: AUC and oracle-MCC (ranking / ceiling, method-independent). */
-const R=require("./site/rerere.js");const W=R.WEIGHTS;const fs=require("fs");
+const R=require("./site/reread.js");const W=R.WEIGHTS;const fs=require("fs");
 const rng=R._rng(20260713);
 function gauss(){let u=0,v=0;while(u===0)u=rng();while(v===0)v=rng();return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v);}
 function qnorm(p){const a=[-39.6968302,220.9460984,-275.9285104,138.3577518,-30.66479806,2.506628277];const b=[-54.47609879,161.5858368,-155.6989798,66.80131188,-13.28068155];const c=[-0.007784894002,-0.3223964580,-2.400758277,-2.549732539,4.374664141,2.938163982];const d=[0.007784695709,0.3224671290,2.445134137,3.754408661];const pl=0.02425;let q,r;if(p<pl){q=Math.sqrt(-2*Math.log(p));return(((((c[0]*q+c[1])*q+c[2])*q+c[3])*q+c[4])*q+c[5])/((((d[0]*q+d[1])*q+d[2])*q+d[3])*q+1);}if(p<=1-pl){q=p-0.5;r=q*q;return(((((a[0]*r+a[1])*r+a[2])*r+a[3])*r+a[4])*r+a[5])*q/(((((b[0]*r+b[1])*r+b[2])*r+b[3])*r+b[4])*r+1);}q=Math.sqrt(-2*Math.log(1-p));return-(((((c[0]*q+c[1])*q+c[2])*q+c[3])*q+c[4])*q+c[5])/((((d[0]*q+d[1])*q+d[2])*q+d[3])*q+1);}

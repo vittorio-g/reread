@@ -1,4 +1,4 @@
-const R=require("./site/rerere.js");const fs=require("fs");
+const R=require("./site/reread.js");const fs=require("fs");
 const rng=R._rng(20260713);
 const src=fs.readFileSync("sim_shipped.js","utf8");
 eval(src.slice(src.indexOf("function gauss"), src.indexOf("function mcc")));  // genClean, inject, qnorm, gauss, K, THR

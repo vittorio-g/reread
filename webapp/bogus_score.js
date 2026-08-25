@@ -1,7 +1,7 @@
 /* bogus_score.js — score each >=5-bogus dataset with the shipped engine and
  * compute AUC of rc / ensemble / Person-Total against the bogus/instructed GT.
  * Bootstrap 95% CI on the rc AUC. */
-const R=require("./site/rerere.js"); const W=R.WEIGHTS; const fs=require("fs"); const rng=R._rng(7);
+const R=require("./site/reread.js"); const W=R.WEIGHTS; const fs=require("fs"); const rng=R._rng(7);
 const D="../Dataset/gt_benchmark_candidates";
 const SETS=[
   ["Kay S1 (IDRIS)", D+"/kay_idris_idria/kay_matrix_s1.csv", "bogus_bench/kay_s1_gt.csv", 250],

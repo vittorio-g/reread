@@ -2,7 +2,7 @@
  * availability at low prevalence without paying on clean data?  Two checks:
  *   A. clean simulated data at n=200/350 (the newly-relaxed regime): gate fire rate + flagged share
  *   B. Study 1 at 5/10/15% true rate: availability and MCC (was 5/10 estimable at 5%). */
-const R = require("./site/rerere.js"); const W = R.WEIGHTS; const fs = require("fs");
+const R = require("./site/reread.js"); const W = R.WEIGHTS; const fs = require("fs");
 let SEED = 2468; const rng = () => { SEED = (SEED*1103515245+12345)&0x7fffffff; return SEED/0x7fffffff; };
 function gauss(){let u=0,v=0;while(!u)u=rng();while(!v)v=rng();return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v);}
 const K5=5, THR=[-0.84,-0.25,0.25,0.84];

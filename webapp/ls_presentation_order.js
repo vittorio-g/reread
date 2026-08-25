@@ -10,7 +10,7 @@
  *                                    per study row, canonical indices, csv)
  */
 const fs = require("fs");
-const R = require("./site/rerere.js");
+const R = require("./site/reread.js");
 
 function readCsv(p) {
   const L = fs.readFileSync(p, "utf8").trim().split(/\r?\n/);

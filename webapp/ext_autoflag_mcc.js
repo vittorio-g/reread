@@ -16,7 +16,7 @@
  *   node ext_autoflag_mcc.js   -> ext_autoflag_mcc.csv
  */
 const fs = require("fs"), path = require("path");
-const R = require("./site/rerere.js");
+const R = require("./site/reread.js");
 const DIR = "ext_bench2";
 
 const ORDER = ["kay_s2","warning300","kay_s1","opsy_16pf","smarvus","kay_s6","kay_s5","douglas","krause","duckworth"];

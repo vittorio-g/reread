@@ -20,7 +20,7 @@
  *   node gate_ablation.js   -> gate_ablation.csv
  */
 const fs = require("fs"), path = require("path");
-const R = require("./site/rerere.js");
+const R = require("./site/reread.js");
 const Z = 2.5, P_TAIL = 0.0062, TAIL_ALPHA = 1e-6;
 
 /* upper-tail binomial p-value in log space (the engine's own test, reimplemented

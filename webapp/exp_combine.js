@@ -1,7 +1,7 @@
 /* exp_combine.js — test alternative ways to COMBINE the oriented detectors
  * (rc, PT, LongString), on Study 1 (induced) and the 6 bogus external datasets.
  * All scores are oriented robust-z (high = careless); AUC vs the GT. */
-const R=require("./site/rerere.js"); const W=R.WEIGHTS; const fs=require("fs");
+const R=require("./site/reread.js"); const W=R.WEIGHTS; const fs=require("fs");
 const auc=(s,y)=>{let po=[],ne=[];for(let i=0;i<y.length;i++)(y[i]?po:ne).push(s[i]);
   if(!po.length||!ne.length)return NaN;let c=0;for(const a of po)for(const b of ne)c+=a>b?1:a===b?0.5:0;return c/(po.length*ne.length);};
 const D="../Dataset/gt_benchmark_candidates";

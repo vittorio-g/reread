@@ -1,4 +1,4 @@
-/* rerere.js — ReReRe core library (browser + Node).
+/* reread.js — ReReRe core library (browser + Node).
  *
  * Canonical algorithm (as in the paper): coupled-pair permutation z-score.
  *  1. Rescale items to proportions (x / item_max) so mixed Likert ranges
@@ -249,16 +249,16 @@
     let level, advice;
     if (!Number.isFinite(strength) || strength < 1.3) {
       level = "no_structure";
-      advice = "The strongest item correlations are indistinguishable from sampling noise: this dataset shows no usable multi-construct structure. ReReRe is NOT suitable here — rely on LongString / IRV / response times instead.";
+      advice = "The strongest item correlations are indistinguishable from sampling noise: this dataset shows no usable multi-construct structure. reread is NOT suitable here — rely on LongString / IRV / response times instead.";
     } else if (strength < 1.8) {
       level = "weak";
-      advice = "Weak structure: the coupled pairs barely rise above sampling noise. ReReRe may produce false positives — treat z-scores as a ranking, not a hard flag, and corroborate with other indices.";
+      advice = "Weak structure: the coupled pairs barely rise above sampling noise. reread may produce false positives — treat z-scores as a ranking, not a hard flag, and corroborate with other indices.";
     } else if (strength < 2.8) {
       level = "marginal";
-      advice = "Marginal structure: ReReRe is usable, but detection quality will be reduced. Consider a stricter threshold and corroborating indices.";
+      advice = "Marginal structure: reread is usable, but detection quality will be reduced. Consider a stricter threshold and corroborating indices.";
     } else {
       level = "ok";
-      advice = "Good multi-construct structure — ReReRe should work well on this dataset.";
+      advice = "Good multi-construct structure — reread should work well on this dataset.";
     }
     return { separation_ratio: ratio, signal_strength: strength, level, advice,
              top_mean_r: topMean, all_mean_r: allMean, noise_top_r: noiseTop };

@@ -26,7 +26,7 @@
  *   node algo2_variants.js        -> algo2_variants.csv
  */
 const fs = require("fs");
-const R = require("./site/rerere.js");
+const R = require("./site/reread.js");
 
 const PHI1 = 0.8413447;
 

@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>CaReReRe — Careless Respondent Recognition · careless responding detector</title>
-<meta name="description" content="Flag careless respondents in questionnaire data with CaReReRe (Careless Respondent Recognition via Resampled Ensemble), a permutation-based individual-coherence method. Runs entirely in your browser: your data never leaves your device.">
+<title>reread — careless responding detector</title>
+<meta name="description" content="reread: screen questionnaire data for careless responding. A permutation-based coherence index combined with two established detectors, and a threshold that calibrates itself without labels. Runs entirely in your browser: your data never leaves your device.">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='6' fill='%23294060'/><circle cx='14' cy='14.5' r='6.4' fill='none' stroke='%23f7f5f0' stroke-width='2.6'/><line x1='18.7' y1='19.2' x2='24.5' y2='25' stroke='%23f7f5f0' stroke-width='2.8' stroke-linecap='round'/></svg>">
 <style>
 :root{
@@ -194,11 +194,12 @@ footer a{color:var(--accent)}
 <header>
   <div class="wrap masthead">
     <p class="eyebrow">Careless responding · detection tool</p>
-    <h1 class="wordmark"><span class="re">Ca</span>Re<span class="re">Re</span>Re</h1>
-    <p class="expansion"><b>Ca</b>reless <b>Re</b>spondent <b>Re</b>cognition via <b>R</b>esampled <b>E</b>nsemble</p>
-    <p class="lede">An ensemble method for detecting careless respondents in questionnaire
-      data, built around a permutation-based individual-coherence index (rr). Drop in a
-      dataset; obtain a careless probability and flagged rows.</p>
+    <h1 class="wordmark">reread</h1>
+    <p class="expansion"><b>re</b>spondent-<b>re</b>ferenced <b>a</b>ttentiveness <b>d</b>emarcation</p>
+    <p class="lede">A screening procedure for careless responding in questionnaire data. It
+      combines a permutation-based coherence index (<i>rc</i>) with two established detectors,
+      and — unlike index-only tools — decides <em>where to cut</em> without labels. Drop in a
+      dataset; obtain a careless probability, flagged rows, and an estimated careless rate.</p>
     <div class="meta">
       <span>Runs entirely in your browser</span><span class="dot">·</span>
       <span>no upload</span><span class="dot">·</span>
@@ -230,26 +231,26 @@ footer a{color:var(--accent)}
         <label class="param">Custom sensitivity cut (z) — advanced
           <input type="number" id="pSensZ" min="0.3" max="5" step="0.1" placeholder="blank = shipped cut (z = 2.5)">
           <div class="help">The tool ships a <b>single</b> automatic cut: z = 2.5 above the attentive
-            cluster (≈0.6% false positives among attentive respondents). It is the best setting across
-            the whole realistic range — up to about a 35% careless rate — so there is nothing to choose.
-            This box is a power-user override: lower z flags <b>more</b> (more false positives), higher z
-            flags <b>fewer</b>. Use it only if your sample is more than about a third careless, where a
-            more liberal cut (z ≈ 1.5) recovers more of them; any value other than 2.5 raises an
-            out-of-limits note on the results.</div>
+            mode (≈0.6% false positives among attentive respondents). It is the better setting from the
+            cleanest samples up to roughly a 32% careless rate, so within any realistic range there is
+            nothing to choose. This box is a power-user override: lower z flags <b>more</b> (more false
+            positives), higher z flags <b>fewer</b>. Use it only if your sample is more than about a
+            third careless, where a more liberal cut (z ≈ 1.5) recovers more of them; any value other
+            than 2.5 raises an out-of-limits note on the results.</div>
         </label>
         <label class="param">Expected careless rate (%) — override
           <input type="number" id="pPrev" min="1" max="99" step="1" placeholder="blank = automatic">
-          <div class="help">Leave <b>blank</b> for automatic calibration (the tool checks whether a careless
-            cluster exists, then cuts above the attentive cluster and estimates the rate). Enter a value only if you have a prior (pilot,
+          <div class="help">Leave <b>blank</b> for automatic calibration (the tool locates the attentive
+            mode, cuts above it, and estimates the rate). Enter a value only if you have a prior (pilot,
             earlier wave): it then flags exactly that top share — apply once, to raw data.</div>
         </label>
         <label class="param">Coupled-pair proportion (corProp)
           <input type="number" id="pCorProp" min="0.01" max="0.25" step="0.01" value="0.03">
-          <div class="help">Share of the highest-|r| item pairs the <b>rr</b> index uses as its coherence signal. Default 0.03.</div>
+          <div class="help">Share of the highest-|r| item pairs the <b><i>rc</i></b> index uses as its coherence signal. Default 0.03.</div>
         </label>
         <label class="param">Permutation iterations
           <input type="number" id="pIter" min="50" max="1000" step="50" value="200">
-          <div class="help">Random pair-sets for each respondent's rr baseline. More = more stable, slower. 200 is plenty (per-respondent SD ≈ 0.01).</div>
+          <div class="help">Random pair-sets for each respondent's <i>rc</i> baseline. More = more stable, slower. 200 is a sound default; 400 tightens the per-respondent standard error.</div>
         </label>
         <label class="param">Minimum coupled pairs
           <input type="number" id="pMinPairs" min="5" max="100" step="1" value="15">
@@ -294,16 +295,16 @@ footer a{color:var(--accent)}
     <div id="prevWarn" class="banner weak" style="display:none"></div>
     <div id="paramWarn" class="banner weak" style="display:none"></div>
     <canvas id="hist"></canvas>
-    <div class="footnote">Each dot is one respondent, ranked left→right by <b>CaReReRe ensemble careless
+    <div class="footnote">Each dot is one respondent, ranked left→right by <b>ensemble careless
       probability</b> (higher = more careless). <b>Red dots are flagged</b>; the dashed line is the
-      cutoff. The rate is set <b>automatically</b> — the tool first checks whether a careless
-      subpopulation exists at all, then locates the attentive cluster from the low side of the
-      distribution and cuts above it, so no rate has to be guessed. Override it with a
+      cutoff. The rate is set <b>automatically</b> — the tool locates the attentive mode from the low
+      side of the distribution, reads its spread from that side only, and cuts above it, so no rate
+      has to be guessed. Override it with a
       fixed expected rate under <i>Advanced settings</i> if you want.</div>
     <div class="row" style="margin:18px 0 10px">
       <button class="primary" id="dlBtn"><svg class="ico" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.5v11"/><path d="M7 10l5 5 5-5"/><path d="M4.5 20.5h15"/></svg>Download results CSV</button>
       <button class="ghost" id="dlFlagBtn"><svg class="ico" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.5v11"/><path d="M7 10l5 5 5-5"/><path d="M4.5 20.5h15"/></svg>Download flagged rows only</button>
-      <span style="color:var(--slate);font-size:.84rem">Columns added: careless_prob, flagged, rr, longstring, person_total, irv, d2, n_missing</span>
+      <span style="color:var(--slate);font-size:.84rem">Columns added: careless_prob, flagged, rc, longstring, person_total, irv, d2, n_missing</span>
     </div>
     <div class="tableWrap"><table id="tbl"></table></div>
     <div class="footnote" id="tblNote"></div>
@@ -312,19 +313,20 @@ footer a{color:var(--accent)}
 
   <div class="card prose">
     <h2>How it works</h2>
-    <p class="lead"><b>CaReReRe is an ensemble.</b> It combines three complementary careless-detection
-    signals into a single per-respondent probability, calibrated on real data with a known
-    careless/attentive ground truth. The distinctive ingredient — the one we built and the reason the
-    method exists — is the <b>rr</b> index; the other two are established detectors that catch the
-    failure modes rr is deliberately blind to. Together they cover careless responding far better than
-    any one signal alone.</p>
+    <p class="lead"><b>reread is an ensemble with a self-calibrating threshold.</b> It combines three
+    complementary careless-detection signals into a single per-respondent score, calibrated on real
+    data with a known careless/attentive ground truth, and then draws the line itself. The distinctive
+    ingredient is the <b><i>rc</i></b> index (<i>relative coherence</i>); the other two are established
+    detectors that catch the failure modes <i>rc</i> is blind to by construction. The part usually left
+    out of such tools — turning a ranking into a decision without labels — is the one this procedure
+    treats as its main job.</p>
 
-    <h3>The rr index — the core signal</h3>
+    <h3>The <i>rc</i> index — the core signal</h3>
     <p>Respondents who answer attentively are <em>internally consistent</em>: on items that tap the
     same construct they give compatible answers, so those items covary <em>within the person</em>
-    just as they do across the sample. Careless respondents break that internal covariance. The rr
-    index asks: <b>did this person answer the questionnaire's strongly-related item pairs more
-    coherently than they would by chance?</b></p>
+    just as they do across the sample. Careless respondents break that internal covariance. The
+    <i>rc</i> index asks: <b>did this person answer the questionnaire's strongly-related item pairs
+    more coherently than they would by chance?</b></p>
     <ol class="steps">
       <li><b>Find the coupled pairs.</b> Correlate every pair of items across your sample; keep the
       top fraction with the largest |r| (default 3%) — the pairs that genuinely move together,
@@ -336,72 +338,75 @@ footer a{color:var(--accent)}
       <em>random</em> item pairs — a permutation done separately for each respondent — absorbing
       their own response style and scale usage.</li>
       <li><b>Turn it into a z-score.</b>
-      <code>rr = (coupled &minus; mean&nbsp;random) / sd&nbsp;random</code>. A <b>low rr</b> means
+      <code>rc = (coupled &minus; mean&nbsp;random) / sd&nbsp;random</code>. A <b>low <i>rc</i></b> means
       their answers to items that <em>should</em> agree are no more coherent than random pairs — the
       signature of inconsistent carelessness.</li>
     </ol>
-    <p>Comparing each person to <em>their own</em> random baseline is what makes rr self-calibrating:
-    no assumption of multivariate normality, no external cut-off table, no per-dataset tuning. That
+    <p>Comparing each person to <em>their own</em> random baseline is what frees <i>rc</i> from
+    distributional assumptions: no multivariate normality, no external cut-off table, no factor key. That
     is the crucial difference from distance-based outlier detectors such as Mahalanobis distance,
     whose chi-square thresholds assume a normality that Likert data violate and which, applied by the
     book, flag almost no one.</p>
 
     <h3>The two partners in the ensemble</h3>
-    <p>rr targets <b>inconsistent</b> carelessness (random or intermittent responding). It is
-    deliberately blind to <b>consistent</b> carelessness — someone who answers &ldquo;3&rdquo; to
+    <p><i>rc</i> targets <b>inconsistent</b> carelessness (random or intermittent responding). It is
+    blind by construction to <b>consistent</b> carelessness — someone who answers &ldquo;3&rdquo; to
     everything is trivially coherent. Two established detectors fill that gap:</p>
     <ul class="plain">
       <li><b>LongString</b> — the longest run of identical consecutive answers, catching
-      straight-lining that rr cannot see.</li>
+      straight-lining that <i>rc</i> cannot see.</li>
       <li><b>Person-Total correlation</b> — how well a respondent's profile aligns with the sample's
       average profile, catching people who answer against the grain.</li>
     </ul>
-    <p>A logistic model fitted on our labelled validation study combines the three into one
-    probability. On that data the ensemble reaches <b>AUC 0.985</b> under leave-one-out validation —
-    matching a far heavier random forest and clearly beating rr alone (AUC 0.90). The two partners
-    are <b>automatically down-weighted</b> when your data's item-mean profile is too flat to support
-    them (a case rr handles alone), so the ensemble never does worse than rr — the results panel
+    <p>A logistic model with <b>fixed</b> weights — fitted once on the labelled validation study and
+    then frozen, never refitted per dataset — combines the three into one score. On that data the
+    ensemble reaches <b>AUC 0.983</b> under leave-one-out validation, against 0.87 for <i>rc</i> alone
+    and 0.94 for the two partners without it. The gap matters more at the decision than at the ranking
+    level: removing <i>rc</i> costs 0.04 of AUC but <b>0.24 of MCC</b> once a threshold is actually
+    applied. The two partners are <b>automatically down-weighted</b> when your data's item-mean profile
+    is too flat to support them (a case <i>rc</i> handles alone) — the results panel
     tells you when this happens. Two further indicators, <b>IRV</b> (within-person response
     variability) and <b>Mahalanobis D²</b>, are computed and shown for transparency but kept out of
     the score: their careless direction is not stable across questionnaires (IRV) or degrades when
-    items outnumber respondents (D²).</p>
+    items outnumber respondents (D²). Refitting the combiner on each new dataset would do better still
+    — but that needs the very labels this procedure is built to work without.</p>
 
-    <h3>From probabilities to flags — no rate to guess</h3>
+    <h3>From scores to flags — no rate to guess</h3>
     <p>The ensemble <em>ranks</em> everyone by careless probability, but turning a ranking into a
     yes/no decision usually needs a threshold — and asking the analyst for the &ldquo;expected
     careless rate&rdquo; is asking for exactly the unknown they are trying to measure. Worse, a
-    fixed top-<em>X</em>% rule flags <em>X</em>% even on perfectly clean data. CaReReRe avoids this
-    with an <b>automatic two-groups calibration</b> in two steps. First it asks whether a careless
-    cluster is there at all, by comparing a one- and a two-cluster fit of the scores (via BIC); if
-    the scores form a single cluster it flags <b>nobody</b>. If a careless cluster is there, the tool
-    then locates the <b>attentive</b> cluster from the <em>low</em> side of the score distribution
-    only &mdash; the side careless respondents cannot reach &mdash; and both the cut and the
-    <b>estimated careless rate</b> follow from it. That asymmetry is deliberate: attentive
-    respondents form a compact peak you can anchor on, whereas careless ones form a long tail with no
-    peak of its own, so anything fitted <em>to</em> them breaks down once they are numerous. A clean
-    or already-cleaned dataset yields ~0% (no false-positive cascade), and a contaminated one yields
-    a data-driven rate &mdash; with nothing to guess.</p>
-    <p>The automatic mode is deliberately conservative: it confidently flags the clearly-separated
-    careless and reports them as the estimated rate; mild or partial inattention that overlaps the
-    attentive cluster is intrinsically ambiguous and is left for you to judge from the dot plot and
-    the per-respondent columns. If you <em>do</em> have a prior on the rate (a pilot, an earlier
-    wave), you can override the automatic cut with a fixed expected rate under Advanced settings.</p>
-    <p>There is <b>one</b> automatic cut and nothing to tune: z = 2.5 above the attentive cluster,
+    fixed top-<em>X</em>% rule flags <em>X</em>% even on perfectly clean data. reread instead
+    <b>anchors the cut on the attentive majority</b>. It locates the <b>attentive mode</b> of the score
+    distribution and reads its spread from the <em>low</em> side only &mdash; the side careless
+    respondents rarely reach &mdash; then flags everyone beyond a fixed distance above it. Both the cut
+    and the <b>estimated careless rate</b> follow from that one fit. The asymmetry is deliberate:
+    attentive respondents form a compact peak you can anchor on, whereas careless ones form a long tail
+    with no peak of its own, so anything fitted <em>to</em> them breaks down once they are numerous.</p>
+    <p>The cut is applied <b>unconditionally</b>, which has an honest consequence the tool reports
+    rather than hides: a sample with no careless respondents at all will still have an upper tail, so
+    it will still yield a few flags. Alongside your result the tool therefore shows the
+    <b>clean-data envelope</b> &mdash; how much a careless-free dataset <em>of your own size</em>
+    typically flags by chance (on the order of 1&ndash;2%, more in the worst cases on short batteries
+    and small samples). A flagged share inside that envelope is indistinguishable from clean data and
+    is labelled as such; one above it is not.</p>
+    <p>If you <em>do</em> have a prior on the rate (a pilot, an earlier wave), you can override the
+    automatic cut with a fixed expected rate under Advanced settings.</p>
+    <p>There is <b>one</b> automatic cut and nothing to tune: z = 2.5 above the attentive mode,
     which puts about 0.6% of attentive respondents on the wrong side. Anchoring it on the attentive
     peak alone is what makes a single setting enough — it is the better choice from the cleanest
-    samples up to roughly a 35% careless rate, which covers every realistic case. (An earlier version
-    of the tool offered a second, more liberal level for heavy contamination; it is no longer needed
-    within that range and was removed. Beyond it, the advanced z override is still there.)</p>
-    <p><b>Validated on real data.</b> On our collected study (real attentive respondents with real
-    careless mixed in at controlled rates from 5% to 50%, 200–300 resamples per point), the ensemble
-    <em>ranks</em> careless vs attentive essentially perfectly at every prevalence (AUC 0.98–0.99),
-    so with the right cut the detection ceiling (oracle MCC) sits at ≈0.9 throughout. The automatic
-    estimate of the careless rate <b>tracks the truth across the whole range</b> — within about two
-    points from 5% to 45% — because it is read off the attentive side rather than fitted to the
-    careless one (detection is still unreliable below ~5%, where there are simply too few careless to
-    separate at all). The shipped cut gives the better flagging accuracy up to about a 35% careless
-    rate (MCC ≈ 0.72 at 10%, 0.81 at 20%, peaking near 0.83 at 30%); above that a more liberal cut
-    would recover more cases, which is what the advanced z override is for.</p>
+    samples up to roughly a 32% careless rate, past any realistic prevalence. Beyond that a more
+    liberal cut would recover more cases, which is what the advanced z override is for.</p>
+    <p><b>Validated on collected data.</b> In the validation study (real attentive respondents with
+    real careless ones mixed in at controlled rates from 5% to 50%, 200 resamples per point) the
+    ensemble <em>ranks</em> careless against attentive essentially perfectly at every prevalence
+    (AUC 0.98–0.99). What the automatic cut then achieves is the number that matters:
+    <b>MCC ≈ 0.77 at a 10% careless rate, 0.81 at 15%, 0.82 at 20%, peaking near 0.83 around 25%</b>.
+    The estimated rate tracks the truth to within about 1.5 percentage points up to a 32% rate (about
+    4 points at 45%), because it is read off the attentive side rather than fitted to the careless
+    one. Precision stays high throughout — the automatic mode is deliberately conservative, confidently
+    flagging the clearly-separated careless while leaving mild or partial inattention, which overlaps
+    the attentive cluster and is intrinsically ambiguous, for you to judge from the dot plot and the
+    per-respondent columns.</p>
 
     <h3>Handling real questionnaires</h3>
     <p>Reverse-keyed items are aligned automatically from the sign of the sample correlation, so you
@@ -413,10 +418,15 @@ footer a{color:var(--accent)}
     lack the cross-item structure the method needs.</p>
 
     <h3>When it works best</h3>
-    <p>The signal grows with the number of correlated item pairs, so CaReReRe is strongest on
-    multi-construct batteries. In our validation study the ensemble is reliable (AUC ≈ 0.88–0.95)
-    from about <b>45 items and 50 respondents</b> upward — and already usable (AUC ≈ 0.80) from ~20
-    items — which is a wider envelope than rr alone. The applicability guide above reports where your
+    <p>The signal grows with the number of correlated item pairs, so reread is strongest on long
+    multi-construct batteries. A controlled simulation puts numbers on this: at the shipped cut the
+    ensemble's severity-weighted MCC climbs from about 0.48 on a 30-item questionnaire to 0.72 at 60
+    items, 0.90 at 120, and 0.94 from 180 upward.</p>
+    <p>The length envelope is a <em>measured</em> claim, not a caveat. <i>rc</i>'s contribution is
+    positive and clearly so from about 120 items (+0.12 MCC), indistinguishable from zero at 60, and
+    actually <b>negative at 30 items</b>, where a noisy coherence estimate widens the attentive mode and
+    pushes the cut out of reach. On short scales, then, the partners and design-time checks — attention
+    checks, response times — should carry the screen. The applicability guide above reports where your
     specific dataset falls.</p>
   </div>
 
@@ -437,7 +447,7 @@ footer a{color:var(--accent)}
       <li><b>Don't take our word for it — verify.</b> Open your browser's developer tools
         (<code>F12 &rarr; Network</code>) and run an analysis: you will see no request leaving
         your machine. The source code is unminified and human-readable
-        (<a href="rerere.js">rerere.js</a>, <a href="app.js">app.js</a>, <a href="worker.js">worker.js</a>).
+        (<a href="reread.js">reread.js</a>, <a href="app.js">app.js</a>, <a href="worker.js">worker.js</a>).
         Once the page has loaded you can even switch off your connection and the tool keeps working.</li>
       <li><b>GDPR standpoint:</b> since no personal data ever reaches us, we perform no
         processing at all — you remain the sole data controller, no data-processing agreement
@@ -468,15 +478,15 @@ footer a{color:var(--accent)}
 
 <footer>
   <div class="wrap">
-    <b>CaReReRe</b> — permutation-based careless responding detection ·
-    method &amp; validation paper in preparation (Guerrieri, 2026) ·
-    R package coming soon · <a href="https://re-re.re">re-re.re</a><br>
+    <b>reread</b> — careless-responding screening with a self-calibrating threshold ·
+    method &amp; validation manuscript under review ·
+    <span class="mono">reread</span> R package · <a href="https://reread.tools">reread.tools</a><br>
     All computation runs locally in your browser — <a href="#privacy">no data is transmitted, stored, or logged</a>.
   </div>
 </footer>
 
 <script src="xlsx.full.min.js"></script>
-<script src="rerere.js"></script>
+<script src="reread.js"></script>
 <script src="demo_data.js"></script>
 <script src="app.js"></script>
 </body>

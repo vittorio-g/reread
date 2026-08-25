@@ -14,7 +14,7 @@
  * Bench: Study 1 (real, prevalence swept) + Study 3 (simulated, prevalence x length).
  * Output: onesided_eval.csv
  */
-const R=require("./site/rerere.js"); const W=R.WEIGHTS; const fs=require("fs");
+const R=require("./site/reread.js"); const W=R.WEIGHTS; const fs=require("fs");
 let SEED=4242; const rng=()=>{SEED=(SEED*1103515245+12345)&0x7fffffff;return SEED/0x7fffffff;};
 function gauss(){let u=0,v=0;while(!u)u=rng();while(!v)v=rng();return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v);}
 const K=5, THR=[-0.84,-0.25,0.25,0.84];

@@ -3,7 +3,7 @@
  * Scores <dir>/_matrix.csv once with the shipped ensemble and reports AUC (ensemble, rc,
  * Person-Total, LongString) plus MCC under the deployed automatic rule and at the oracle cut.
  */
-const R = require("./site/rerere.js"); const W = R.WEIGHTS; const fs = require("fs");
+const R = require("./site/reread.js"); const W = R.WEIGHTS; const fs = require("fs");
 const DIR = process.argv[2], LAB = process.argv[3] || "_labels.csv", TAG = process.argv[4] || "";
 const MAT = process.argv[5] || "_matrix.csv";
 const P = R.parseCSV(fs.readFileSync(DIR + "/" + MAT, "utf8"));

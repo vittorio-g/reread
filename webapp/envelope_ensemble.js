@@ -4,7 +4,7 @@
  * scores each subsample exactly as the deployed tool (features restandardized
  * within the subsample, fixed weights), records AUC(careful vs careless). */
 const fs = require("fs");
-const R = require("./site/rerere.js");
+const R = require("./site/reread.js");
 const M = R.parseCSV(fs.readFileSync("_study_matrix.csv", "utf8"));
 const L = R.parseCSV(fs.readFileSync("_study_labels.csv", "utf8"));
 const rows = M.rows.map(r => r.map(Number)), y = L.rows.map(r => Number(r[0]));

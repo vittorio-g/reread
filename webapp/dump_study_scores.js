@@ -1,6 +1,6 @@
 /* dump_study_scores.js — per-respondent shipped rr (oriented high=careless) and ensemble log-odds
  * (high=careless) for the Study-1 matrix, for the competitive benchmark. */
-const R=require("./site/rerere.js"); const W=R.WEIGHTS; const fs=require("fs");
+const R=require("./site/reread.js"); const W=R.WEIGHTS; const fs=require("fs");
 const Ms=R.parseCSV(fs.readFileSync("_study_matrix.csv","utf8")), J=Ms.header.length;
 const rows=Ms.rows.map(r=>r.map(v=>{const x=Number(v);return Number.isFinite(x)?x:NaN;}));
 const n=rows.length, mat=new Float64Array(n*J);

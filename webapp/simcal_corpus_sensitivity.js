@@ -10,7 +10,7 @@
  *   node simcal_corpus_sensitivity.js   -> simcal_corpus_sensitivity.csv
  */
 const fs = require("fs");
-const R = require("./site/rerere.js");
+const R = require("./site/reread.js");
 
 /* ---- simulated corpus, respondent level ---- */
 const raw = fs.readFileSync("sim_calib_features.csv", "utf8").split(/\r?\n/).filter(Boolean);

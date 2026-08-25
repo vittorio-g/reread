@@ -1,4 +1,4 @@
-const fs=require("fs");const R=require("./site/rerere.js");
+const fs=require("fs");const R=require("./site/reread.js");
 const M=R.parseCSV(fs.readFileSync("_study_matrix.csv","utf8"));
 const n=M.rows.length,J=M.header.length,mat=new Float64Array(n*J);
 for(let i=0;i<n;i++)for(let j=0;j<J;j++)mat[i*J+j]=R.toNum(M.rows[i][j]);

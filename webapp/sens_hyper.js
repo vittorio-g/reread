@@ -2,7 +2,7 @@
  * Sweeps corProp (top-share), min_pairs (floor), gate offset & scale, and the
  * flagging cut z, recomputing ensemble AUC (and, for z, MCC) on real data:
  * Study 1 + two in-envelope external datasets. Writes sens_hyper.csv. */
-const R=require("./site/rerere.js"); const W=R.WEIGHTS; const fs=require("fs");
+const R=require("./site/reread.js"); const W=R.WEIGHTS; const fs=require("fs");
 const auc=(s,y)=>{let po=[],ne=[];for(let i=0;i<y.length;i++)(y[i]?po:ne).push(s[i]);
   let c=0;for(const a of po)for(const b of ne)c+=a>b?1:a===b?0.5:0;return c/(po.length*ne.length);};
 function load(mp,lp,ycol){const P=R.parseCSV(fs.readFileSync(mp,"utf8")),J=P.header.length;

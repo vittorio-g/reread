@@ -2,7 +2,7 @@
  * study data (n=157: 70 careful + 87 real scrambled careless). Prevalence sweep: keep all careful,
  * sample k real careless to hit target rates; average over resamples. Real careless are extreme
  * (scrambled text) => they DO form a cluster, unlike the heterogeneous simulated careless. */
-const R=require("./site/rerere.js"); const W=R.WEIGHTS; const fs=require("fs");
+const R=require("./site/reread.js"); const W=R.WEIGHTS; const fs=require("fs");
 const rng=R._rng(20260714);
 const src=fs.readFileSync("sim_v2.js","utf8");
 eval(src.slice(src.indexOf("function qnorm"), src.indexOf("function scoreDataset")));  // helpers + metrics + allFlags

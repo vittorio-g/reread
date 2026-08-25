@@ -7,7 +7,7 @@
  *   B1+B3   : both fixes together
  * The cut is always m + 2.5*sigma with sigma from the left side only.
  */
-const R = require("./site/rerere.js"); const W = R.WEIGHTS; const fs = require("fs");
+const R = require("./site/reread.js"); const W = R.WEIGHTS; const fs = require("fs");
 const { binomUpper } = require("./gate_tailtest.js");
 const Z = 2.5, P0 = 0.006209665, TAILALPHA = 1e-6;
 let SEED=13579; const rng=()=>{SEED=(SEED*1103515245+12345)&0x7fffffff;return SEED/0x7fffffff;};

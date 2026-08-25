@@ -1,7 +1,7 @@
 /* test_cut.js — does using pi (mixture prevalence) to PLACE the cut beat the fixed z-cut?
  * Metric = MCC vs true labels (that's what matters: where to cut). Real study sweep, 200 resamples/rate.
  * Strategies: Standard(z2.5), High(z1.5), pi-cut(top-pi by eta), leak-cut(top-leak), oracle(best thr). */
-const R=require("./site/rerere.js"); const W=R.WEIGHTS; const fs=require("fs"); const rng=R._rng(31459);
+const R=require("./site/reread.js"); const W=R.WEIGHTS; const fs=require("fs"); const rng=R._rng(31459);
 const Ms=R.parseCSV(fs.readFileSync("_study_matrix.csv","utf8")), J=Ms.header.length;
 const allR=Ms.rows.map(r=>r.map(v=>{const x=Number(v);return Number.isFinite(x)?x:NaN;}));
 const y=R.parseCSV(fs.readFileSync("_study_labels.csv","utf8")).rows.map(r=>Number(r[0]));

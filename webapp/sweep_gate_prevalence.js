@@ -5,7 +5,7 @@
  *   - the reported pi-hat, the share actually flagged, and MCC
  * so we can see the operating characteristic of the gate against a KNOWN prevalence.
  */
-const R = require("./site/rerere.js"); const W = R.WEIGHTS; const fs = require("fs");
+const R = require("./site/reread.js"); const W = R.WEIGHTS; const fs = require("fs");
 const { binomUpper } = require("./gate_tailtest.js");
 const Z = 2.5, P0 = 0.006209665, TAILALPHA = 1e-6;
 let SEED = 24680; const rng = () => { SEED = (SEED*1103515245+12345)&0x7fffffff; return SEED/0x7fffffff; };

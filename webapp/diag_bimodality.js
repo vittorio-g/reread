@@ -4,7 +4,7 @@
  *     (~0 = unimodal continuum -> counting machinery inapplicable; ->1 = separable group)
  *   mixture sep (gaussMix1D) and GT separation d as references.
  * Prediction: warning IPIP valley ~0; Kay S2 deep valley. */
-const R = require("./site/rerere.js"); const W = R.WEIGHTS; const fs = require("fs");
+const R = require("./site/reread.js"); const W = R.WEIGHTS; const fs = require("fs");
 const D = "../Dataset/gt_benchmark_candidates";
 const SETS = [
   ["warning pooled", D+"/warning_ipipneo300", "_labels2.csv", "_matrix.csv"],

@@ -1,4 +1,4 @@
-const fs=require("fs");const R=require("./site/rerere.js");
+const fs=require("fs");const R=require("./site/reread.js");
 function auc(sc,y){const idx=[...sc.keys()].sort((a,b)=>sc[a]-sc[b]);const rk=[];idx.forEach((id,r)=>rk[id]=r+1);
   let n1=0,n0=0,s=0;for(let i=0;i<sc.length;i++){if(y[i]===1){n1++;s+=rk[i];}else n0++;}return n1&&n0?(s-n1*(n1+1)/2)/(n1*n0):NaN;}
 function metrics(flag,y){let tp=0,fp=0,fn=0,tn=0;for(let i=0;i<y.length;i++){if(y[i]===1){flag[i]?tp++:fn++;}else{flag[i]?fp++:tn++;}}

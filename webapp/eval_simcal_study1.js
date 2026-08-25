@@ -16,7 +16,7 @@
  *   node eval_simcal_study1.js       -> simcal_study1.csv + report on stdout
  */
 const fs = require("fs");
-const R = require("./site/rerere.js");
+const R = require("./site/reread.js");
 
 const CAL = JSON.parse(fs.readFileSync("sim_calib.json", "utf8"));
 const Wsim = CAL.weights, Zsim = CAL.zBest;

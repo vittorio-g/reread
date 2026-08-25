@@ -14,7 +14,7 @@
  * self-report), so "careless" here means "flagged by that criterion" - the mixing is exact, the
  * construct is the criterion's. Output: broad_eval.csv
  */
-const R=require("./site/rerere.js"); const W=R.WEIGHTS; const fs=require("fs");
+const R=require("./site/reread.js"); const W=R.WEIGHTS; const fs=require("fs");
 let SEED=20260804; const rng=()=>{SEED=(SEED*1103515245+12345)&0x7fffffff;return SEED/0x7fffffff;};
 const mn=a=>a.length?a.reduce((s,v)=>s+v,0)/a.length:NaN;
 const med=a=>{const s=[...a].sort((x,y)=>x-y);const h=s.length>>1;return s.length%2?s[h]:(s[h-1]+s[h])/2;};
