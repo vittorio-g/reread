@@ -47,11 +47,20 @@ licences, and re-downloadable from the sources named in each subdirectory README
 The derived per-respondent scores that the analyses actually read are committed
 under `webapp/ext_bench2/*_y.csv`.
 
-Item-level responses from the validation study are **not** included: they are
-embargoed until the manuscript is accepted, and the public release is prepared
-separately on OSF. The per-respondent condition labels and derived scores are
-here, and the browser tool's demo publishes the same quantities, so the analyses
-can be inspected without the raw responses.
+Item-level responses from the validation study are not kept here either. They are
+published, de-identified and complete, in the OSF archive at
+<https://osf.io/ryce4/>, together with the full study materials — the item
+battery, the letter-scrambling procedure that induced carelessness, and the
+questionnaire as participants saw it. The per-respondent condition labels and
+derived scores are in this repository, and the browser tool's demo publishes the
+same quantities.
+
+## Archive
+
+A citable snapshot of the code, the R package, the analysis pipelines, the
+manuscript figures and the Study 1 data lives on OSF at <https://osf.io/kzgdw/>,
+where `REPRODUCE.md` maps every table and figure to the command that produces it.
+This repository is the development mirror; the OSF deposit is the archived record.
 
 ## Licence
 
