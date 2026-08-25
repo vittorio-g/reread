@@ -1,0 +1,42 @@
+Package: reread
+Type: Package
+Title: Screening Careless Respondents with a Self-Calibrating Threshold
+Version: 0.1.0
+Authors@R: c(
+    person("Vittorio", "Guerrieri", email = "v.guerrieri4@campus.unimib.it",
+           role = c("aut", "cre")),
+    person("Marcello", "Gallucci", role = "aut"),
+    person("Marcello", "Passarelli", email = "passarelli@itd.cnr.it", role = "aut"))
+Description: Screens questionnaire data for careless or insufficient-effort
+    responding, and -- unlike index-only tools -- decides where to cut without
+    labels. The threshold is anchored on the attentive mode of the score
+    distribution, estimated from that mode's left flank alone, and is reported
+    together with a calibrated prevalence estimate and with what the same rule
+    flags on careless-free data of the same size. The score it cuts is 'rc'
+    (relative coherence), a permutation-based index of individual response
+    coherence that needs no declared factor structure, combined with two
+    complementary detectors (longstring and person-total correlation) in a compact,
+    profile-gated logistic ensemble with frozen weights; the same threshold can be
+    applied to person-total alone. The package is a faithful port of the shipped
+    browser tool and reproduces its scores. Utilities are provided for simulating
+    careless responding and for benchmarking against the indices in the 'careless'
+    package. Methods are described in Guerrieri, Gallucci, and Passarelli (2026).
+License: GPL-3
+Encoding: UTF-8
+Depends: R (>= 4.0)
+Imports:
+    stats,
+    utils
+Suggests:
+    ggplot2,
+    pROC,
+    careless,
+    MASS,
+    testthat (>= 3.0.0),
+    knitr,
+    rmarkdown
+VignetteBuilder: knitr
+Config/testthat/edition: 3
+URL: https://ca.re-re.re
+LazyData: true
+Config/roxygen2/version: 8.0.0

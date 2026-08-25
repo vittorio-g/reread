@@ -1,0 +1,146 @@
+
+====================================================
+ External validation of FULL RF ensemble (FAST)
+====================================================
+Loading Schroeders2022...
+
+=== Schroeders2022 (n=605 items=60 careless=244/40.3%) ===
+    computing z_rr (n=605 J=60)...
+    computing IRV/LS/D^2/PersonTot...
+  features done (36.0s)
+        method n_features         mcc         f1       sens      spec       auc
+1       Full_5          5  0.16195527 0.24080268 0.14754098 0.9473684 0.5591538
+2      Triad_3          3  0.08797834 0.17301038 0.10245902 0.9445983 0.5616514
+3       NoRR_4          4  0.18404858 0.26402640 0.16393443 0.9473684 0.5228475
+4    z_rr_only          1 -0.01705998 0.08029197 0.04508197 0.9473684 0.5298919
+5 Mah_chi2_001          1  0.04488040 0.13427562 0.07786885 0.9445983 0.5367944
+  Delta MCC bootstrap: mean=-0.023 [95% CI -0.094 to 0.041] P(D>0)=0.245
+  total time: 44.1s
+Loading Schneider_QoL...
+
+=== Schneider_QoL (n=1649 items=31 careless=109/6.6%) ===
+    computing z_rr (n=1649 J=31)...
+    computing IRV/LS/D^2/PersonTot...
+  features done (45.6s)
+        method n_features        mcc         f1      sens      spec       auc
+1       Full_5          5 0.52272658 0.55172414 0.6605505 0.9480519 0.8496038
+2      Triad_3          3 0.52275549 0.55252918 0.6513761 0.9500000 0.8378232
+3       NoRR_4          4 0.54803911 0.57471264 0.6880734 0.9500000 0.8583701
+4    z_rr_only          1 0.02370752 0.08121827 0.0733945 0.9480519 0.6227451
+5 Mah_chi2_001          1 0.20629333 0.26470588 0.3302752 0.9175325 0.7239396
+  Delta MCC bootstrap: mean=-0.024 [95% CI -0.065 to 0.014] P(D>0)=0.120
+  total time: 61.1s
+Loading Niessen2016...
+
+=== Niessen2016 (n=180 items=100 careless=30/16.7%) ===
+    computing z_rr (n=180 J=100)...
+    computing IRV/LS/D^2/PersonTot...
+  features done (9.4s)
+        method n_features        mcc        f1       sens      spec       auc
+1       Full_5          5 0.02169305 0.1000000 0.06666667 0.9466667 0.6296667
+2      Triad_3          3 0.11952286 0.1904762 0.13333333 0.9466667 0.5758889
+3       NoRR_4          4 0.11952286 0.1904762 0.13333333 0.9466667 0.5611111
+4    z_rr_only          1 0.11952286 0.1904762 0.13333333 0.9466667 0.6080000
+5 Mah_chi2_001          1 0.00000000        NA 0.00000000 1.0000000 0.4324444
+  Delta MCC bootstrap: mean=-0.098 [95% CI -0.290 to 0.056] P(D>0)=0.100
+  total time: 15.2s
+Loading Goldammer_S1...
+  Goldammer S1 columns kept: 60
+
+=== Goldammer_S1 (n=291 items=60 careless=185/63.6%) ===
+    computing z_rr (n=291 J=60)...
+    computing IRV/LS/D^2/PersonTot...
+  features done (22.3s)
+        method n_features       mcc        f1      sens      spec       auc
+1       Full_5          5 0.4972705 0.7006803 0.5567568 0.9433962 0.8288118
+2      Triad_3          3 0.3832682 0.5746269 0.4162162 0.9433962 0.8074197
+3       NoRR_4          4 0.3480771 0.5307692 0.3729730 0.9433962 0.8181285
+4    z_rr_only          1 0.1798902 0.3559322 0.2270270 0.9150943 0.6262366
+5 Mah_chi2_001          1 0.2566300 0.2790698 0.1621622 1.0000000 0.7865885
+  Delta MCC bootstrap: mean=0.153 [95% CI 0.089 to 0.224] P(D>0)=1.000
+  total time: 29.9s
+Loading Goldammer_S2...
+  Goldammer S2 columns kept: 60
+
+=== Goldammer_S2 (n=265 items=60 careless=168/63.4%) ===
+    computing z_rr (n=265 J=60)...
+    computing IRV/LS/D^2/PersonTot...
+  features done (17.0s)
+        method n_features       mcc        f1      sens      spec       auc
+1       Full_5          5 0.4718446 0.6692308 0.5178571 0.9484536 0.8219195
+2      Triad_3          3 0.3024497 0.4622222 0.3095238 0.9484536 0.8112420
+3       NoRR_4          4 0.4478202 0.6431373 0.4880952 0.9484536 0.8483984
+4    z_rr_only          1 0.2393401 0.3755869 0.2380952 0.9484536 0.6565722
+5 Mah_chi2_001          1 0.2663632 0.2944162 0.1726190 1.0000000 0.7951031
+  Delta MCC bootstrap: mean=0.024 [95% CI -0.017 to 0.064] P(D>0)=0.860
+  total time: 22.0s
+
+Saved external_rf_ensemble.csv
+Saved external_rf_bootstrap.csv
+
+Final table:
+          dataset       method n_features         mcc         f1       sens
+1  Schroeders2022       Full_5          5  0.16195527 0.24080268 0.14754098
+2  Schroeders2022      Triad_3          3  0.08797834 0.17301038 0.10245902
+3  Schroeders2022       NoRR_4          4  0.18404858 0.26402640 0.16393443
+4  Schroeders2022    z_rr_only          1 -0.01705998 0.08029197 0.04508197
+5  Schroeders2022 Mah_chi2_001          1  0.04488040 0.13427562 0.07786885
+6   Schneider_QoL       Full_5          5  0.52272658 0.55172414 0.66055046
+7   Schneider_QoL      Triad_3          3  0.52275549 0.55252918 0.65137615
+8   Schneider_QoL       NoRR_4          4  0.54803911 0.57471264 0.68807339
+9   Schneider_QoL    z_rr_only          1  0.02370752 0.08121827 0.07339450
+10  Schneider_QoL Mah_chi2_001          1  0.20629333 0.26470588 0.33027523
+11    Niessen2016       Full_5          5  0.02169305 0.10000000 0.06666667
+12    Niessen2016      Triad_3          3  0.11952286 0.19047619 0.13333333
+13    Niessen2016       NoRR_4          4  0.11952286 0.19047619 0.13333333
+14    Niessen2016    z_rr_only          1  0.11952286 0.19047619 0.13333333
+15    Niessen2016 Mah_chi2_001          1  0.00000000         NA 0.00000000
+16   Goldammer_S1       Full_5          5  0.49727052 0.70068027 0.55675676
+17   Goldammer_S1      Triad_3          3  0.38326821 0.57462687 0.41621622
+18   Goldammer_S1       NoRR_4          4  0.34807713 0.53076923 0.37297297
+19   Goldammer_S1    z_rr_only          1  0.17989018 0.35593220 0.22702703
+20   Goldammer_S1 Mah_chi2_001          1  0.25663001 0.27906977 0.16216216
+21   Goldammer_S2       Full_5          5  0.47184458 0.66923077 0.51785714
+22   Goldammer_S2      Triad_3          3  0.30244966 0.46222222 0.30952381
+23   Goldammer_S2       NoRR_4          4  0.44782025 0.64313725 0.48809524
+24   Goldammer_S2    z_rr_only          1  0.23934011 0.37558685 0.23809524
+25   Goldammer_S2 Mah_chi2_001          1  0.26636320 0.29441624 0.17261905
+        spec       auc    tau_op
+1  0.9473684 0.5591538   0.71000
+2  0.9445983 0.5616514   0.72500
+3  0.9473684 0.5228475   0.69000
+4  0.9473684 0.5298919   0.97500
+5  0.9445983 0.5367944  99.60723
+6  0.9480519 0.8496038   0.20500
+7  0.9500000 0.8378232   0.20025
+8  0.9500000 0.8583701   0.18575
+9  0.9480519 0.6227451   0.63500
+10 0.9175325 0.7239396  61.09831
+11 0.9466667 0.6296667   0.48550
+12 0.9466667 0.5758889   0.48525
+13 0.9466667 0.5611111   0.44050
+14 0.9466667 0.6080000   0.74925
+15 1.0000000 0.4324444 149.44925
+16 0.9433962 0.8288118   0.84750
+17 0.9433962 0.8074197   0.89750
+18 0.9433962 0.8181285   0.93250
+19 0.9150943 0.6262366   1.00000
+20 1.0000000 0.7865885  99.60723
+21 0.9484536 0.8219195   0.87300
+22 0.9484536 0.8112420   0.94900
+23 0.9484536 0.8483984   0.89200
+24 0.9484536 0.6565722   0.99600
+25 1.0000000 0.7951031  99.60723
+
+Bootstrap CIs (Full - NoRR):
+             dataset  delta_mean    delta_lo   delta_hi p_gt0
+mean  Schroeders2022 -0.02309953 -0.09373927 0.04142755 0.245
+mean1  Schneider_QoL -0.02439338 -0.06470264 0.01449987 0.120
+mean2    Niessen2016 -0.09770776 -0.28992987 0.05636282 0.100
+mean3   Goldammer_S1  0.15326640  0.08898530 0.22430024 1.000
+mean4   Goldammer_S2  0.02436902 -0.01658675 0.06433496 0.860
+
+DONE
+Messaggi di avvertimento:
+1: il pacchetto 'randomForest' è stato creato con R versione 4.4.3 
+2: il pacchetto 'pROC' è stato creato con R versione 4.4.3 

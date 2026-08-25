@@ -1,0 +1,47 @@
+[10:28:51] Loading scores ...
+   shape=(192000, 15), careless rate (overall) = 0.195
+   z_rr clean median=4.08, careless median=0.50 (low = careless)
+[10:28:51] Per-cell 5-fold CV (Full=5 feat & No-RR=4 feat) ...
+   32/384 cells  elapsed=196s
+   64/384 cells  elapsed=404s
+   96/384 cells  elapsed=597s
+   128/384 cells  elapsed=762s
+   160/384 cells  elapsed=922s
+   192/384 cells  elapsed=1075s
+   224/384 cells  elapsed=1220s
+   256/384 cells  elapsed=1373s
+   288/384 cells  elapsed=1507s
+   320/384 cells  elapsed=1664s
+   352/384 cells  elapsed=1820s
+   384/384 cells  elapsed=1972s
+   DONE per-cell CV in 1972s
+   Saved OOF predictions to v3_oof_full.npy / v3_oof_norr.npy
+[11:01:43] Calibration comparison at the (size,rate) level ...
+[11:04:08] Bootstrap 95% CIs on Delta MCC by size ...
+scenario  size     n  delta_pt  delta_lo  delta_hi  delta_p_gt0  mcc_full  mcc_norr
+       B    30 24000  0.020230  0.009455  0.030685          1.0  0.485207  0.464977
+       B    50 24000  0.018096  0.008307  0.027862          1.0  0.538468  0.520372
+       B    80 24000  0.034963  0.024424  0.045959          1.0  0.603292  0.568329
+       B   100 24000  0.035336  0.025016  0.044604          1.0  0.628550  0.593214
+       B   150 24000  0.096138  0.084899  0.109565          1.0  0.712863  0.616725
+       B   200 24000  0.120823  0.107748  0.133431          1.0  0.763032  0.642209
+       B   250 24000  0.133294  0.120490  0.145038          1.0  0.788485  0.655191
+       B   300 24000  0.150328  0.138305  0.163225          1.0  0.800656  0.650328
+
+Rate-aware pooled (Scenario B):
+scenario      mcc       f1     sens     spec      auc
+       B 0.662351 0.729839 0.730569 0.932384 0.918933
+[11:05:05] Plots ...
+
+Files written:
+  C:\Users\vitto\Desktop\ReReReRe\sim_article_v3_metrics.csv
+  C:\Users\vitto\Desktop\ReReReRe\sim_article_v3_ablation.csv
+  C:\Users\vitto\Desktop\ReReReRe\sim_article_v3_perpat.csv
+  C:\Users\vitto\Desktop\ReReReRe\robustness_calibration_v3.csv
+  C:\Users\vitto\Desktop\ReReReRe\bootstrap_delta_mcc_v3.csv
+  C:\Users\vitto\Desktop\ReReReRe\article_assets_v3\article_data.pkl
+  C:\Users\vitto\Desktop\ReReReRe\article_assets_v3\fig01_mcc_by_size.png
+  C:\Users\vitto\Desktop\ReReReRe\article_assets_v3\fig04_per_pattern.png
+  C:\Users\vitto\Desktop\ReReReRe\article_assets_v3\fig08_delta_mcc_by_size.png
+  C:\Users\vitto\Desktop\ReReReRe\revision_assets_v3\figR2_calibration_strategies.png
+  C:\Users\vitto\Desktop\ReReReRe\revision_assets_v3\figR3_bootstrap_delta_mcc.png

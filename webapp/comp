@@ -1,0 +1,5 @@
+mean AUC across 12 datasets:
+AUC_ReReRe     AUC_rr   AUC_Psyn    AUC_IRV    AUC_Mah   AUC_Long 
+     0.652      0.573      0.615      0.568      0.554      0.549 
+
+rr counts (of datasets where both defined):

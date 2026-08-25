@@ -1,0 +1,35 @@
+Messaggi di avvertimento:
+1: il pacchetto 'randomForest' è stato creato con R versione 4.4.3 
+2: il pacchetto 'pROC' è stato creato con R versione 4.4.3 
+This is lavaan 0.6-19
+lavaan is FREE software! Please report any bugs.
+Messaggio di avvertimento:
+il pacchetto 'lavaan' è stato creato con R versione 4.4.2 
+
+Caricamento pacchetto: 'psych'
+
+Il seguente oggetto è mascherato da 'package:lavaan':
+
+    cor2cov
+
+Il seguente oggetto è mascherato da 'package:randomForest':
+
+    outlier
+
+
+Caricamento pacchetto: 'mice'
+
+Il seguente oggetto è mascherato da 'package:stats':
+
+    filter
+
+I seguenti oggetti sono mascherati da 'package:base':
+
+    cbind, rbind
+
+
+====================================================
+ External validation of FULL RF ensemble (revision)
+====================================================
+
+=== Schroeders2022 (n=605 items=60 careless=244/40.3%) ===

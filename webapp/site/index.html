@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CaReReRe — Careless Respondent Recognition · careless responding detector</title>
+<meta name="description" content="Flag careless respondents in questionnaire data with CaReReRe (Careless Respondent Recognition via Resampled Ensemble), a permutation-based individual-coherence method. Runs entirely in your browser: your data never leaves your device.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='6' fill='%23294060'/><circle cx='14' cy='14.5' r='6.4' fill='none' stroke='%23f7f5f0' stroke-width='2.6'/><line x1='18.7' y1='19.2' x2='24.5' y2='25' stroke='%23f7f5f0' stroke-width='2.8' stroke-linecap='round'/></svg>">
+<style>
+:root{
+  --ink:#1b1d21; --slate:#5f6b7a; --faint:#8a8578;
+  --line:#e4e1d9; --line-soft:#efece4;
+  --bg:#f7f5f0; --card:#ffffff; --panel:#fbfaf6;
+  --accent:#294060; --accent-deep:#1b2d47; --accent-soft:#e9eef4;
+  --ok:#2f6b3a; --warn:#8a6a1e; --bad:#8f3535;
+  --serif:"Iowan Old Style","Palatino Linotype",Palatino,"Book Antiqua",Georgia,Cambria,serif;
+  --sans:system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  --mono:ui-monospace,"SF Mono",SFMono-Regular,Consolas,"Liberation Mono",monospace;
+  --shadow:0 1px 2px rgba(24,26,31,.04),0 1px 1px rgba(24,26,31,.03);
+  --measure:70ch;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;font:16.5px/1.66 var(--sans);color:var(--ink);background:var(--bg);
+  -webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
+.wrap{max-width:920px;margin:0 auto;padding:0 28px}
+::selection{background:var(--accent-soft)}
+a{color:var(--accent);text-underline-offset:2px;text-decoration-thickness:.06em}
+a:hover{color:var(--accent-deep)}
+
+/* ---- masthead ---- */
+header{background:var(--card);border-bottom:1px solid var(--line);
+  background-image:linear-gradient(var(--accent),var(--accent));
+  background-repeat:no-repeat;background-size:100% 4px;background-position:top}
+.masthead{padding:52px 0 40px}
+.eyebrow{margin:0 0 18px;font:600 .72rem/1 var(--sans);letter-spacing:.18em;
+  text-transform:uppercase;color:var(--accent)}
+.wordmark{margin:0;font:600 3.5rem/1 var(--serif);letter-spacing:.005em;color:var(--ink)}
+.wordmark .re{color:inherit}
+.expansion{margin:10px 0 0;font:1.14rem/1.4 var(--serif);color:var(--slate);letter-spacing:.01em}
+.expansion b{color:var(--accent);font-weight:600}
+.lede{margin:18px 0 0;max-width:64ch;font:1.16rem/1.55 var(--serif);color:#33363c}
+.meta{margin:24px 0 0;display:flex;flex-wrap:wrap;align-items:center;gap:8px 14px;
+  font-size:.86rem;color:var(--slate)}
+.meta .dot{color:var(--line);font-weight:700}
+.meta .privacy{display:inline-flex;align-items:center;gap:.4em;color:var(--accent);
+  text-decoration:none;padding:5px 12px;border:1px solid var(--line);border-radius:999px;
+  transition:border-color .15s,background .15s}
+.meta .privacy:hover{border-color:var(--accent);background:var(--accent-soft)}
+
+main{padding:40px 0 24px}
+
+/* ---- section cards ---- */
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;
+  padding:30px 34px;margin-bottom:26px;box-shadow:var(--shadow)}
+.card.prose{background:var(--panel);box-shadow:none}
+h2{margin:0 0 18px;font:600 1.6rem/1.2 var(--serif);color:var(--ink);
+  display:flex;align-items:baseline;gap:.6em}
+h2 .secno{flex:none;font:600 1rem/1 var(--sans);color:var(--accent);
+  width:1.9em;height:1.9em;display:inline-flex;align-items:center;justify-content:center;
+  border:1px solid var(--accent);border-radius:50%;letter-spacing:0;transform:translateY(-.15em)}
+h3{margin:30px 0 8px;font:600 1.12rem/1.35 var(--serif);color:var(--accent-deep)}
+h3::before{content:"";display:block;width:34px;height:2px;background:var(--accent);
+  margin-bottom:11px;opacity:.55}
+.card p{margin:12px 0;max-width:var(--measure)}
+.card p:first-of-type{margin-top:0}
+.lead{color:#33363c}
+ol.steps,ul.plain{max-width:var(--measure)}
+ol.steps{margin:12px 0 6px;padding-left:0;list-style:none;counter-reset:s}
+ol.steps li{position:relative;margin:12px 0;padding-left:40px;counter-increment:s}
+ol.steps li::before{content:counter(s);position:absolute;left:0;top:.05em;
+  width:26px;height:26px;display:flex;align-items:center;justify-content:center;
+  font:600 .82rem/1 var(--sans);color:var(--accent);
+  border:1px solid var(--line);border-radius:50%;background:var(--card)}
+ul.plain{margin:10px 0 4px;padding-left:0;list-style:none}
+ul.plain li{position:relative;margin:9px 0;padding-left:22px}
+ul.plain li::before{content:"";position:absolute;left:2px;top:.62em;width:6px;height:6px;
+  border-radius:50%;background:var(--accent);opacity:.7}
+.footnote{font-size:.86rem;line-height:1.55;color:var(--slate);margin-top:12px;max-width:var(--measure)}
+
+/* ---- dropzone ---- */
+#drop{border:1.5px dashed #cbc6ba;border-radius:10px;padding:44px 22px;text-align:center;
+  cursor:pointer;background:var(--panel);transition:background .15s,border-color .15s}
+#drop:hover,#drop.hover{border-color:var(--accent);background:var(--accent-soft)}
+#drop .big{font:600 1.18rem/1.3 var(--serif);color:var(--accent-deep)}
+#drop .sub{margin-top:8px;font-size:.9rem;line-height:1.55;color:var(--slate);
+  max-width:60ch;margin-left:auto;margin-right:auto}
+
+/* ---- controls ---- */
+button{font:500 .95rem/1 var(--sans);border:1px solid var(--accent);border-radius:7px;
+  padding:10px 18px;cursor:pointer;background:transparent;color:var(--accent);
+  transition:background .15s,color .15s,border-color .15s}
+button.primary{background:var(--accent);color:#fff;border-color:var(--accent)}
+button.primary:hover{background:var(--accent-deep);border-color:var(--accent-deep)}
+button.ghost{background:transparent;color:var(--accent);border-color:var(--line)}
+button.ghost:hover{border-color:var(--accent);background:var(--accent-soft)}
+button:disabled{opacity:.42;cursor:default}
+.row{display:flex;gap:12px;flex-wrap:wrap;align-items:center}
+
+/* ---- stats strip ---- */
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:1px;
+  margin:20px 0;background:var(--line);border:1px solid var(--line);border-radius:10px;overflow:hidden}
+.stat{background:var(--card);padding:18px 16px;text-align:center}
+.stat .v{font:600 1.85rem/1.1 var(--serif);color:var(--accent);font-feature-settings:"lnum" 1,"tnum" 1}
+.stat .l{margin-top:5px;font-size:.68rem;color:var(--faint);text-transform:uppercase;letter-spacing:.11em}
+
+/* ---- banners ---- */
+.banner{border:1px solid;border-left-width:3px;border-radius:8px;padding:14px 18px;
+  margin:14px 0;font-size:.94rem;line-height:1.55}
+.banner b{font-weight:600}
+.banner.ok{background:#eef5ef;border-color:#cfe2d0;border-left-color:var(--ok);color:#274f2c}
+.banner.marginal{background:#f8f3e7;border-color:#e6d9b4;border-left-color:var(--warn);color:#5f4a17}
+.banner.weak,.banner.no_structure{background:#f8efec;border-color:#e6cbc4;border-left-color:var(--bad);color:#6f2b2b}
+
+/* ---- progress ---- */
+#progressWrap{display:none;margin:16px 0 4px}
+#progressLabel{font-size:.85rem;color:var(--slate);margin-bottom:6px}
+#progressBar{height:7px;border-radius:99px;background:var(--line-soft);overflow:hidden}
+#progressFill{height:100%;width:0;background:var(--accent);transition:width .2s}
+
+/* ---- table ---- */
+.tableWrap{max-height:480px;overflow:auto;border:1px solid var(--line);border-radius:10px;margin-top:6px}
+table{border-collapse:collapse;width:100%;font-size:.9rem;font-feature-settings:"tnum" 1}
+th,td{padding:9px 13px;border-bottom:1px solid var(--line-soft);text-align:right;white-space:nowrap}
+th:first-child,td:first-child{text-align:left}
+th{position:sticky;top:0;background:var(--panel);color:var(--slate);cursor:pointer;
+  user-select:none;font-weight:600;letter-spacing:.01em;border-bottom:2px solid var(--accent)}
+th:hover{color:var(--accent)}
+tbody tr:hover td{background:#faf9f5}
+tr.flag td{background:#f9efec}
+tr.flag:hover td{background:#f5e6e2}
+td.flagcell{font-weight:600;color:var(--bad)}
+.se{color:#9aa6ad;font-size:.85em;font-weight:400}
+
+/* ---- advanced settings ---- */
+details.adv{margin:16px 0 4px;border:1px solid var(--line);border-radius:10px;
+  background:var(--panel);overflow:hidden}
+details.adv summary{cursor:pointer;list-style:none;padding:13px 18px;font-weight:600;
+  color:var(--accent);display:flex;align-items:center;gap:.5em}
+details.adv summary::-webkit-details-marker{display:none}
+details.adv summary::before{content:"";width:7px;height:7px;border-right:2px solid var(--accent);
+  border-bottom:2px solid var(--accent);transform:rotate(-45deg);transition:transform .2s;margin-right:.2em}
+details.adv[open] summary::before{transform:rotate(45deg)}
+details.adv summary:hover{background:var(--accent-soft)}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:18px;
+  padding:6px 18px 20px}
+label.param{display:block;font-size:.9rem;color:var(--ink);font-weight:600}
+label.param select,label.param input[type=number]{font:inherit;font-weight:400;width:100%;
+  padding:8px 10px;border:1px solid var(--line);border-radius:7px;margin-top:6px;
+  background:var(--card);color:var(--ink)}
+label.param select:focus,label.param input:focus{outline:none;border-color:var(--accent);
+  box-shadow:0 0 0 3px var(--accent-soft)}
+.help{font-size:.8rem;line-height:1.5;color:var(--slate);margin-top:5px;font-weight:400}
+
+/* ---- scatter ---- */
+#hist{width:100%;height:230px;background:var(--panel);border:1px solid var(--line);
+  border-radius:10px;margin-top:4px}
+
+/* ---- misc ---- */
+.rule{border:0;border-top:1px solid var(--line);margin:20px 0}
+code{font-family:var(--mono);font-size:.82em;background:var(--line-soft);
+  padding:2px 6px;border-radius:5px;color:#2a2c30}
+.ico{display:inline-block;vertical-align:-0.16em;margin-right:.35em}
+.err{color:var(--bad);font-weight:600;margin-top:10px}
+#fileInfo{color:var(--slate);font-size:.88rem}
+#results{display:none}
+
+footer{border-top:1px solid var(--line);background:var(--card);
+  padding:30px 0 54px;color:var(--slate);font-size:.88rem;line-height:1.6}
+footer .wrap{max-width:920px}
+footer a{color:var(--accent)}
+
+/* ---- modal ---- */
+.modal{display:none;position:fixed;inset:0;background:rgba(20,28,44,.46);z-index:100;
+  align-items:center;justify-content:center;padding:20px}
+.modal .box{background:var(--card);border-radius:12px;padding:26px 28px;max-width:460px;width:100%;
+  box-shadow:0 16px 48px rgba(0,0,0,.24)}
+.modal h2{margin:0 0 6px}
+.modal .box>p{color:var(--slate);font-size:.92rem;margin:0 0 16px}
+#sheetList{display:flex;flex-direction:column;gap:8px;max-height:320px;overflow:auto}
+#sheetList button{text-align:left;width:100%;padding:12px 14px;border-color:var(--line)}
+#sheetList button:hover{border-color:var(--accent);background:var(--accent-soft)}
+
+@media (max-width:560px){
+  .wrap{padding:0 18px}
+  .card{padding:24px 20px}
+  .wordmark{font-size:2.7rem}
+  .masthead{padding:40px 0 32px}
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap masthead">
+    <p class="eyebrow">Careless responding · detection tool</p>
+    <h1 class="wordmark"><span class="re">Ca</span>Re<span class="re">Re</span>Re</h1>
+    <p class="expansion"><b>Ca</b>reless <b>Re</b>spondent <b>Re</b>cognition via <b>R</b>esampled <b>E</b>nsemble</p>
+    <p class="lede">An ensemble method for detecting careless respondents in questionnaire
+      data, built around a permutation-based individual-coherence index (rr). Drop in a
+      dataset; obtain a careless probability and flagged rows.</p>
+    <div class="meta">
+      <span>Runs entirely in your browser</span><span class="dot">·</span>
+      <span>no upload</span><span class="dot">·</span>
+      <span>no account</span>
+      <a href="#privacy" class="privacy"><svg class="ico" viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="9" rx="1.6"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>Your data never leaves this device</a>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <div class="card">
+    <h2><span class="secno">1</span>Load your data</h2>
+    <div id="drop">
+      <div class="big">Drop a CSV or Excel file here — or click to browse</div>
+      <div class="sub">Rows = respondents, columns = questionnaire items (Likert-type).
+        Accepts <b>.csv / .tsv</b> (comma, semicolon or tab) and <b>.xlsx / .xls</b>
+        (you'll be asked which sheet to use). ID columns are detected and set aside.</div>
+    </div>
+    <input type="file" id="file" accept=".csv,.tsv,.txt,.xlsx,.xls" style="display:none">
+    <div class="row" style="margin-top:16px">
+      <button class="ghost" id="demoBtn">No data at hand? Try the demo dataset</button>
+      <span id="fileInfo"></span>
+    </div>
+
+    <details class="adv">
+      <summary>Advanced settings</summary>
+      <div class="grid2">
+        <label class="param">Custom sensitivity cut (z) — advanced
+          <input type="number" id="pSensZ" min="0.3" max="5" step="0.1" placeholder="blank = shipped cut (z = 2.5)">
+          <div class="help">The tool ships a <b>single</b> automatic cut: z = 2.5 above the attentive
+            cluster (≈0.6% false positives among attentive respondents). It is the best setting across
+            the whole realistic range — up to about a 35% careless rate — so there is nothing to choose.
+            This box is a power-user override: lower z flags <b>more</b> (more false positives), higher z
+            flags <b>fewer</b>. Use it only if your sample is more than about a third careless, where a
+            more liberal cut (z ≈ 1.5) recovers more of them; any value other than 2.5 raises an
+            out-of-limits note on the results.</div>
+        </label>
+        <label class="param">Expected careless rate (%) — override
+          <input type="number" id="pPrev" min="1" max="99" step="1" placeholder="blank = automatic">
+          <div class="help">Leave <b>blank</b> for automatic calibration (the tool checks whether a careless
+            cluster exists, then cuts above the attentive cluster and estimates the rate). Enter a value only if you have a prior (pilot,
+            earlier wave): it then flags exactly that top share — apply once, to raw data.</div>
+        </label>
+        <label class="param">Coupled-pair proportion (corProp)
+          <input type="number" id="pCorProp" min="0.01" max="0.25" step="0.01" value="0.03">
+          <div class="help">Share of the highest-|r| item pairs the <b>rr</b> index uses as its coherence signal. Default 0.03.</div>
+        </label>
+        <label class="param">Permutation iterations
+          <input type="number" id="pIter" min="50" max="1000" step="50" value="200">
+          <div class="help">Random pair-sets for each respondent's rr baseline. More = more stable, slower. 200 is plenty (per-respondent SD ≈ 0.01).</div>
+        </label>
+        <label class="param">Minimum coupled pairs
+          <input type="number" id="pMinPairs" min="5" max="100" step="1" value="15">
+          <div class="help">Floor on the number of coupled pairs (protects short questionnaires).</div>
+        </label>
+        <label class="param">Random seed
+          <input type="number" id="pSeed" min="1" step="1" value="1">
+          <div class="help">Fixed seed &rarr; identical results on re-run.</div>
+        </label>
+        <label class="param">Delimiter
+          <select id="pDelim">
+            <option value="">auto-detect</option>
+            <option value=",">comma ,</option>
+            <option value=";">semicolon ;</option>
+            <option value="&#9;">tab</option>
+          </select>
+          <input type="text" id="pDelimCustom" maxlength="1" placeholder="or type any single char, e.g. | ~ ^" style="margin-top:6px">
+          <div class="help">Override only if auto-detection fails. Pick a preset above, or type any
+            single character in the box for an unusual delimiter (pipe, tilde, caret, …) — the custom
+            box wins when filled.</div>
+        </label>
+      </div>
+    </details>
+
+    <div id="progressWrap">
+      <div id="progressLabel">Computing…</div>
+      <div id="progressBar"><div id="progressFill"></div></div>
+    </div>
+    <div id="error" class="err"></div>
+  </div>
+
+  <div class="card" id="results">
+    <h2><span class="secno">2</span>Results</h2>
+    <div id="diagBanner" class="banner ok"></div>
+    <div id="applicability" class="banner ok"></div>
+    <div class="cards">
+      <div class="stat"><div class="v" id="sN">–</div><div class="l">respondents</div></div>
+      <div class="stat"><div class="v" id="sJ">–</div><div class="l">items used</div></div>
+      <div class="stat"><div class="v" id="sEst">–</div><div class="l">careless rate (est.)</div></div>
+      <div class="stat"><div class="v" id="sFlag">–</div><div class="l">flagged careless</div></div>
+    </div>
+    <div id="prevWarn" class="banner weak" style="display:none"></div>
+    <div id="paramWarn" class="banner weak" style="display:none"></div>
+    <canvas id="hist"></canvas>
+    <div class="footnote">Each dot is one respondent, ranked left→right by <b>CaReReRe ensemble careless
+      probability</b> (higher = more careless). <b>Red dots are flagged</b>; the dashed line is the
+      cutoff. The rate is set <b>automatically</b> — the tool first checks whether a careless
+      subpopulation exists at all, then locates the attentive cluster from the low side of the
+      distribution and cuts above it, so no rate has to be guessed. Override it with a
+      fixed expected rate under <i>Advanced settings</i> if you want.</div>
+    <div class="row" style="margin:18px 0 10px">
+      <button class="primary" id="dlBtn"><svg class="ico" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.5v11"/><path d="M7 10l5 5 5-5"/><path d="M4.5 20.5h15"/></svg>Download results CSV</button>
+      <button class="ghost" id="dlFlagBtn"><svg class="ico" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.5v11"/><path d="M7 10l5 5 5-5"/><path d="M4.5 20.5h15"/></svg>Download flagged rows only</button>
+      <span style="color:var(--slate);font-size:.84rem">Columns added: careless_prob, flagged, rr, longstring, person_total, irv, d2, n_missing</span>
+    </div>
+    <div class="tableWrap"><table id="tbl"></table></div>
+    <div class="footnote" id="tblNote"></div>
+    <div class="footnote" id="exclNote"></div>
+  </div>
+
+  <div class="card prose">
+    <h2>How it works</h2>
+    <p class="lead"><b>CaReReRe is an ensemble.</b> It combines three complementary careless-detection
+    signals into a single per-respondent probability, calibrated on real data with a known
+    careless/attentive ground truth. The distinctive ingredient — the one we built and the reason the
+    method exists — is the <b>rr</b> index; the other two are established detectors that catch the
+    failure modes rr is deliberately blind to. Together they cover careless responding far better than
+    any one signal alone.</p>
+
+    <h3>The rr index — the core signal</h3>
+    <p>Respondents who answer attentively are <em>internally consistent</em>: on items that tap the
+    same construct they give compatible answers, so those items covary <em>within the person</em>
+    just as they do across the sample. Careless respondents break that internal covariance. The rr
+    index asks: <b>did this person answer the questionnaire's strongly-related item pairs more
+    coherently than they would by chance?</b></p>
+    <ol class="steps">
+      <li><b>Find the coupled pairs.</b> Correlate every pair of items across your sample; keep the
+      top fraction with the largest |r| (default 3%) — the pairs that genuinely move together,
+      typically items from the same scale.</li>
+      <li><b>Score each person's coherence.</b> For one respondent, measure how tightly their
+      answers track across those coupled pairs (an individual-level |correlation|). Attentive people
+      track them closely; careless ones produce near-noise.</li>
+      <li><b>Build a personal chance baseline.</b> Recompute the same coherence many times on
+      <em>random</em> item pairs — a permutation done separately for each respondent — absorbing
+      their own response style and scale usage.</li>
+      <li><b>Turn it into a z-score.</b>
+      <code>rr = (coupled &minus; mean&nbsp;random) / sd&nbsp;random</code>. A <b>low rr</b> means
+      their answers to items that <em>should</em> agree are no more coherent than random pairs — the
+      signature of inconsistent carelessness.</li>
+    </ol>
+    <p>Comparing each person to <em>their own</em> random baseline is what makes rr self-calibrating:
+    no assumption of multivariate normality, no external cut-off table, no per-dataset tuning. That
+    is the crucial difference from distance-based outlier detectors such as Mahalanobis distance,
+    whose chi-square thresholds assume a normality that Likert data violate and which, applied by the
+    book, flag almost no one.</p>
+
+    <h3>The two partners in the ensemble</h3>
+    <p>rr targets <b>inconsistent</b> carelessness (random or intermittent responding). It is
+    deliberately blind to <b>consistent</b> carelessness — someone who answers &ldquo;3&rdquo; to
+    everything is trivially coherent. Two established detectors fill that gap:</p>
+    <ul class="plain">
+      <li><b>LongString</b> — the longest run of identical consecutive answers, catching
+      straight-lining that rr cannot see.</li>
+      <li><b>Person-Total correlation</b> — how well a respondent's profile aligns with the sample's
+      average profile, catching people who answer against the grain.</li>
+    </ul>
+    <p>A logistic model fitted on our labelled validation study combines the three into one
+    probability. On that data the ensemble reaches <b>AUC 0.985</b> under leave-one-out validation —
+    matching a far heavier random forest and clearly beating rr alone (AUC 0.90). The two partners
+    are <b>automatically down-weighted</b> when your data's item-mean profile is too flat to support
+    them (a case rr handles alone), so the ensemble never does worse than rr — the results panel
+    tells you when this happens. Two further indicators, <b>IRV</b> (within-person response
+    variability) and <b>Mahalanobis D²</b>, are computed and shown for transparency but kept out of
+    the score: their careless direction is not stable across questionnaires (IRV) or degrades when
+    items outnumber respondents (D²).</p>
+
+    <h3>From probabilities to flags — no rate to guess</h3>
+    <p>The ensemble <em>ranks</em> everyone by careless probability, but turning a ranking into a
+    yes/no decision usually needs a threshold — and asking the analyst for the &ldquo;expected
+    careless rate&rdquo; is asking for exactly the unknown they are trying to measure. Worse, a
+    fixed top-<em>X</em>% rule flags <em>X</em>% even on perfectly clean data. CaReReRe avoids this
+    with an <b>automatic two-groups calibration</b> in two steps. First it asks whether a careless
+    cluster is there at all, by comparing a one- and a two-cluster fit of the scores (via BIC); if
+    the scores form a single cluster it flags <b>nobody</b>. If a careless cluster is there, the tool
+    then locates the <b>attentive</b> cluster from the <em>low</em> side of the score distribution
+    only &mdash; the side careless respondents cannot reach &mdash; and both the cut and the
+    <b>estimated careless rate</b> follow from it. That asymmetry is deliberate: attentive
+    respondents form a compact peak you can anchor on, whereas careless ones form a long tail with no
+    peak of its own, so anything fitted <em>to</em> them breaks down once they are numerous. A clean
+    or already-cleaned dataset yields ~0% (no false-positive cascade), and a contaminated one yields
+    a data-driven rate &mdash; with nothing to guess.</p>
+    <p>The automatic mode is deliberately conservative: it confidently flags the clearly-separated
+    careless and reports them as the estimated rate; mild or partial inattention that overlaps the
+    attentive cluster is intrinsically ambiguous and is left for you to judge from the dot plot and
+    the per-respondent columns. If you <em>do</em> have a prior on the rate (a pilot, an earlier
+    wave), you can override the automatic cut with a fixed expected rate under Advanced settings.</p>
+    <p>There is <b>one</b> automatic cut and nothing to tune: z = 2.5 above the attentive cluster,
+    which puts about 0.6% of attentive respondents on the wrong side. Anchoring it on the attentive
+    peak alone is what makes a single setting enough — it is the better choice from the cleanest
+    samples up to roughly a 35% careless rate, which covers every realistic case. (An earlier version
+    of the tool offered a second, more liberal level for heavy contamination; it is no longer needed
+    within that range and was removed. Beyond it, the advanced z override is still there.)</p>
+    <p><b>Validated on real data.</b> On our collected study (real attentive respondents with real
+    careless mixed in at controlled rates from 5% to 50%, 200–300 resamples per point), the ensemble
+    <em>ranks</em> careless vs attentive essentially perfectly at every prevalence (AUC 0.98–0.99),
+    so with the right cut the detection ceiling (oracle MCC) sits at ≈0.9 throughout. The automatic
+    estimate of the careless rate <b>tracks the truth across the whole range</b> — within about two
+    points from 5% to 45% — because it is read off the attentive side rather than fitted to the
+    careless one (detection is still unreliable below ~5%, where there are simply too few careless to
+    separate at all). The shipped cut gives the better flagging accuracy up to about a 35% careless
+    rate (MCC ≈ 0.72 at 10%, 0.81 at 20%, peaking near 0.83 at 30%); above that a more liberal cut
+    would recover more cases, which is what the advanced z override is for.</p>
+
+    <h3>Handling real questionnaires</h3>
+    <p>Reverse-keyed items are aligned automatically from the sign of the sample correlation, so you
+    needn't recode anything. Items on different Likert ranges are rescaled to a common proportion, so
+    a 1–7 scale can't drown out a 1–4 one. Constant (zero-variance) respondents are handled
+    explicitly. Every feature is standardised <em>within your dataset</em> before the ensemble
+    combines them, so the fixed weights transfer across questionnaires of different length and scale.
+    A <b>structure diagnostic</b>, calibrated against pure sampling noise, warns you when the data
+    lack the cross-item structure the method needs.</p>
+
+    <h3>When it works best</h3>
+    <p>The signal grows with the number of correlated item pairs, so CaReReRe is strongest on
+    multi-construct batteries. In our validation study the ensemble is reliable (AUC ≈ 0.88–0.95)
+    from about <b>45 items and 50 respondents</b> upward — and already usable (AUC ≈ 0.80) from ~20
+    items — which is a wider envelope than rr alone. The applicability guide above reports where your
+    specific dataset falls.</p>
+  </div>
+
+  <div class="card prose" id="privacy">
+    <h2>Privacy: your data never leaves your device — by design</h2>
+    <p>Questionnaire data is often sensitive (personality, mental health, workplace surveys).
+    This tool is built so that <b>uploading your data is not just avoided — it is impossible</b>:
+    there is no server to receive it.</p>
+    <ul class="plain">
+      <li><b>All computation happens in your browser.</b> Your file is read locally
+        (<code>FileReader</code>) and analysed by JavaScript running on your own machine
+        (a Web Worker). Nothing is transmitted, stored, or logged anywhere.</li>
+      <li><b>The only network activity is downloading this page itself.</b> The app makes
+        zero outgoing requests with your data: no upload endpoint, no cookies, no analytics,
+        no trackers, no runtime CDN calls. Every script (including the Excel reader, SheetJS)
+        is bundled and served from this same origin — nothing is fetched from elsewhere and
+        no library ever phones home.</li>
+      <li><b>Don't take our word for it — verify.</b> Open your browser's developer tools
+        (<code>F12 &rarr; Network</code>) and run an analysis: you will see no request leaving
+        your machine. The source code is unminified and human-readable
+        (<a href="rerere.js">rerere.js</a>, <a href="app.js">app.js</a>, <a href="worker.js">worker.js</a>).
+        Once the page has loaded you can even switch off your connection and the tool keeps working.</li>
+      <li><b>GDPR standpoint:</b> since no personal data ever reaches us, we perform no
+        processing at all — you remain the sole data controller, no data-processing agreement
+        is needed, and there is nothing for us to retain or erase. Using this tool does not
+        constitute a data transfer to a third party.</li>
+      <li><b>The flip side:</b> we cannot recover anything for you. Results exist only in your
+        browser tab — download the results CSV before closing it.</li>
+    </ul>
+    <p class="footnote">The static files are served by Cloudflare Pages; like any web host,
+    Cloudflare sees the ordinary page request (your IP requesting the site) — but never your
+    data, which is opened only after the page is already on your machine. Your institution's
+    policies for handling data on your own computer still apply.</p>
+  </div>
+
+</main>
+
+<!-- Excel sheet-picker modal -->
+<div id="sheetModal" class="modal">
+  <div class="box">
+    <h2>Choose a worksheet</h2>
+    <p id="sheetModalSub">This Excel file has several sheets. Which one holds your questionnaire data?</p>
+    <div id="sheetList"></div>
+    <div class="row" style="margin-top:18px;justify-content:flex-end">
+      <button class="ghost" id="sheetCancel">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <div class="wrap">
+    <b>CaReReRe</b> — permutation-based careless responding detection ·
+    method &amp; validation paper in preparation (Guerrieri, 2026) ·
+    R package coming soon · <a href="https://re-re.re">re-re.re</a><br>
+    All computation runs locally in your browser — <a href="#privacy">no data is transmitted, stored, or logged</a>.
+  </div>
+</footer>
+
+<script src="xlsx.full.min.js"></script>
+<script src="rerere.js"></script>
+<script src="demo_data.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

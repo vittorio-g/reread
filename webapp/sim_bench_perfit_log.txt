@@ -1,0 +1,32 @@
+Messaggi di avvertimento:
+1: il pacchetto 'careless' è stato creato con R versione 4.6.1 
+2: il pacchetto 'pROC' è stato creato con R versione 4.6.1 
+3: il pacchetto 'PerFit' è stato creato con R versione 4.6.1 
+4: il pacchetto 'ltm' è stato creato con R versione 4.6.1 
+5: il pacchetto 'msm' è stato creato con R versione 4.6.1 
+6: il pacchetto 'polycor' è stato creato con R versione 4.6.1 
+7: il pacchetto 'mirt' è stato creato con R versione 4.6.1 
+lzpoly 30_0 (J=30) 5s
+J=30  | ReReRe 0.853 rr 0.636 lz 0.876 U3 0.817 PersRel 0.818 PsychSyn 0.744 EvenOdd 0.619
+lzpoly 60_0 (J=60) 12s
+J=60  | ReReRe 0.956 rr 0.839 lz 0.951 U3 0.737 PersRel 0.853 PsychSyn 0.782 EvenOdd 0.529
+lzpoly 120_0 (J=120) 20s
+J=120 | ReReRe 0.990 rr 0.927 lz 0.981 U3 0.781 PersRel 0.960 PsychSyn 0.834 EvenOdd 0.776
+lzpoly 180_0 (J=180) 37s
+J=180 | ReReRe 0.995 rr 0.968 lz 0.990 U3 0.768 PersRel 0.977 PsychSyn 0.894 EvenOdd 0.787
+lzpoly 240_0 (J=240) 56s
+J=240 | ReReRe 0.994 rr 0.971 lz 0.992 U3 0.801 PersRel 0.990 PsychSyn 0.925 EvenOdd 0.767
+lzpoly 300_0 (J=300) 77s
+J=300 | ReReRe 0.980 rr 0.932 lz 0.995 U3 0.750 PersRel 0.984 PsychSyn 0.915 EvenOdd 0.776
+Ci sono 50 o più avvertimenti (utilizza warnings() per visualizzare i primi 50)
+
+=== Study 3: mean AUC by questionnaire length (lz = rep 0 only; others = 10 reps) ===
+ items ReReRe    rr    lz    U3 PersRel PsychSyn EvenOdd
+    30  0.877 0.691 0.876 0.752   0.812    0.675   0.596
+    60  0.952 0.842 0.951 0.738   0.866    0.746   0.631
+   120  0.986 0.936 0.981 0.758   0.952    0.837   0.700
+   180  0.992 0.960 0.990 0.782   0.974    0.869   0.726
+   240  0.991 0.956 0.992 0.766   0.986    0.898   0.766
+   300  0.996 0.968 0.995 0.780   0.990    0.918   0.803
+
+wrote sim_bench/sim_bench_perfit_raw.csv and sim_bench_perfit_meanauc.csv

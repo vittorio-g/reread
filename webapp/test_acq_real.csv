@@ -1,0 +1,5 @@
+which,model,auc,wmcc,dfpr
+johnson,base,0.9329,0.8285,0.3509
+johnson,acq,0.9565,0.8665,0.1386
+study,base,0.9814,,
+study,acq,0.9829,,

@@ -1,0 +1,238 @@
+Messaggio di avvertimento:
+il pacchetto 'ggplot2' è stato creato con R versione 4.4.3 
+This is lavaan 0.6-19
+lavaan is FREE software! Please report any bugs.
+Messaggio di avvertimento:
+il pacchetto 'lavaan' è stato creato con R versione 4.4.2 
+
+Caricamento pacchetto: 'magrittr'
+
+Il seguente oggetto è mascherato da 'package:tidyr':
+
+    extract
+
+
+Caricamento pacchetto: 'psych'
+
+Il seguente oggetto è mascherato da 'package:lavaan':
+
+    cor2cov
+
+I seguenti oggetti sono mascherati da 'package:ggplot2':
+
+    %+%, alpha
+
+
+Caricamento pacchetto: 'mice'
+
+Il seguente oggetto è mascherato da 'package:stats':
+
+    filter
+
+I seguenti oggetti sono mascherati da 'package:base':
+
+    cbind, rbind
+
+Ensemble v2: 6 conditions x 4 reps = 24 datasets
+Detectors: z_rr, z_rr_iter_coupled, z_rr_iter_efa, irv, longstring, d2, person_tot
+
+Parallel analysis suggests that the number of factors =  7  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  7  and the number of components =  NA 
+Caricamento dei namespace richiesti: GPArotation
+Parallel analysis suggests that the number of factors =  6  and the number of components =  NA 
+[1/24] nF=8 ipf=6 rep=1 | 0.7 min ETA NA
+Parallel analysis suggests that the number of factors =  7  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  7  and the number of components =  NA 
+[2/24] nF=8 ipf=6 rep=2 | 1.2 min ETA 13
+Parallel analysis suggests that the number of factors =  6  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  6  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  6  and the number of components =  NA 
+[3/24] nF=8 ipf=6 rep=3 | 1.7 min ETA 12
+Parallel analysis suggests that the number of factors =  6  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  6  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  6  and the number of components =  NA 
+[4/24] nF=8 ipf=6 rep=4 | 2.1 min ETA 11
+Parallel analysis suggests that the number of factors =  13  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  13  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  13  and the number of components =  NA 
+[5/24] nF=16 ipf=6 rep=1 | 2.4 min ETA 9
+Parallel analysis suggests that the number of factors =  12  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  11  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  12  and the number of components =  NA 
+[6/24] nF=16 ipf=6 rep=2 | 2.6 min ETA 8
+Parallel analysis suggests that the number of factors =  10  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  10  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  10  and the number of components =  NA 
+[7/24] nF=16 ipf=6 rep=3 | 2.9 min ETA 7
+Parallel analysis suggests that the number of factors =  12  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  12  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  11  and the number of components =  NA 
+[8/24] nF=16 ipf=6 rep=4 | 3.4 min ETA 7
+Parallel analysis suggests that the number of factors =  22  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  22  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  22  and the number of components =  NA 
+[9/24] nF=30 ipf=6 rep=1 | 4.3 min ETA 7
+Parallel analysis suggests that the number of factors =  22  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  22  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  21  and the number of components =  NA 
+[10/24] nF=30 ipf=6 rep=2 | 5.6 min ETA 8
+Parallel analysis suggests that the number of factors =  19  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  19  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  19  and the number of components =  NA 
+[11/24] nF=30 ipf=6 rep=3 | 6.6 min ETA 8
+Parallel analysis suggests that the number of factors =  22  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  21  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  22  and the number of components =  NA 
+[12/24] nF=30 ipf=6 rep=4 | 7.7 min ETA 8
+Parallel analysis suggests that the number of factors =  7  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  8  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  7  and the number of components =  NA 
+[13/24] nF=8 ipf=10 rep=1 | 8.0 min ETA 7
+Parallel analysis suggests that the number of factors =  7  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  7  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  7  and the number of components =  NA 
+[14/24] nF=8 ipf=10 rep=2 | 8.3 min ETA 6
+Parallel analysis suggests that the number of factors =  7  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  6  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  6  and the number of components =  NA 
+[15/24] nF=8 ipf=10 rep=3 | 8.6 min ETA 5
+Parallel analysis suggests that the number of factors =  7  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  7  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  6  and the number of components =  NA 
+[16/24] nF=8 ipf=10 rep=4 | 8.9 min ETA 4
+Parallel analysis suggests that the number of factors =  16  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  15  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  14  and the number of components =  NA 
+[17/24] nF=16 ipf=10 rep=1 | 10.1 min ETA 4
+Parallel analysis suggests that the number of factors =  13  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  13  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  12  and the number of components =  NA 
+[18/24] nF=16 ipf=10 rep=2 | 11.5 min ETA 4
+Parallel analysis suggests that the number of factors =  12  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  12  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  12  and the number of components =  NA 
+[19/24] nF=16 ipf=10 rep=3 | 12.8 min ETA 3
+Parallel analysis suggests that the number of factors =  13  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  13  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  12  and the number of components =  NA 
+[20/24] nF=16 ipf=10 rep=4 | 13.8 min ETA 3
+Parallel analysis suggests that the number of factors =  25  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  26  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  23  and the number of components =  NA 
+[21/24] nF=30 ipf=10 rep=1 | 16.8 min ETA 2
+Parallel analysis suggests that the number of factors =  23  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  23  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  22  and the number of components =  NA 
+[22/24] nF=30 ipf=10 rep=2 | 20.6 min ETA 2
+Parallel analysis suggests that the number of factors =  24  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  24  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  22  and the number of components =  NA 
+[23/24] nF=30 ipf=10 rep=3 | 25.0 min ETA 1
+Parallel analysis suggests that the number of factors =  26  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  27  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  25  and the number of components =  NA 
+[24/24] nF=30 ipf=10 rep=4 | 29.5 min ETA 0
+
+=== STANDALONE ===
+Messaggi di avvertimento:
+1: glm.fit: si sono verificate probabilità stimate numericamente pari a 0 o 1 
+2: glm.fit: si sono verificate probabilità stimate numericamente pari a 0 o 1 
+3: glm.fit: si sono verificate probabilità stimate numericamente pari a 0 o 1 
+4: glm.fit: si sono verificate probabilità stimate numericamente pari a 0 o 1 
+5: glm.fit: si sono verificate probabilità stimate numericamente pari a 0 o 1 
+          detector  sens  spec   mcc
+               irv 0.329 0.994 0.505
+              z_rr 0.315 0.957 0.367
+     z_rr_iter_efa 0.329 0.949 0.361
+        longstring 0.135 0.998 0.317
+ z_rr_iter_coupled 0.212 0.938 0.208
+                d2 0.000 1.000 0.000
+        person_tot 0.000 1.000 0.000
+
+=== FORWARD SELECTION ===
+Step 0: z_rr alone | MCC=0.367
+Step 1: +irv -> MCC=0.483 (+0.116)
+Step 2: +d2 -> MCC=0.551 (+0.068)
+Step 3: +z_rr_iter_efa -> MCC=0.603 (+0.052)
+Step 4: +longstring -> MCC=0.623 (+0.020)
+Step 5: +z_rr_iter_coupled -> MCC=0.621 (+-0.002)
+Step 6: +person_tot -> MCC=0.617 (+-0.004)
+Ci sono stati 30 avvertimenti (utilizza warnings() per visualizzarli)
+
+=== Per-pattern detection @ FPR=5% operating point ===
+z_rr_only       sens=0.419  fpr=0.070  MCC=0.403
+triad_v1        sens=0.624  fpr=0.087  MCC=0.544
+all_non_iter    sens=0.650  fpr=0.089  MCC=0.560
+plus_iter_c     sens=0.657  fpr=0.089  MCC=0.566
+plus_iter_e     sens=0.742  fpr=0.099  MCC=0.614
+all_features    sens=0.744  fpr=0.099  MCC=0.615
+Messaggi di avvertimento:
+1: glm.fit: si sono verificate probabilità stimate numericamente pari a 0 o 1 
+2: glm.fit: si sono verificate probabilità stimate numericamente pari a 0 o 1 
+3: glm.fit: si sono verificate probabilità stimate numericamente pari a 0 o 1 
+4: glm.fit: si sono verificate probabilità stimate numericamente pari a 0 o 1 
+5: glm.fit: si sono verificate probabilità stimate numericamente pari a 0 o 1 
+6: glm.fit: si sono verificate probabilità stimate numericamente pari a 0 o 1 
+7: glm.fit: si sono verificate probabilità stimate numericamente pari a 0 o 1 
+8: glm.fit: si sono verificate probabilità stimate numericamente pari a 0 o 1 
+9: glm.fit: si sono verificate probabilità stimate numericamente pari a 0 o 1 
+10: glm.fit: si sono verificate probabilità stimate numericamente pari a 0 o 1 
+
+=== Detection @ 100% corruption per pattern, per model (FPR=5%) ===
+
+[z_rr_only]
+       pattern  n  rate
+   acquiescent 81 0.728
+       fatigue 78 0.462
+    longstring 83 0.506
+         mixed 77 0.429
+ pure_straight 84 1.000
+        random 83 0.277
+
+[triad_v1]
+       pattern  n  rate
+   acquiescent 81 1.000
+       fatigue 78 0.628
+    longstring 83 0.723
+         mixed 77 0.662
+ pure_straight 84 1.000
+        random 83 0.518
+
+[all_non_iter]
+       pattern  n  rate
+   acquiescent 81 1.000
+       fatigue 78 0.603
+    longstring 83 0.759
+         mixed 77 0.675
+ pure_straight 84 1.000
+        random 83 0.530
+
+[plus_iter_c]
+       pattern  n  rate
+   acquiescent 81 1.000
+       fatigue 78 0.615
+    longstring 83 0.783
+         mixed 77 0.701
+ pure_straight 84 1.000
+        random 83 0.542
+
+[plus_iter_e]
+       pattern  n  rate
+   acquiescent 81 1.000
+       fatigue 78 0.795
+    longstring 83 0.880
+         mixed 77 0.766
+ pure_straight 84 1.000
+        random 83 0.747
+
+[all_features]
+       pattern  n  rate
+   acquiescent 81 1.000
+       fatigue 78 0.808
+    longstring 83 0.867
+         mixed 77 0.779
+ pure_straight 84 1.000
+        random 83 0.747
+
+Runtime: 29.9 min
+=== DONE ===

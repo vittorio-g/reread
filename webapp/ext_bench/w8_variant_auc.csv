@@ -1,0 +1,6 @@
+"variant","AUC","label"
+"shipped",0.990147783251232,"shipped (2.68,1.24,1.44)"
+"one_sigfig",0.988013136288998,"1 sig-fig (3,1,1)"
+"integers",0.988013136288998,"integers (3,1,1)"
+"rr_plus_equal_aux",0.989162561576355,"rr + equal aux (3,1.5,1.5)"
+"all_equal",0.98111658456486,"unweighted z-sum (1,1,1)"

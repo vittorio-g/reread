@@ -1,0 +1,65 @@
+Messaggi di avvertimento:
+1: il pacchetto 'ggplot2' è stato creato con R versione 4.4.3 
+2: il pacchetto 'randomForest' è stato creato con R versione 4.4.3 
+3: il pacchetto 'pROC' è stato creato con R versione 4.4.3 
+Loaded 24000 respondents
+Scenario A: N = 16330 (positives=1930, negatives=14400)
+Fold 1 done
+Fold 2 done
+Fold 3 done
+Fold 4 done
+Fold 5 done
+
+Threshold @ FPR=5%: 0.150
+
+Overall: sens=0.927 spec=0.951 MCC=0.788
+
+=== Property 1: MCC by total_items ===
+ total_items    n n_pos  sens  spec   mcc
+          48 2717   317 0.804 0.897 0.580
+          80 2721   321 0.897 0.932 0.719
+          96 2721   321 0.947 0.945 0.783
+         160 2723   323 0.966 0.975 0.887
+         180 2719   319 0.953 0.968 0.855
+         300 2729   329 0.991 0.989 0.951
+
+=== Property 2: MCC by (nF, ipf) ===
+ nF ipf total_items    n  sens   mcc
+  8   6          48 2717 0.804 0.580
+  8  10          80 2721 0.897 0.719
+ 16   6          96 2721 0.947 0.783
+ 16  10         160 2723 0.966 0.887
+ 30   6         180 2719 0.953 0.855
+ 30  10         300 2729 0.991 0.951
+
+=== Property 3: Per-pattern detection (corruption >80%) ===
+       pattern corr_bin   n  rate
+   acquiescent      0.9 159 1.000
+   acquiescent      1.0 159 1.000
+       fatigue      0.9 155 0.916
+       fatigue      1.0 159 1.000
+    longstring      0.9 159 0.950
+    longstring      1.0 166 0.940
+         mixed      0.9 163 0.767
+         mixed      1.0 160 0.881
+ pure_straight      0.9 157 1.000
+ pure_straight      1.0 161 1.000
+        random      0.9 170 0.835
+        random      1.0 162 0.846
+
+=== Property 4: Stability across reps ===
+ nF ipf mean_mcc sd_mcc se_mcc n_reps
+  8   6    0.583  0.058  0.021      8
+  8  10    0.725  0.068  0.024      8
+ 16   6    0.787  0.059  0.021      8
+ 16  10    0.889  0.040  0.014      8
+ 30   6    0.858  0.062  0.022      8
+ 30  10    0.952  0.031  0.011      8
+
+=== AUC: 0.9825 ===
+Saved: plot_phase2_mcc_by_items.png
+Saved: plot_phase2_per_pattern.png
+Saved: plot_phase2_roc.png
+Saved: plot_phase2_stability.png
+
+=== DONE Phase 2 ===

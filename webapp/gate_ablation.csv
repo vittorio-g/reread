@@ -1,0 +1,7 @@
+configuration,ext_mean_mcc,ext_mean_share,ext_gate_shut,s1_mean_mcc,clean_mean,clean_worst,clean_over5pct
+shipped: HWHM + gate(BIC|tail),0.1904,0.1365,0,0.7546,0.0054,0.1600,5
+HWHM + gate(BIC only),0.1678,0.1231,3,0.7447,0.0000,0.0000,0
+HWHM + NO gate,0.1904,0.1365,0,0.7915,0.0084,0.1600,5
+previous: MAD + gate(BIC only),0.1663,0.1316,3,0.7540,0.0000,0.0000,0
+MAD + gate(BIC|tail),0.1886,0.1436,0,0.7639,0.0024,0.1250,3
+MAD + NO gate,0.1886,0.1436,0,0.8024,0.0047,0.1250,3

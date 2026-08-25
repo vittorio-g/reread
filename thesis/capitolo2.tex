@@ -1,0 +1,489 @@
+% =====================================================================
+% Thesis — Chapter 2
+% Statistical Preliminaries
+% Class: apa7 (doc option) + biblatex-apa (APA 7th)
+% Compile: pdflatex -> biber -> pdflatex -> pdflatex
+% =====================================================================
+\documentclass[doc,11pt,donotrepeattitle]{apa7}
+
+\usepackage[american]{babel}
+\usepackage{csquotes}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{ragged2e}
+
+\usepackage[style=apa,sortcites=true,sorting=nyt,backend=biber]{biblatex}
+\DeclareLanguageMapping{american}{american-apa}
+\addbibresource{bibliografia.bib}
+
+\newcolumntype{L}[1]{>{\RaggedRight\arraybackslash}p{#1}}
+
+% apa7 loads hyperref; hide the colored link borders for a clean print look
+\hypersetup{hidelinks}
+
+\title{Statistical Preliminaries}
+\shorttitle{Statistical Preliminaries}
+\author{Vittorio Guerrieri}
+\affiliation{Chapter~2 of the thesis}
+
+\begin{document}
+
+\maketitle
+
+% =====================================================================
+\section{Orientation}
+% =====================================================================
+
+The methods developed in the following chapters draw on a handful of
+statistical ideas that, while standard in statistics and machine learning, are
+not all part of the routine toolkit of a working psychologist. This chapter
+collects them in one place and explains them at the level of detail needed to
+follow the rest of the thesis. It is deliberately self-contained and tutorial in
+tone: a reader comfortable with these concepts may skim it, while a reader who
+last met some of them in an undergraduate methods course should find here
+enough to read Chapters~3 to 5 without consulting outside references.
+
+The selection is driven by what the method actually uses. The
+correlation coefficient (Section~\ref{sec:corr}) is the raw material of the
+ReReReRe detector, which compares a respondent's \emph{individual-level}
+coherence with a baseline. Exploratory factor analysis
+(Section~\ref{sec:efa}) supplies the latent-variable model that justifies why
+attentive responses to different items covary in the first place, and parallel
+analysis---the procedure ReReReRe uses to estimate the number of factors---is a
+factor-retention method. Permutation tests (Section~\ref{sec:perm}) are the
+inferential engine behind ReReReRe's per-respondent z-score, and the bootstrap
+(Section~\ref{sec:boot}) provides the confidence intervals used to quantify the
+detector's contribution. The Random Forest (Section~\ref{sec:rf}) is the
+classifier that combines ReReReRe with the auxiliary detectors into an
+ensemble, cross-validation (Section~\ref{sec:cv}) is how its performance is
+estimated honestly, and the battery of evaluation metrics
+(Section~\ref{sec:metrics})---above all the Matthews correlation
+coefficient---is how detection quality is reported throughout.
+
+% =====================================================================
+\section{Correlation and Covariance}
+\label{sec:corr}
+% =====================================================================
+
+Two variables are \emph{correlated} when knowing one tells us something about
+the other. The workhorse measure of linear association is the Pearson
+product--moment correlation coefficient \parencite{pearson1896mathematical}.
+For two variables $X$ and $Y$ measured on $n$ units, it is defined as the
+covariance of $X$ and $Y$ divided by the product of their standard deviations,
+\begin{equation}
+r_{XY} \;=\; \frac{\operatorname{cov}(X,Y)}{s_X\, s_Y}
+\;=\; \frac{\sum_{i=1}^{n}(x_i-\bar{x})(y_i-\bar{y})}
+{\sqrt{\sum_{i=1}^{n}(x_i-\bar{x})^2}\,\sqrt{\sum_{i=1}^{n}(y_i-\bar{y})^2}} .
+\label{eq:pearson}
+\end{equation}
+The coefficient ranges from $-1$ (perfect negative linear association) through
+$0$ (no linear association) to $+1$ (perfect positive linear association). The
+numerator, the \emph{covariance}, is positive when above-average values of $X$
+tend to co-occur with above-average values of $Y$; dividing by the standard
+deviations rescales this to the unit interval, making correlations comparable
+across variables measured on different scales.
+
+Three properties of Equation~\ref{eq:pearson} matter for what follows. First,
+$r$ captures only \emph{linear} association: two variables can be strongly
+related in a curved pattern yet have $r \approx 0$. Second, $r$ is invariant to
+separate linear rescalings of $X$ and $Y$: adding a constant to every value, or
+multiplying every value by a positive constant, leaves $r$ unchanged. This
+invariance is exploited directly in Chapter~3, where it guarantees that
+dividing every item by its scale maximum---a rescaling used to handle
+mixed-format questionnaires---cannot change the correlation among items measured
+on a common scale. Third, the \emph{sign} of $r$ encodes the direction of the
+relationship, which is why reverse-keyed questionnaire items (worded so that
+agreement indicates \emph{less} of the trait) correlate \emph{negatively} with
+same-trait items keyed in the usual direction; handling that sign correctly is
+essential when aggregating correlations across item pairs.
+
+A distinction that is central to this thesis, but easy to overlook, is between
+correlation computed \emph{across respondents} and correlation computed
+\emph{within a respondent}. The familiar use of Equation~\ref{eq:pearson} treats
+each respondent as one unit and each pair of items as the two variables $X$ and
+$Y$; this \emph{sample-level} correlation describes how two items relate in the
+population. One can instead fix a single respondent and treat their answers to a
+set of item pairs as the data, computing a correlation that describes whether
+\emph{that person} answered coherently across pairs that the sample says should
+agree. This \emph{individual-level} or \emph{person-level} correlation is the
+quantity ReReReRe estimates and tests; the psychometric-synonym index of
+Chapter~1 is an early instance of the same idea
+\parencite{meade2012identifying}.
+
+% =====================================================================
+\section{Likert Scales and the Measurement Model}
+% =====================================================================
+
+Most of the data this thesis concerns come from \emph{Likert items}
+\parencite{likert1932technique}: statements to which respondents indicate
+agreement on an ordered set of categories, typically five or seven points from
+``strongly disagree'' to ``strongly agree.'' Strictly, a Likert response is
+\emph{ordinal}---the categories are ordered, but the psychological distance
+between ``agree'' and ``strongly agree'' need not equal that between ``neutral''
+and ``agree.'' In practice, researchers routinely treat summed or averaged
+Likert responses as \emph{interval} data and apply correlation- and
+mean-based statistics to them, a simplification that is generally defensible for
+scales with five or more categories that are reasonably symmetric.
+
+The thesis follows this common practice, computing Pearson correlations on
+Likert responses, with two consequences worth flagging now. First, because the
+correlation in Equation~\ref{eq:pearson} is sensitive to the numerical spacing
+of the response options, items administered on \emph{different} Likert ranges
+(say, some on a 1--5 scale and others on a 1--7 scale) can contribute unequally
+to an individual-level correlation; Chapter~3 addresses this with a rescaling
+step. Second, a respondent who selects the same category for every item has zero
+variance, which makes the denominator of Equation~\ref{eq:pearson} undefined for
+that person---a degenerate case that careless ``straightlining'' produces and
+that any individual-level method must handle explicitly.
+
+% =====================================================================
+\section{Latent Variables and Factor Analysis}
+\label{sec:efa}
+% =====================================================================
+
+Why should answers to different items correlate at all? The dominant answer in
+psychometrics is the \emph{common-factor model}, which traces to
+\textcite{spearman1904general} and was systematized by
+\textcite{thurstone1947multiple}. The model posits that the observed responses
+are generated by a small number of unobserved \emph{latent factors}---traits
+such as extraversion or conscientiousness---plus item-specific noise. Items that
+load on the same factor correlate because they share that common cause; items on
+different factors correlate weakly or not at all. Formally, the response of a
+respondent to item $j$ is modelled as a weighted sum of the latent factors,
+\begin{equation}
+x_j \;=\; \lambda_{j1} f_1 + \lambda_{j2} f_2 + \cdots + \lambda_{jm} f_m
+\;+\; \varepsilon_j ,
+\label{eq:cfa}
+\end{equation}
+where $f_1,\dots,f_m$ are the latent factors, the \emph{loadings}
+$\lambda_{jk}$ quantify how strongly item $j$ depends on factor $k$, and
+$\varepsilon_j$ is the part of the item unique to itself (specific variance plus
+measurement error). The squared loadings summed across factors give the item's
+\emph{communality}, the proportion of its variance explained by the common
+factors.
+
+\emph{Exploratory factor analysis} (EFA) works backwards from the observed
+correlation matrix to estimates of the loadings and the number of factors,
+without assuming in advance which items load on which factor
+\parencite{fabrigar1999evaluating, costello2005best}. It is ``exploratory'' in
+contrast to confirmatory factor analysis, where the loading pattern is specified
+ahead of time and tested. EFA matters for this thesis in two ways. The
+\emph{generative} use comes first: the simulation studies of later chapters
+create artificial questionnaires from a known factor model of the form in
+Equation~\ref{eq:cfa}, so that the ground-truth structure is available for
+evaluation. The \emph{analytic} use comes second: ReReReRe relies on the fact
+that attentive respondents reproduce the sample's factor structure in their own
+answers, and one variant of the method uses EFA to choose which item pairs to
+score.
+
+A practical question in any factor analysis is \emph{how many factors to
+retain}. Retaining too few collapses distinct constructs; too many fits noise.
+Two classical heuristics are \textcite{cattell1966scree}'s \emph{scree test},
+which looks for an ``elbow'' in the plot of successive eigenvalues, and the
+eigenvalue-greater-than-one rule. Both are now regarded as unreliable, and the
+recommended procedure is \emph{parallel analysis} \parencite{horn1965rationale}:
+one generates many random data sets with the same number of variables and
+respondents but no real factor structure, computes their eigenvalues, and
+retains only the factors whose eigenvalues in the real data exceed what random
+data produce by chance. Parallel analysis is, in effect, a permutation-style
+calibration of the factor count---a recurring logic in this thesis---and is the
+factor-retention method ReReReRe uses internally when it needs an estimate of
+dimensionality.
+
+% =====================================================================
+\section{Reliability and Internal Consistency}
+% =====================================================================
+
+A measurement is \emph{reliable} to the extent that it is reproducible---that
+repeated measurement of the same unit yields similar values. For a multi-item
+scale, the most widely reported reliability index is \emph{coefficient alpha}
+\parencite{cronbach1951coefficient}, which summarizes the average inter-item
+correlation, adjusted for the number of items, into a single number between
+$0$ and $1$. High alpha indicates that the items ``hang together,'' covarying as
+they should if they measure a common construct.
+
+Reliability connects directly to careless responding. Because careless answers
+are unrelated to the construct, they behave like added noise: they raise the
+$\varepsilon_j$ term in Equation~\ref{eq:cfa}, lower communalities, weaken
+inter-item correlations, and therefore \emph{depress} reliability
+\parencite{huang2012detecting}. A drop in alpha when a scale is administered to
+a careless-contaminated sample is one of the symptoms motivating detection in
+the first place. Conversely, identifying and removing careless respondents
+typically \emph{raises} the reliability and sharpens the factor structure of the
+remaining data---the practical payoff that Chapter~5 evaluates.
+
+% =====================================================================
+\section{Permutation and Randomization Tests}
+\label{sec:perm}
+% =====================================================================
+
+Classical hypothesis tests compare an observed statistic to a theoretical null
+distribution---the $t$, $F$, or $\chi^2$ distribution---derived under
+assumptions such as normality. When those assumptions are doubtful, a
+\emph{permutation} (or \emph{randomization}) \emph{test} offers an alternative
+that builds the null distribution \emph{from the data themselves}
+\parencite{good2005permutation}. The logic is simple and assumption-light: if
+the null hypothesis is true, then the observed arrangement of the data is just
+one of many equally likely arrangements obtainable by shuffling. One therefore
+repeatedly shuffles the data in a way consistent with the null, recomputes the
+statistic on each shuffle, and reads off where the observed value falls in the
+resulting distribution. A value far in the tail is unlikely under the null and
+constitutes evidence against it.
+
+This is precisely the inferential principle behind ReReReRe. The method asks, of
+each respondent, whether their coherence across the item pairs that the sample
+deems related is higher than would be expected if their answers carried no such
+structure. The ``no structure'' null is realized by computing the same coherence
+over \emph{randomly chosen} item pairs, repeated many times, to form a
+per-respondent null distribution. The respondent's observed coherence is then
+expressed as a \emph{z-score} relative to this distribution,
+\begin{equation}
+z \;=\; \frac{C_{\text{obs}} - \operatorname{mean}(C_{\text{rand}})}
+{\operatorname{sd}(C_{\text{rand}})},
+\label{eq:z}
+\end{equation}
+where $C_{\text{obs}}$ is coherence over the genuinely coupled pairs and
+$C_{\text{rand}}$ is the coherence over random pairs. A high z means the
+respondent is far more coherent than chance---attentive; a low or negative z
+means they are no more coherent than random pairs would predict---potentially
+careless. Building the baseline per respondent makes the method
+\emph{self-calibrating}: it does not assume any particular distribution for the
+coherence statistic, sidestepping exactly the normality problems that, as
+Chapter~1 noted, make the chi-square cutoff for Mahalanobis distance unreliable
+on Likert data.
+
+% =====================================================================
+\section{The Bootstrap}
+\label{sec:boot}
+% =====================================================================
+
+A close cousin of the permutation test is the \emph{bootstrap}
+\parencite{efron1979bootstrap, efron1993introduction}, a resampling method for
+quantifying the uncertainty of an estimate. Where a permutation test shuffles to
+simulate a null hypothesis, the bootstrap \emph{resamples with replacement} to
+simulate the sampling variability of a statistic. Given a sample of $n$ units,
+one draws many new samples of size $n$ by sampling the original units with
+replacement (so some appear multiple times and others not at all), recomputes
+the statistic of interest on each resample, and uses the spread of these
+recomputed values as an estimate of the statistic's sampling distribution.
+
+The bootstrap is valuable precisely when a statistic is too complicated for a
+closed-form standard error. This thesis uses it for exactly such a case. To
+quantify how much ReReReRe contributes to the ensemble, Chapter~4 reports the
+\emph{difference} in Matthews correlation coefficient between the full ensemble
+and an ablated ensemble without ReReReRe. No textbook formula gives the standard
+error of a difference of two MCCs, so a \emph{percentile bootstrap} confidence
+interval is used: respondents are resampled with replacement several hundred
+times, the difference is recomputed on each resample, and the $2.5$th and
+$97.5$th percentiles of the resulting distribution form a 95\% interval. If that
+interval excludes zero, the contribution is statistically distinguishable from
+no contribution---the form in which the thesis's central ablation claim is
+stated.
+
+% =====================================================================
+\section{Supervised Classification and the Random Forest}
+\label{sec:rf}
+% =====================================================================
+
+The ensemble at the heart of Chapters~4 and~5 is a \emph{supervised classifier}:
+a model trained on examples whose true labels (careless or attentive) are known,
+which then predicts labels for new respondents. The specific classifier is the
+\emph{Random Forest} \parencite{breiman2001random}, built from \emph{decision
+trees}. Because many psychologists know logistic regression but not tree
+ensembles, this section develops the Random Forest from the ground up; a fuller
+treatment appears in standard references \parencite{hastie2009elements,
+james2013introduction}.
+
+\subsection{Decision trees}
+
+A \emph{decision tree} is a sequence of yes/no questions about the predictor
+variables, arranged as a branching flowchart \parencite{breiman1984cart}. To
+classify a respondent, one starts at the top and answers each question---``is
+the ReReReRe z-score below $-0.5$?'', then ``is the longstring above $12$?''---
+following the corresponding branch until reaching a terminal \emph{leaf}, which
+carries a predicted class (or class probability). The tree is \emph{grown} from
+training data by repeatedly choosing, at each node, the question that best
+separates careless from attentive respondents according to a purity criterion
+such as the Gini index. A single tree has an appealing property---its decisions
+are transparent and can interact predictors automatically (the second question
+asked depends on the answer to the first)---but also a serious flaw: it is
+\emph{high-variance}. Small changes in the training data can change which
+question is chosen near the top and thereby reshape the entire tree.
+
+\subsection{From one tree to a forest}
+
+The Random Forest tames this instability by averaging \emph{many}
+de-correlated trees \parencite{breiman2001random}. Two sources of randomness
+make the trees differ. First, each tree is grown on a \emph{bootstrap resample}
+of the training respondents (the resampling idea of Section~\ref{sec:boot}),
+so each tree sees a slightly different data set---a strategy called
+\emph{bagging}, for bootstrap aggregating. Second, at each node only a
+\emph{random subset} of the predictors is considered as candidate questions
+(typically about $\sqrt{p}$ of the $p$ predictors), which prevents every tree
+from being dominated by the same one or two strong predictors. The forest's
+prediction is the average of the predictions of its trees---in our setting, the
+proportion of trees that vote ``careless,'' interpreted as a predicted careless
+probability. Averaging many noisy but roughly unbiased trees reduces variance
+without inflating bias, which is why the forest predicts far more stably than any
+single tree.
+
+\subsection{Why a forest can beat logistic regression}
+
+Logistic regression models the log-odds of the outcome as a \emph{linear,
+additive} function of the predictors. That is an excellent model when the truth
+is close to linear and additive, but careless detection is not such a case. The
+predictors interact: a respondent with both a very low ReReReRe z-score
+\emph{and} an unusually low intra-individual response variability is far more
+suspicious than the additive combination of the two signals would imply, because
+that conjunction is the signature of straightlining. A Random Forest captures
+such interactions automatically through the nested structure of its splits,
+without the analyst having to specify interaction terms in advance. In the
+simulation studies of later chapters, the forest outperforms logistic regression
+on every evaluation metric, with the largest margins on the hardest cases (short
+questionnaires and low careless base rates).
+
+A further benefit is \emph{variable importance}: by measuring how much
+predictive accuracy degrades when a predictor is randomly permuted, a Random
+Forest ranks the predictors by their contribution \parencite{strobl2008conditional}.
+This provides a principled way to ask which detectors carry the signal---an
+analysis the thesis uses to show that ReReReRe and a small set of auxiliary
+indices account for most of the ensemble's power.
+
+% =====================================================================
+\section{Cross-Validation}
+\label{sec:cv}
+% =====================================================================
+
+A classifier evaluated on the same data used to train it will look better than
+it really is, because it can memorize idiosyncrasies of the training sample that
+do not generalize---a problem called \emph{optimism} or \emph{overfitting}.
+\emph{Cross-validation} estimates out-of-sample performance without requiring a
+separate test set \parencite{stone1974cross, kohavi1995study}. In
+\emph{$k$-fold} cross-validation, the data are partitioned into $k$ roughly
+equal folds (here $k=5$). The model is trained on $k-1$ folds and used to
+predict the held-out fold; this is repeated $k$ times so that each fold serves
+once as the held-out set. Every respondent thus receives a prediction from a
+model that did \emph{not} see them during training. These \emph{out-of-fold}
+predictions are concatenated and used for all performance estimates, giving an
+honest picture of how the classifier would behave on new respondents drawn from
+the same population. The folds are \emph{stratified}---constructed to preserve
+the careless base rate within each fold---so that no fold is unrepresentative.
+
+% =====================================================================
+\section{Evaluating a Binary Classifier}
+\label{sec:metrics}
+% =====================================================================
+
+Once a classifier assigns each respondent a predicted careless probability,
+turning those probabilities into a binary decision requires a \emph{threshold},
+and judging the decisions requires \emph{metrics}. Both rest on the
+\emph{confusion matrix} (Table~\ref{tab:confusion}), which cross-tabulates the
+predicted label against the truth into four counts: true positives (TP, careless
+correctly flagged), true negatives (TN), false positives (FP, attentive
+respondents wrongly flagged), and false negatives (FN, careless respondents
+missed).
+
+\begin{table}[t]
+\centering
+\caption{The confusion matrix for careless detection. ``Positive'' denotes a
+respondent flagged as careless.}
+\label{tab:confusion}
+\small
+\begin{tabular}{l c c}
+\toprule
+ & \textbf{Truly careless} & \textbf{Truly attentive} \\
+\midrule
+\textbf{Flagged careless}  & True positive (TP)  & False positive (FP) \\
+\textbf{Flagged attentive} & False negative (FN) & True negative (TN)  \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+From these four counts a family of metrics is derived. \emph{Sensitivity}
+(recall, true-positive rate) is the proportion of truly careless respondents
+that are flagged, $\text{TP}/(\text{TP}+\text{FN})$; \emph{specificity} is the
+proportion of attentive respondents correctly left unflagged,
+$\text{TN}/(\text{TN}+\text{FP})$. \emph{Precision} (positive predictive value)
+is the proportion of flagged respondents who are genuinely careless,
+$\text{TP}/(\text{TP}+\text{FP})$. The \emph{F1 score} is the harmonic mean of
+precision and recall. These are summarized in Table~\ref{tab:metrics}.
+
+\begin{table}[t]
+\centering
+\caption{Principal evaluation metrics derived from the confusion matrix.}
+\label{tab:metrics}
+\small
+\begin{tabular}{L{0.30\linewidth} L{0.40\linewidth} L{0.20\linewidth}}
+\toprule
+\textbf{Metric} & \textbf{Definition} & \textbf{Range} \\
+\midrule
+Sensitivity (recall) & $\text{TP}/(\text{TP}+\text{FN})$ & $0$ to $1$ \\
+Specificity & $\text{TN}/(\text{TN}+\text{FP})$ & $0$ to $1$ \\
+Precision (PPV) & $\text{TP}/(\text{TP}+\text{FP})$ & $0$ to $1$ \\
+F1 & harmonic mean of precision and recall & $0$ to $1$ \\
+MCC & Equation~\ref{eq:mcc} & $-1$ to $+1$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The thesis adopts the \emph{Matthews correlation coefficient} (MCC) as its
+primary metric \parencite{matthews1975comparison, chicco2020advantages}. The MCC
+is, in effect, the Pearson correlation between the predicted and the true binary
+labels,
+\begin{equation}
+\text{MCC} \;=\;
+\frac{\text{TP}\cdot\text{TN} - \text{FP}\cdot\text{FN}}
+{\sqrt{(\text{TP}+\text{FP})(\text{TP}+\text{FN})
+(\text{TN}+\text{FP})(\text{TN}+\text{FN})}} ,
+\label{eq:mcc}
+\end{equation}
+ranging from $-1$ (perfect disagreement) through $0$ (chance) to $+1$ (perfect
+agreement). Its decisive advantage over accuracy and F1 is that it uses all four
+cells of the confusion matrix and is therefore robust to \emph{class
+imbalance}, which careless detection always involves: when only, say, 10\% of
+respondents are careless, a useless classifier that flags no one achieves 90\%
+accuracy, and even F1 can be inflated, whereas the MCC of such a classifier is
+$0$ \parencite{chicco2020advantages}. A high MCC requires the classifier to do
+well on \emph{both} classes simultaneously.
+
+Two \emph{threshold-free} metrics complete the picture by summarizing
+performance across all possible thresholds at once. The \emph{area under the
+receiver operating characteristic curve} (AUC) is the probability that a randomly
+chosen careless respondent receives a higher predicted probability than a
+randomly chosen attentive one \parencite{hanley1982meaning}; $0.5$ is chance and
+$1$ is perfect. The \emph{area under the precision--recall curve} (AUPRC) is a
+companion measure that, by ignoring the typically very large true-negative cell,
+is more informative than AUC under heavy class imbalance
+\parencite{saito2015precision}. Because AUC and AUPRC do not depend on a chosen
+cutoff, they isolate the quality of the underlying ranking from the separate
+question of where to set the threshold.
+
+That separate question---\emph{which} threshold to use---is itself consequential,
+as Chapter~1 stressed. A threshold defines an \emph{operating point}, a specific
+trade-off between sensitivity and specificity; moving it trades missed careless
+respondents against falsely flagged attentive ones. Chapter~5 returns to the
+problem of choosing an operating point without access to ground-truth labels,
+which is the form the threshold problem takes in real deployment.
+
+% =====================================================================
+\section{Summary}
+% =====================================================================
+
+The pieces assembled here recur throughout the thesis as a connected toolkit
+rather than a list. Correlation, computed at the level of the individual rather
+than the sample, is what ReReReRe measures; the common-factor model explains why
+that correlation exists for attentive respondents and parallel analysis
+estimates its dimensionality; the permutation test turns the measurement into a
+self-calibrating per-respondent z-score; the bootstrap puts a confidence
+interval on the detector's contribution; the Random Forest combines that
+detector with auxiliary indices, cross-validation estimates the combination's
+performance without optimism, and the Matthews correlation coefficient---together
+with AUC and AUPRC---reports how good that performance is under the class
+imbalance intrinsic to careless detection. With these concepts in place,
+Chapter~3 can introduce the ReReReRe detector itself.
+
+\printbibliography
+
+\end{document}

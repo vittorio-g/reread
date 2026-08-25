@@ -1,0 +1,11 @@
+"method","AUC","lo95","hi95","p_vs_rr","p_vs_ensemble"
+"ReReRe (ensemble)",0.982,0.966,0.998,0.00014,NA
+"Resampled pers. rel.",0.922,0.879,0.965,0.125,0.00657
+"Person-Total corr.",0.896,0.843,0.948,0.555,0.000515
+"rr (index)",0.873,0.812,0.933,NA,0.00014
+"Psych synonyms",0.837,0.774,0.901,0.291,8.71e-06
+"LongString",0.785,0.715,0.854,0.093,1.67e-08
+"Even-odd inconsistency",0.691,0.608,0.774,0.000131,2.66e-11
+"IRV (low=careless)",0.689,0.606,0.772,0.000424,2.44e-12
+"Mahalanobis D2",0.652,0.564,0.739,1.12e-06,3.55e-13
+"Psych antonyms",NA,NA,NA,NA,NA

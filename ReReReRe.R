@@ -74,6 +74,10 @@
 # 2026-03-30:  Added weighted mode for short questionnaires
 # 2026-03-31:  Tested EFA-D as default — rejected after real data validation
 # 2026-04-01:  Split into ReReReRe() (standard) + ReReReRe_F() (per-factor)
+# 2026-04-27:  Added rescale parameter (default "proportion") for mixed-scale
+#              robustness. Generalized align_signs reverse-coding from
+#              (item_max + 1) - x to (item_max + item_min) - x so it works on
+#              any rescaled scale. Identical to legacy on raw 1..K Likert.
 # ===
 
 library(dplyr)
@@ -450,7 +454,10 @@ ReReReRe <- function(data, #any dataset with questionnaire data
                     variance_penalty=FALSE, # penalize z-score for low within-respondent SD (detects straight-lining/acquiescence)
                     vp_alpha=3.0, # variance-penalty strength (only used if variance_penalty=TRUE)
                     vp_beta=0.5,  # variance-penalty decay (only used if variance_penalty=TRUE)
+                    rescale = c("proportion", "none", "minmax", "zscore"), # per-item rescaling for mixed-scale robustness
                     progress = F){
+
+  rescale <- match.arg(rescale)
 
   #keep only numeric values
   data <- data[, sapply(data, is.numeric), drop = FALSE]
@@ -494,9 +501,56 @@ ReReReRe <- function(data, #any dataset with questionnaire data
   #convert to matrix for faster operations
   mat <- as.matrix(data)
 
-  # Precompute per-item observed max for reverse coding (align_signs).
+  # --- Per-item rescaling (mixed Likert scales) ---
+  # Pearson correlation is invariant to identical affine transforms applied to
+  # all items, so per-item rescaling has zero cost on homogeneous-scale data
+  # (every column gets divided by the same constant). On heterogeneous scales
+  # (e.g. some items 1-5, some 1-7) it removes the bias toward longer scales
+  # in the row-wise correlation used by the coupled mode.
+  #
+  # "proportion" (default): x / max(x). Cheapest and provably non-destructive
+  #   on uniform-scale Likert data. Recommended for general use.
+  # "minmax": (x - min) / (max - min). Maps every item to [0, 1].
+  # "zscore": (x - mean) / sd. Most aggressive; removes mean/spread differences.
+  # "none": legacy behaviour (raw Likert values).
+  if (rescale != "none" && J >= 1) {
+    item_min_pre <- apply(mat, 2, min, na.rm = TRUE)
+    item_max_pre <- apply(mat, 2, max, na.rm = TRUE)
+
+    if (rescale == "proportion") {
+      denom <- item_max_pre
+      denom[!is.finite(denom) | denom == 0] <- 1
+      mat <- sweep(mat, 2, denom, "/")
+    } else if (rescale == "minmax") {
+      rng <- item_max_pre - item_min_pre
+      rng[!is.finite(rng) | rng == 0] <- 1
+      mat <- sweep(mat, 2, item_min_pre, "-")
+      mat <- sweep(mat, 2, rng, "/")
+    } else if (rescale == "zscore") {
+      mat <- scale(mat, center = TRUE, scale = TRUE)
+      attr(mat, "scaled:center") <- NULL
+      attr(mat, "scaled:scale")  <- NULL
+      mat[is.nan(mat)] <- 0
+    }
+  }
+
+  # Mixed-scale heuristic warning when user opts out of rescaling.
+  if (rescale == "none" && J >= 2) {
+    rng_check <- apply(mat, 2, function(v) diff(range(v, na.rm = TRUE)))
+    rng_check <- rng_check[is.finite(rng_check) & rng_check > 0]
+    if (length(rng_check) >= 2 && (max(rng_check) / min(rng_check)) >= 1.5) {
+      warning("ReReReRe: items appear to span heterogeneous response scales ",
+              "(max/min item range >= 1.5). Consider rescale='proportion'.")
+    }
+  }
+
+  # Precompute per-item observed min/max for reverse coding (align_signs).
+  # Computed AFTER rescaling so the reverse formula (item_max + item_min - x)
+  # is correct on the rescaled scale. On raw Likert with min=1, this reduces
+  # to the legacy (item_max + 1) - x.
   if (align_signs) {
     item_max <- apply(mat, 2, max, na.rm = TRUE)
+    item_min <- apply(mat, 2, min, na.rm = TRUE)
   }
 
   # Precompute correlation matrices
@@ -533,7 +587,8 @@ ReReReRe <- function(data, #any dataset with questionnaire data
         needs_flip <- which(pair_sign < 0)
         if (length(needs_flip) > 0) {
           flip_max <- item_max[idx_B[needs_flip]]
-          B_coupled[, needs_flip] <- rep(flip_max + 1, each = N) - B_coupled[, needs_flip]
+          flip_min <- item_min[idx_B[needs_flip]]
+          B_coupled[, needs_flip] <- rep(flip_max + flip_min, each = N) - B_coupled[, needs_flip]
         }
       }
 
@@ -575,7 +630,8 @@ ReReReRe <- function(data, #any dataset with questionnaire data
           rand_neg <- which(rand_signs < 0)
           if (length(rand_neg) > 0) {
             rand_flip_max <- item_max[rand_idx2[rand_neg]]
-            B_rand[, rand_neg] <- rep(rand_flip_max + 1, each = N) - B_rand[, rand_neg]
+            rand_flip_min <- item_min[rand_idx2[rand_neg]]
+            B_rand[, rand_neg] <- rep(rand_flip_max + rand_flip_min, each = N) - B_rand[, rand_neg]
           }
         }
 
@@ -635,7 +691,8 @@ ReReReRe <- function(data, #any dataset with questionnaire data
     if (align_signs && n_negative > 0) {
       needs_flip <- which(pair_sign < 0)
       flip_max <- item_max[pair_idx[needs_flip, 2]]
-      B_coupled[, needs_flip] <- rep(flip_max + 1, each = N) - B_coupled[, needs_flip]
+      flip_min <- item_min[pair_idx[needs_flip, 2]]
+      B_coupled[, needs_flip] <- rep(flip_max + flip_min, each = N) - B_coupled[, needs_flip]
     }
 
     rowCors <- rowCor_weighted(A_coupled, B_coupled, weights)
@@ -661,7 +718,8 @@ ReReReRe <- function(data, #any dataset with questionnaire data
         rand_signs <- signMat[cbind(ri, ci)]; rand_signs[is.na(rand_signs)] <- 1
         rand_neg <- which(rand_signs < 0)
         if (length(rand_neg) > 0) {
-          B_rand[, rand_neg] <- rep(item_max[rand_idx2[rand_neg]] + 1, each = N) - B_rand[, rand_neg]
+          rb_idx <- rand_idx2[rand_neg]
+          B_rand[, rand_neg] <- rep(item_max[rb_idx] + item_min[rb_idx], each = N) - B_rand[, rand_neg]
         }
       }
       all_RIC[, i] <- rowCor_weighted(A_rand, B_rand, weights)
@@ -714,7 +772,8 @@ ReReReRe <- function(data, #any dataset with questionnaire data
     if (align_signs && n_negative > 0) {
       needs_flip <- which(coupled_signs < 0)
       flip_max <- item_max[couples[needs_flip, 2]]
-      B_coupled[, needs_flip] <- rep(flip_max + 1, each = N) - B_coupled[, needs_flip]
+      flip_min <- item_min[couples[needs_flip, 2]]
+      B_coupled[, needs_flip] <- rep(flip_max + flip_min, each = N) - B_coupled[, needs_flip]
     }
 
     rowCors <- rowCor_abs(A_coupled, B_coupled, zero_val = 0)
@@ -748,7 +807,8 @@ ReReReRe <- function(data, #any dataset with questionnaire data
         rand_signs <- signMat[cbind(ri, ci)]; rand_signs[is.na(rand_signs)] <- 1
         rand_neg <- which(rand_signs < 0)
         if (length(rand_neg) > 0) {
-          B_rand[, rand_neg] <- rep(item_max[idx2[rand_neg]] + 1, each = N) - B_rand[, rand_neg]
+          rb_idx <- idx2[rand_neg]
+          B_rand[, rand_neg] <- rep(item_max[rb_idx] + item_min[rb_idx], each = N) - B_rand[, rand_neg]
         }
       }
       all_RIC[, i] <- rowCor_abs(A_rand, B_rand, zero_val = 0)
@@ -797,7 +857,8 @@ ReReReRe <- function(data, #any dataset with questionnaire data
     nFactors_detected = nFactors_detected,  # from parallel analysis
     mode_used = mode_used,         # "efa_d", "coupled", or "weighted"
     n_pairs = k,                   # number of item pairs used
-    variance_penalty_used = isTRUE(variance_penalty)
+    variance_penalty_used = isTRUE(variance_penalty),
+    rescale_used = rescale         # per-item rescaling applied
   )
 }
 
@@ -831,7 +892,10 @@ ReReReRe_F <- function(data,
                        auto_z = FALSE,
                        min_r = 0.0,
                        cross_factor_baseline = FALSE,
+                       rescale = c("proportion", "none", "minmax", "zscore"),
                        progress = FALSE) {
+
+  rescale <- match.arg(rescale)
 
   # Delegate to ReReReRe with mode="efa_d"
   ReReReRe(data,
@@ -843,6 +907,7 @@ ReReReRe_F <- function(data,
            mode = "efa_d",
            min_r = min_r,
            cross_factor_baseline = cross_factor_baseline,
+           rescale = rescale,
            progress = progress)
 }
 
@@ -1033,3 +1098,9 @@ ReReReRe_F_iterative <- function(data, iterations = 50, align_signs = TRUE,
     n_pairs = k
   )
 }
+
+## Official name (2026-07-05): the method is now "ReReRe" (3 Re, matching
+## re-re.re). ReReRe() is the canonical name; ReReReRe() is kept as a
+## backward-compatible alias so existing scripts keep working.
+ReReRe   <- ReReReRe
+ReReRe_F <- ReReReRe_F

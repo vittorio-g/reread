@@ -1,0 +1,625 @@
+
+Caricamento pacchetto: 'dplyr'
+
+I seguenti oggetti sono mascherati da 'package:stats':
+
+    filter, lag
+
+I seguenti oggetti sono mascherati da 'package:base':
+
+    intersect, setdiff, setequal, union
+
+This is lavaan 0.6-19
+lavaan is FREE software! Please report any bugs.
+
+Caricamento pacchetto: 'psych'
+
+Il seguente oggetto è mascherato da 'package:lavaan':
+
+    cor2cov
+
+
+Caricamento pacchetto: 'mice'
+
+Il seguente oggetto è mascherato da 'package:stats':
+
+    filter
+
+I seguenti oggetti sono mascherati da 'package:base':
+
+    cbind, rbind
+
+Messaggio di avvertimento:
+il pacchetto 'lavaan' è stato creato con R versione 4.4.2 
+Old checkpoint found, starting fresh (optimized version)
+
+============================================================
+ALL VARIANTS SIMULATION (optimized) — 75 conditions, 75 remaining
+============================================================
+
+[1/75] nF=4 ipf=3 (12 items) rep=1 | GT:22/23 ... Parallel analysis suggests that the number of factors =  3  and the number of components =  NA 
+Caricamento dei namespace richiesti: GPArotation
+Parallel analysis suggests that the number of factors =  3  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  3  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  3  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  3  and the number of components =  NA 
+std=0.138 f=0.167 | 0.2 min ETA 11
+[2/75] nF=8 ipf=3 (24 items) rep=1 | GT:22/23 ... Parallel analysis suggests that the number of factors =  4  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  4  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  4  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  4  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  4  and the number of components =  NA 
+std=0.256 f=0.306 | 0.3 min ETA 12
+[3/75] nF=12 ipf=3 (36 items) rep=1 | GT:21/24 ... Parallel analysis suggests that the number of factors =  6  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  6  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  6  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  6  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  6  and the number of components =  NA 
+std=0.114 f=0.169 | 0.7 min ETA 17
+[4/75] nF=20 ipf=3 (60 items) rep=1 | GT:23/22 ... Parallel analysis suggests that the number of factors =  8  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  8  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  10  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  8  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  8  and the number of components =  NA 
+std=0.210 f=0.201 | 1.6 min ETA 28
+[5/75] nF=30 ipf=3 (90 items) rep=1 | GT:23/22 ... Parallel analysis suggests that the number of factors =  13  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  13  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  13  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  13  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  13  and the number of components =  NA 
+std=0.297 f=0.448 | 2.4 min ETA 34
+[6/75] nF=4 ipf=6 (24 items) rep=1 | GT:23/22 ... Parallel analysis suggests that the number of factors =  3  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  3  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  3  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  3  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  3  and the number of components =  NA 
+std=0.230 f=0.252 | 2.6 min ETA 30
+[7/75] nF=8 ipf=6 (48 items) rep=1 | GT:20/25 ... Parallel analysis suggests that the number of factors =  6  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  6  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  6  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  6  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  6  and the number of components =  NA 
+std=0.265 f=0.357 | 3.1 min ETA 30
+[8/75] nF=12 ipf=6 (72 items) rep=1 | GT:21/24 ... Parallel analysis suggests that the number of factors =  8  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  8  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  8  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  8  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  8  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  7  and the number of components =  NA 
+std=0.351 f=0.391 | 3.7 min ETA 31
+[9/75] nF=20 ipf=6 (120 items) rep=1 | GT:24/21 ... Parallel analysis suggests that the number of factors =  16  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  16  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  16  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  16  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  17  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  15  and the number of components =  NA 
+std=0.549 f=0.619 | 5.0 min ETA 36
+[10/75] nF=30 ipf=6 (180 items) rep=1 | GT:21/24 ... Parallel analysis suggests that the number of factors =  16  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  16  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  16  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  16  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  16  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  16  and the number of components =  NA 
+std=0.508 f=0.572 | 8.0 min ETA 52
+[11/75] nF=4 ipf=10 (40 items) rep=1 | GT:23/22 ... Parallel analysis suggests that the number of factors =  3  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  3  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  3  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  3  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  3  and the number of components =  NA 
+std=0.287 f=0.247 | 8.3 min ETA 49
+[12/75] nF=8 ipf=10 (80 items) rep=1 | GT:23/22 ... Parallel analysis suggests that the number of factors =  6  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  6  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  6  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  6  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  6  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  6  and the number of components =  NA 
+std=0.244 f=0.402 | 9.0 min ETA 47
+[13/75] nF=12 ipf=10 (120 items) rep=1 | GT:22/23 ... Parallel analysis suggests that the number of factors =  8  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  8  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  8  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  8  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  8  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  8  and the number of components =  NA 
+std=0.517 f=0.496 | 10.3 min ETA 49
+[14/75] nF=20 ipf=10 (200 items) rep=1 | GT:24/21 ... Parallel analysis suggests that the number of factors =  14  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  14  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  14  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  14  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  14  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  14  and the number of components =  NA 
+std=0.746 f=0.725 | 13.7 min ETA 60
+[15/75] nF=30 ipf=10 (300 items) rep=1 | GT:20/25 ... Parallel analysis suggests that the number of factors =  21  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  21  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  21  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  21  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  21  and the number of components =  NA 
+The determinant of the smoothed correlation was zero.
+This means the objective function is not defined for the null model either.
+The Chi square is thus based upon observed correlations.
+std=0.829 f=0.701 | 23.0 min ETA 92
+[16/75] nF=4 ipf=3 (12 items) rep=2 | GT:23/22 ... Parallel analysis suggests that the number of factors =  3  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  3  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  3  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  3  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  3  and the number of components =  NA 
+std=0.082 f=0.143 | 23.1 min ETA 85
+[17/75] nF=8 ipf=3 (24 items) rep=2 | GT:25/20 ... Parallel analysis suggests that the number of factors =  3  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  3  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  3  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  3  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  3  and the number of components =  NA 
+std=0.087 f=0.192 | 23.3 min ETA 79
+[18/75] nF=12 ipf=3 (36 items) rep=2 | GT:21/24 ... Parallel analysis suggests that the number of factors =  6  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  6  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  6  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  6  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  6  and the number of components =  NA 
+std=0.196 f=0.279 | 23.5 min ETA 74
+[19/75] nF=20 ipf=3 (60 items) rep=2 | GT:22/23 ... Parallel analysis suggests that the number of factors =  9  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  9  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  9  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  9  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  9  and the number of components =  NA 
+std=0.229 f=0.229 | 23.9 min ETA 71
+[20/75] nF=30 ipf=3 (90 items) rep=2 | GT:24/21 ... Parallel analysis suggests that the number of factors =  18  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  18  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  18  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  17  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  20  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  15  and the number of components =  NA 
+std=0.430 f=0.358 | 24.5 min ETA 67
+[21/75] nF=4 ipf=6 (24 items) rep=2 | GT:24/21 ... Parallel analysis suggests that the number of factors =  3  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  3  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  3  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  3  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  3  and the number of components =  NA 
+std=0.149 f=0.221 | 24.7 min ETA 63
+[22/75] nF=8 ipf=6 (48 items) rep=2 | GT:24/21 ... Parallel analysis suggests that the number of factors =  5  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  5  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  5  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  5  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  5  and the number of components =  NA 
+std=0.221 f=0.218 | 25.0 min ETA 60
+[23/75] nF=12 ipf=6 (72 items) rep=2 | GT:23/22 ... Parallel analysis suggests that the number of factors =  9  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  9  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  9  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  9  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  9  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  8  and the number of components =  NA 
+std=0.374 f=0.403 | 25.4 min ETA 58
+[24/75] nF=20 ipf=6 (120 items) rep=2 | GT:26/19 ... Parallel analysis suggests that the number of factors =  12  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  11  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  11  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  12  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  11  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  11  and the number of components =  NA 
+std=0.441 f=0.381 | 26.5 min ETA 56
+[25/75] nF=30 ipf=6 (180 items) rep=2 | GT:23/22 ... Parallel analysis suggests that the number of factors =  20  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  20  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  20  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  20  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  20  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  18  and the number of components =  NA 
+std=0.507 f=0.580 | 29.0 min ETA 58
+[26/75] nF=4 ipf=10 (40 items) rep=2 | GT:22/23 ... Parallel analysis suggests that the number of factors =  3  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  3  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  3  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  3  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  3  and the number of components =  NA 
+std=0.217 f=0.325 | 29.3 min ETA 55
+[27/75] nF=8 ipf=10 (80 items) rep=2 | GT:22/23 ... Parallel analysis suggests that the number of factors =  6  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  6  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  6  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  6  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  6  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  6  and the number of components =  NA 
+std=0.344 f=0.405 | 29.8 min ETA 53
+[28/75] nF=12 ipf=10 (120 items) rep=2 | GT:22/23 ... Parallel analysis suggests that the number of factors =  9  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  9  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  9  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  9  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  9  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  9  and the number of components =  NA 
+std=0.582 f=0.585 | 30.8 min ETA 52
+[29/75] nF=20 ipf=10 (200 items) rep=2 | GT:22/23 ... Parallel analysis suggests that the number of factors =  14  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  14  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  14  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  14  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  14  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  14  and the number of components =  NA 
+std=0.832 f=0.683 | 34.1 min ETA 54
+[30/75] nF=30 ipf=10 (300 items) rep=2 | GT:22/23 ... Parallel analysis suggests that the number of factors =  21  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  21  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  21  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  21  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  21  and the number of components =  NA 
+The determinant of the smoothed correlation was zero.
+This means the objective function is not defined for the null model either.
+The Chi square is thus based upon observed correlations.
+std=0.734 f=0.683 | 43.4 min ETA 65
+[31/75] nF=4 ipf=3 (12 items) rep=3 | GT:21/24 ... Parallel analysis suggests that the number of factors =  4  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  4  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  4  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  4  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  4  and the number of components =  NA 
+std=0.211 f=0.108 | 43.5 min ETA 62
+[32/75] nF=8 ipf=3 (24 items) rep=3 | GT:21/24 ... Parallel analysis suggests that the number of factors =  5  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  5  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  5  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  5  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  5  and the number of components =  NA 
+std=0.207 f=0.169 | 43.6 min ETA 59
+[33/75] nF=12 ipf=3 (36 items) rep=3 | GT:26/19 ... Parallel analysis suggests that the number of factors =  7  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  7  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  7  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  7  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  8  and the number of components =  NA 
+std=0.326 f=0.293 | 43.9 min ETA 56
+[34/75] nF=20 ipf=3 (60 items) rep=3 | GT:22/23 ... Parallel analysis suggests that the number of factors =  10  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  11  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  13  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  10  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  12  and the number of components =  NA 
+std=0.290 f=0.429 | 44.3 min ETA 53
+[35/75] nF=30 ipf=3 (90 items) rep=3 | GT:23/22 ... Parallel analysis suggests that the number of factors =  14  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  14  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  14  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  14  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  18  and the number of components =  NA 
+std=0.301 f=0.230 | 44.9 min ETA 51
+[36/75] nF=4 ipf=6 (24 items) rep=3 | GT:23/22 ... Parallel analysis suggests that the number of factors =  3  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  3  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  3  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  3  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  3  and the number of components =  NA 
+std=0.192 f=0.230 | 45.0 min ETA 49
+[37/75] nF=8 ipf=6 (48 items) rep=3 | GT:23/22 ... Parallel analysis suggests that the number of factors =  6  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  6  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  6  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  6  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  6  and the number of components =  NA 
+std=0.477 f=0.435 | 45.3 min ETA 47
+[38/75] nF=12 ipf=6 (72 items) rep=3 | GT:22/23 ... Parallel analysis suggests that the number of factors =  8  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  9  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  9  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  9  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  9  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  8  and the number of components =  NA 
+std=0.259 f=0.416 | 45.7 min ETA 45
+[39/75] nF=20 ipf=6 (120 items) rep=3 | GT:23/22 ... Parallel analysis suggests that the number of factors =  13  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  14  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  13  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  14  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  14  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  12  and the number of components =  NA 
+std=0.556 f=0.610 | 46.8 min ETA 43
+[40/75] nF=30 ipf=6 (180 items) rep=3 | GT:22/23 ... Parallel analysis suggests that the number of factors =  18  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  18  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  18  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  18  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  18  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  17  and the number of components =  NA 
+std=0.569 f=0.595 | 49.2 min ETA 43
+[41/75] nF=4 ipf=10 (40 items) rep=3 | GT:24/21 ... Parallel analysis suggests that the number of factors =  3  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  3  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  3  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  3  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  3  and the number of components =  NA 
+std=0.222 f=0.256 | 49.5 min ETA 41
+[42/75] nF=8 ipf=10 (80 items) rep=3 | GT:22/23 ... Parallel analysis suggests that the number of factors =  6  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  6  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  6  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  6  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  6  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  6  and the number of components =  NA 
+std=0.367 f=0.464 | 50.0 min ETA 39
+[43/75] nF=12 ipf=10 (120 items) rep=3 | GT:23/22 ... Parallel analysis suggests that the number of factors =  9  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  9  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  8  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  8  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  8  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  8  and the number of components =  NA 
+std=0.511 f=0.587 | 51.3 min ETA 38
+[44/75] nF=20 ipf=10 (200 items) rep=3 | GT:23/22 ... Parallel analysis suggests that the number of factors =  17  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  17  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  17  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  17  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  17  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  17  and the number of components =  NA 
+std=0.593 f=0.666 | 54.5 min ETA 38
+[45/75] nF=30 ipf=10 (300 items) rep=3 | GT:22/23 ... Parallel analysis suggests that the number of factors =  21  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  21  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  21  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  21  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  20  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  21  and the number of components =  NA 
+std=0.951 f=0.804 | 64.6 min ETA 43
+[46/75] nF=4 ipf=3 (12 items) rep=4 | GT:22/23 ... Parallel analysis suggests that the number of factors =  2  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  2  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  2  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  2  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  2  and the number of components =  NA 
+std=0.204 f=0.191 | 64.7 min ETA 41
+[47/75] nF=8 ipf=3 (24 items) rep=4 | GT:23/22 ... Parallel analysis suggests that the number of factors =  5  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  5  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  5  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  5  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  5  and the number of components =  NA 
+std=0.220 f=0.226 | 64.9 min ETA 39
+[48/75] nF=12 ipf=3 (36 items) rep=4 | GT:23/22 ... Parallel analysis suggests that the number of factors =  7  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  7  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  7  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  7  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  7  and the number of components =  NA 
+std=0.230 f=0.253 | 65.2 min ETA 37
+[49/75] nF=20 ipf=3 (60 items) rep=4 | GT:22/23 ... Parallel analysis suggests that the number of factors =  12  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  12  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  12  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  12  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  12  and the number of components =  NA 
+std=0.285 f=0.255 | 65.7 min ETA 35
+[50/75] nF=30 ipf=3 (90 items) rep=4 | GT:23/22 ... Parallel analysis suggests that the number of factors =  16  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  16  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  16  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  16  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  16  and the number of components =  NA 
+std=0.261 f=0.224 | 66.3 min ETA 33
+[51/75] nF=4 ipf=6 (24 items) rep=4 | GT:20/25 ... Parallel analysis suggests that the number of factors =  4  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  4  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  4  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  4  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  4  and the number of components =  NA 
+std=0.266 f=0.257 | 66.5 min ETA 31
+[52/75] nF=8 ipf=6 (48 items) rep=4 | GT:21/24 ... Parallel analysis suggests that the number of factors =  6  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  6  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  6  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  6  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  6  and the number of components =  NA 
+std=0.292 f=0.310 | 66.8 min ETA 30
+[53/75] nF=12 ipf=6 (72 items) rep=4 | GT:24/21 ... Parallel analysis suggests that the number of factors =  7  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  7  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  7  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  7  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  7  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  7  and the number of components =  NA 
+std=0.292 f=0.495 | 67.3 min ETA 28
+[54/75] nF=20 ipf=6 (120 items) rep=4 | GT:21/24 ... Parallel analysis suggests that the number of factors =  14  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  15  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  14  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  14  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  14  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  14  and the number of components =  NA 
+std=0.591 f=0.454 | 68.4 min ETA 27
+[55/75] nF=30 ipf=6 (180 items) rep=4 | GT:23/22 ... Parallel analysis suggests that the number of factors =  22  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  22  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  20  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  20  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  22  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  21  and the number of components =  NA 
+std=0.800 f=0.727 | 71.5 min ETA 26
+[56/75] nF=4 ipf=10 (40 items) rep=4 | GT:21/24 ... Parallel analysis suggests that the number of factors =  3  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  3  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  3  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  3  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  3  and the number of components =  NA 
+std=0.241 f=0.296 | 71.9 min ETA 24
+[57/75] nF=8 ipf=10 (80 items) rep=4 | GT:25/20 ... Parallel analysis suggests that the number of factors =  6  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  6  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  6  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  6  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  6  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  6  and the number of components =  NA 
+std=0.381 f=0.379 | 72.6 min ETA 23
+[58/75] nF=12 ipf=10 (120 items) rep=4 | GT:23/22 ... Parallel analysis suggests that the number of factors =  8  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  8  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  8  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  8  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  8  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  8  and the number of components =  NA 
+std=0.362 f=0.400 | 74.1 min ETA 22
+[59/75] nF=20 ipf=10 (200 items) rep=4 | GT:21/24 ... Parallel analysis suggests that the number of factors =  13  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  13  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  13  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  13  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  13  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  13  and the number of components =  NA 
+std=0.563 f=0.603 | 78.7 min ETA 21
+[60/75] nF=30 ipf=10 (300 items) rep=4 | GT:25/20 ... Parallel analysis suggests that the number of factors =  23  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  23  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  23  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  23  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  23  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  23  and the number of components =  NA 
+The determinant of the smoothed correlation was zero.
+This means the objective function is not defined.
+Chi square is based upon observed residuals.
+The determinant of the smoothed correlation was zero.
+This means the objective function is not defined for the null model either.
+The Chi square is thus based upon observed correlations.
+std=0.820 f=0.769 | 93.0 min ETA 23
+[61/75] nF=4 ipf=3 (12 items) rep=5 | GT:22/23 ... Parallel analysis suggests that the number of factors =  4  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  4  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  4  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  4  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  4  and the number of components =  NA 
+std=0.291 f=0.231 | 93.2 min ETA 21
+[62/75] nF=8 ipf=3 (24 items) rep=5 | GT:24/21 ... Parallel analysis suggests that the number of factors =  4  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  4  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  4  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  4  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  4  and the number of components =  NA 
+std=0.125 f=0.195 | 93.5 min ETA 20
+[63/75] nF=12 ipf=3 (36 items) rep=5 | GT:23/22 ... Parallel analysis suggests that the number of factors =  7  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  7  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  7  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  6  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  7  and the number of components =  NA 
+std=0.227 f=0.217 | 93.8 min ETA 18
+[64/75] nF=20 ipf=3 (60 items) rep=5 | GT:23/22 ... Parallel analysis suggests that the number of factors =  10  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  10  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  10  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  10  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  10  and the number of components =  NA 
+std=0.379 f=0.303 | 94.6 min ETA 16
+[65/75] nF=30 ipf=3 (90 items) rep=5 | GT:22/23 ... Parallel analysis suggests that the number of factors =  15  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  15  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  16  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  14  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  16  and the number of components =  NA 
+std=0.261 f=0.334 | 95.5 min ETA 15
+[66/75] nF=4 ipf=6 (24 items) rep=5 | GT:21/24 ... Parallel analysis suggests that the number of factors =  4  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  4  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  3  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  4  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  4  and the number of components =  NA 
+std=0.277 f=0.211 | 95.7 min ETA 13
+[67/75] nF=8 ipf=6 (48 items) rep=5 | GT:20/25 ... Parallel analysis suggests that the number of factors =  4  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  4  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  4  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  4  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  4  and the number of components =  NA 
+std=0.172 f=0.178 | 96.3 min ETA 11
+[68/75] nF=12 ipf=6 (72 items) rep=5 | GT:21/24 ... Parallel analysis suggests that the number of factors =  10  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  9  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  10  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  10  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  10  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  9  and the number of components =  NA 
+std=0.352 f=0.403 | 97.0 min ETA 10
+[69/75] nF=20 ipf=6 (120 items) rep=5 | GT:21/24 ... Parallel analysis suggests that the number of factors =  12  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  11  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  13  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  13  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  11  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  11  and the number of components =  NA 
+std=0.573 f=0.488 | 98.6 min ETA 9
+[70/75] nF=30 ipf=6 (180 items) rep=5 | GT:22/23 ... Parallel analysis suggests that the number of factors =  18  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  18  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  18  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  18  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  18  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  19  and the number of components =  NA 
+std=0.510 f=0.514 | 102.4 min ETA 7
+[71/75] nF=4 ipf=10 (40 items) rep=5 | GT:22/23 ... Parallel analysis suggests that the number of factors =  3  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  3  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  3  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  3  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  3  and the number of components =  NA 
+std=0.343 f=0.362 | 102.9 min ETA 6
+[72/75] nF=8 ipf=10 (80 items) rep=5 | GT:23/22 ... Parallel analysis suggests that the number of factors =  6  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  6  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  6  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  6  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  6  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  6  and the number of components =  NA 
+std=0.349 f=0.335 | 103.7 min ETA 4
+[73/75] nF=12 ipf=10 (120 items) rep=5 | GT:21/24 ... Parallel analysis suggests that the number of factors =  9  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  10  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  9  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  9  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  9  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  9  and the number of components =  NA 
+std=0.465 f=0.516 | 105.4 min ETA 3
+[74/75] nF=20 ipf=10 (200 items) rep=5 | GT:23/22 ... Parallel analysis suggests that the number of factors =  15  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  15  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  15  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  15  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  15  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  15  and the number of components =  NA 
+std=0.739 f=0.736 | 110.3 min ETA 1
+[75/75] nF=30 ipf=10 (300 items) rep=5 | GT:20/25 ... Parallel analysis suggests that the number of factors =  22  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  22  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  22  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  22  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  22  and the number of components =  NA 
+The determinant of the smoothed correlation was zero.
+This means the objective function is not defined for the null model either.
+The Chi square is thus based upon observed correlations.
+std=0.829 f=0.665 | 123.3 min ETA 0
+
+Done. 123.3 min
+
+
+============================================================
+ANALYSIS
+============================================================
+
+--- ORACLE MCC (all) ---
+          method oracle
+1      iterative  0.398
+2          efa_d  0.394
+3       efa_d_cf  0.390
+4            std  0.383
+5         std_cf  0.380
+6        pf_mean  0.379
+7  proplow_fz1.5  0.280
+8  proplow_fz1.0  0.280
+9   pf_comb_l0.5  0.277
+10 proplow_fz0.5  0.276
+11 proplow_fz2.0  0.264
+12  pf_comb_l1.0  0.111
+13  pf_comb_l1.5  0.061
+
+--- ORACLE BY ITEM BIN ---
+      bin efa_d efa_d_cf iterative pf_comb_l0.5 pf_comb_l1.0 pf_comb_l1.5
+1     <30 0.207    0.193     0.196        0.167       0.0995       0.0774
+2   30-60 0.281    0.273     0.279        0.184       0.0970       0.0724
+3  60-100 0.379    0.374     0.407        0.269       0.1411       0.0709
+4 100-200 0.577    0.581     0.580        0.381       0.1139       0.0421
+5    >200 0.724    0.732     0.725        0.585       0.1015       0.0119
+  pf_mean   std std_cf
+1   0.198 0.196  0.187
+2   0.258 0.261  0.259
+3   0.355 0.324  0.321
+4   0.571 0.576  0.578
+5   0.705 0.832  0.824
+
+--- ORACLE BY nF ---
+  nF efa_d efa_d_cf iterative pf_comb_l0.5 pf_comb_l1.0 pf_comb_l1.5 pf_mean
+1  4 0.233    0.211     0.218        0.159       0.0949       0.0723   0.213
+2  8 0.305    0.303     0.305        0.204       0.0889       0.0554   0.293
+3 12 0.394    0.383     0.404        0.247       0.1051       0.0649   0.373
+4 20 0.492    0.499     0.498        0.337       0.1127       0.0608   0.485
+5 30 0.547    0.554     0.566        0.437       0.1540       0.0518   0.529
+    std std_cf
+1 0.223  0.210
+2 0.267  0.271
+3 0.344  0.346
+4 0.505  0.496
+5 0.574  0.574
+
+--- CROSS-FACTOR BASELINE EFFECT ---
+    method oracle
+1    efa_d  0.394
+2 efa_d_cf  0.390
+3      std  0.383
+4   std_cf  0.380
+
+--- PROPLOW BY THRESHOLD ---
+         method oracle
+1 proplow_fz1.5  0.280
+2 proplow_fz1.0  0.280
+3 proplow_fz0.5  0.276
+4 proplow_fz2.0  0.264
+
+--- WINNER MAP (nF x ipf) ---
+  nF  ipf  items  winner                  MCC
+   4    3     12  std                  0.185
+   4    6     24  efa_d                0.234
+   4   10     40  efa_d                0.297
+   8    3     24  efa_d_cf             0.224
+   8    6     48  pf_mean              0.306
+   8   10     80  iterative            0.404
+  12    3     36  iterative            0.254
+  12    6     72  iterative            0.428
+  12   10    120  iterative            0.531
+  20    3     60  iterative            0.284
+  20    6    120  std                  0.542
+  20   10    200  iterative            0.698
+  30    3     90  iterative            0.390
+  30    6    180  efa_d_cf             0.599
+  30   10    300  std                  0.832
+
+Report: archive/variants_comparison/report.txt
+
+=== DONE ===

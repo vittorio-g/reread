@@ -29,3 +29,41 @@ _analysis.py
 
 # Checkpoints
 *_checkpoint.rds
+
+# ---------------------------------------------------------------------------
+# Added 2026-08-25: keep the repository to code + small derived artefacts.
+# ---------------------------------------------------------------------------
+
+# Third-party benchmark corpora (hundreds of MB, redistributable only under
+# their own licences, and re-downloadable from the sources listed in each
+# README). The derived scores committed under webapp/ext_bench2/*_y.csv are what
+# the analyses actually read.
+Dataset/
+!Dataset/**/README.md
+
+# Item-level matrices extracted from those corpora: same provenance, same reason.
+webapp/ext_bench/*_M.csv
+webapp/ext_bench2/*_M.csv
+webapp/ext_bench2/*_comp.csv
+webapp/ext_bench_oriented/*_M.csv
+webapp/sim_bench/
+
+# Build/check output and large intermediates
+*.Rcheck/
+*.npy
+webapp/site/xlsx.full.min.js
+_engine_gated.js
+*.bak_pre_*
+
+# --- excluded from the public repository (2026-08-25) ---
+# First-party study data under embargo until the manuscript is accepted; the
+# public release is prepared separately on OSF. The per-respondent labels and
+# derived scores stay, because the tool already publishes them in its demo.
+Raccolta Dati/
+webapp/_study_matrix.csv
+
+# Internal working log: candid process notes, and it names the on-disk location
+# of API credentials. Kept locally, not published.
+CLAUDE.md
+CLAUDE.md.tmp
+.claude/scheduled_tasks.lock

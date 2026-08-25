@@ -1,0 +1,107 @@
+\documentclass[11pt,a4paper]{report}
+
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{lmodern}
+\usepackage[american]{babel}
+\usepackage{csquotes}
+
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{ragged2e}
+\usepackage{graphicx}
+\usepackage{microtype}
+
+\usepackage[style=apa,sortcites=true,sorting=nyt,backend=biber]{biblatex}
+\DeclareLanguageMapping{american}{american-apa}
+\addbibresource{bibliografia.bib}
+
+\numberwithin{equation}{chapter}
+
+\newcolumntype{L}[1]{>{\RaggedRight\arraybackslash}p{#1}}
+
+\usepackage{hyperref}
+\hypersetup{hidelinks}
+
+\newcommand{\thesistitle}{Detecting Careless Responding}
+\newcommand{\thesissubtitle}{A Permutation-Based Coherence Index and a
+                             Random Forest Ensemble}
+\newcommand{\shorttitletext}{Detecting Careless Responding}
+\newcommand{\candidate}{Vittorio Guerrieri}
+\newcommand{\advisor}{Marcello Gallucci}
+\newcommand{\coadvisor}{Marcello Passarelli}
+\newcommand{\university}{Universit\`a degli Studi di Milano-Bicocca}
+\newcommand{\department}{Dipartimento di Psicologia}
+\newcommand{\course}{Corso di Laurea Magistrale in Psicologia}
+\newcommand{\academicyear}{Anno Accademico 2025--2026}
+
+\usepackage{fancyhdr}
+\setlength{\headheight}{14pt}
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\small\shorttitletext}
+\fancyhead[R]{\small\nouppercase{\leftmark}}
+\fancyfoot[C]{\small\thepage}
+\renewcommand{\headrulewidth}{0.4pt}
+\renewcommand{\footrulewidth}{0pt}
+\renewcommand{\chaptermark}[1]{\markboth{\thechapter.\ #1}{}}
+
+\setcounter{tocdepth}{1}
+\setlength{\emergencystretch}{2em}
+
+\begin{document}
+
+\begin{titlepage}
+\centering
+\thispagestyle{empty}
+\IfFileExists{figures/logo_bicocca.png}{%
+  \includegraphics[width=0.40\textwidth]{figures/logo_bicocca.png}\par
+  \vspace{0.9cm}%
+}{}
+{\large \university \par}
+{\normalsize \department \par}
+{\normalsize \course \par}
+\vspace{1.2cm}
+\rule{\linewidth}{0.4pt}\\[0.6cm]
+{\Huge\bfseries \thesistitle \par}
+\vspace{0.4cm}
+{\Large \thesissubtitle \par}
+\vspace{0.4cm}
+\rule{\linewidth}{0.4pt}
+\vspace{2.4cm}
+
+\begin{minipage}[t]{0.48\textwidth}
+\raggedright
+{\normalsize\bfseries Relatore:}\\[0.2em]
+{\normalsize \advisor}\\[1em]
+{\normalsize\bfseries Correlatore:}\\[0.2em]
+{\normalsize \coadvisor}
+\end{minipage}\hfill
+\begin{minipage}[t]{0.48\textwidth}
+\raggedleft
+{\normalsize\bfseries Candidato:}\\[0.2em]
+{\normalsize \candidate}
+\end{minipage}
+
+\vfill
+{\normalsize \academicyear \par}
+\end{titlepage}
+
+\pagenumbering{roman}
+\setcounter{page}{2}
+\tableofcontents
+\cleardoublepage
+
+\pagenumbering{arabic}
+\include{chapters/ch1}
+\include{chapters/ch2}
+\include{chapters/ch3}
+\include{chapters/ch4}
+
+\cleardoublepage
+\addcontentsline{toc}{chapter}{References}
+\printbibliography[title={References}]
+
+\end{document}

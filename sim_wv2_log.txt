@@ -1,0 +1,245 @@
+This is lavaan 0.6-19
+lavaan is FREE software! Please report any bugs.
+Messaggio di avvertimento:
+il pacchetto 'lavaan' è stato creato con R versione 4.4.2 
+
+Caricamento pacchetto: 'psych'
+
+Il seguente oggetto è mascherato da 'package:lavaan':
+
+    cor2cov
+
+
+Caricamento pacchetto: 'mice'
+
+Il seguente oggetto è mascherato da 'package:stats':
+
+    filter
+
+I seguenti oggetti sono mascherati da 'package:base':
+
+    cbind, rbind
+
+============================================================
+ WEIGHTED_V2 vs TOP METHODS
+============================================================
+15 conditions × 3 reps = 45 runs
+Methods: std, efa_d, iterative, weighted_v2
+
+[1/45] nF=4 ipf=3 (12 items) rep=1 | GT:22/noise:23 | Parallel analysis suggests that the number of factors =  4  and the number of components =  NA 
+Caricamento dei namespace richiesti: GPArotation
+Parallel analysis suggests that the number of factors =  4  and the number of components =  NA 
+std=0.199 efa=0.222 iter=0.231 v2=0.087 | 0.1 min ETA NA
+[2/45] nF=4 ipf=3 (12 items) rep=2 | GT:24/noise:21 | Parallel analysis suggests that the number of factors =  4  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  4  and the number of components =  NA 
+std=0.153 efa=0.158 iter=0.135 v2=0.052 | 0.3 min ETA 7
+[3/45] nF=4 ipf=3 (12 items) rep=3 | GT:24/noise:21 | Parallel analysis suggests that the number of factors =  1  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  1  and the number of components =  NA 
+std=0.083 efa=0.085 iter=0.056 v2=0.070 | 0.6 min ETA 8
+[4/45] nF=8 ipf=3 (24 items) rep=1 | GT:20/noise:25 | Parallel analysis suggests that the number of factors =  7  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  6  and the number of components =  NA 
+std=0.211 efa=0.181 iter=0.171 v2=0.123 | 0.9 min ETA 9
+[5/45] nF=8 ipf=3 (24 items) rep=2 | GT:21/noise:24 | Parallel analysis suggests that the number of factors =  3  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  3  and the number of components =  NA 
+std=0.207 efa=0.145 iter=0.142 v2=0.075 | 1.2 min ETA 10
+[6/45] nF=8 ipf=3 (24 items) rep=3 | GT:22/noise:23 | Parallel analysis suggests that the number of factors =  5  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  5  and the number of components =  NA 
+std=0.146 efa=0.135 iter=0.142 v2=0.057 | 1.6 min ETA 10
+[7/45] nF=12 ipf=3 (36 items) rep=1 | GT:23/noise:22 | Parallel analysis suggests that the number of factors =  6  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  6  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  6  and the number of components =  NA 
+std=0.218 efa=0.176 iter=0.189 v2=0.202 | 2.3 min ETA 12
+[8/45] nF=12 ipf=3 (36 items) rep=2 | GT:20/noise:25 | Parallel analysis suggests that the number of factors =  6  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  6  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  6  and the number of components =  NA 
+std=0.171 efa=0.170 iter=0.234 v2=0.100 | 2.6 min ETA 12
+[9/45] nF=12 ipf=3 (36 items) rep=3 | GT:24/noise:21 | Parallel analysis suggests that the number of factors =  6  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  6  and the number of components =  NA 
+std=0.143 efa=0.090 iter=0.084 v2=0.166 | 2.8 min ETA 11
+[10/45] nF=20 ipf=3 (60 items) rep=1 | GT:21/noise:24 | Parallel analysis suggests that the number of factors =  14  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  14  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  12  and the number of components =  NA 
+std=0.181 efa=0.277 iter=0.245 v2=0.211 | 3.4 min ETA 12
+[11/45] nF=20 ipf=3 (60 items) rep=2 | GT:23/noise:22 | Parallel analysis suggests that the number of factors =  8  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  8  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  9  and the number of components =  NA 
+std=0.187 efa=0.242 iter=0.299 v2=0.270 | 4.4 min ETA 14
+[12/45] nF=20 ipf=3 (60 items) rep=3 | GT:22/noise:23 | Parallel analysis suggests that the number of factors =  11  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  10  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  10  and the number of components =  NA 
+std=0.350 efa=0.406 iter=0.292 v2=0.284 | 5.6 min ETA 15
+[13/45] nF=30 ipf=3 (90 items) rep=1 | GT:21/noise:24 | Parallel analysis suggests that the number of factors =  13  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  12  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  13  and the number of components =  NA 
+std=0.221 efa=0.194 iter=0.249 v2=0.297 | 7.1 min ETA 18
+[14/45] nF=30 ipf=3 (90 items) rep=2 | GT:22/noise:23 | Parallel analysis suggests that the number of factors =  15  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  15  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  16  and the number of components =  NA 
+std=0.271 efa=0.346 iter=0.276 v2=0.400 | 8.8 min ETA 20
+[15/45] nF=30 ipf=3 (90 items) rep=3 | GT:24/noise:21 | Parallel analysis suggests that the number of factors =  17  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  17  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  16  and the number of components =  NA 
+std=0.287 efa=0.318 iter=0.301 v2=0.496 | 10.4 min ETA 21
+[16/45] nF=4 ipf=6 (24 items) rep=1 | GT:20/noise:25 | Parallel analysis suggests that the number of factors =  4  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  4  and the number of components =  NA 
+std=0.197 efa=0.167 iter=0.162 v2=0.137 | 10.7 min ETA 19
+[17/45] nF=4 ipf=6 (24 items) rep=2 | GT:24/noise:21 | Parallel analysis suggests that the number of factors =  2  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  3  and the number of components =  NA 
+std=0.180 efa=0.166 iter=0.136 v2=0.184 | 11.0 min ETA 18
+[18/45] nF=4 ipf=6 (24 items) rep=3 | GT:23/noise:22 | Parallel analysis suggests that the number of factors =  3  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  3  and the number of components =  NA 
+std=0.155 efa=0.174 iter=0.174 v2=0.133 | 11.3 min ETA 17
+[19/45] nF=8 ipf=6 (48 items) rep=1 | GT:23/noise:22 | Parallel analysis suggests that the number of factors =  5  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  5  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  5  and the number of components =  NA 
+std=0.226 efa=0.155 iter=0.166 v2=0.151 | 12.2 min ETA 17
+[20/45] nF=8 ipf=6 (48 items) rep=2 | GT:22/noise:23 | Parallel analysis suggests that the number of factors =  6  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  6  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  6  and the number of components =  NA 
+std=0.177 efa=0.184 iter=0.168 v2=0.211 | 13.1 min ETA 16
+[21/45] nF=8 ipf=6 (48 items) rep=3 | GT:23/noise:22 | Parallel analysis suggests that the number of factors =  5  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  4  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  4  and the number of components =  NA 
+std=0.328 efa=0.231 iter=0.288 v2=0.218 | 14.0 min ETA 16
+[22/45] nF=12 ipf=6 (72 items) rep=1 | GT:24/noise:21 | Parallel analysis suggests that the number of factors =  9  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  9  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  9  and the number of components =  NA 
+std=0.240 efa=0.398 iter=0.374 v2=0.339 | 15.0 min ETA 16
+[23/45] nF=12 ipf=6 (72 items) rep=2 | GT:22/noise:23 | Parallel analysis suggests that the number of factors =  9  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  9  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  10  and the number of components =  NA 
+std=0.302 efa=0.411 iter=0.395 v2=0.415 | 15.7 min ETA 15
+[24/45] nF=12 ipf=6 (72 items) rep=3 | GT:22/noise:23 | Parallel analysis suggests that the number of factors =  8  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  8  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  8  and the number of components =  NA 
+std=0.252 efa=0.268 iter=0.251 v2=0.395 | 16.5 min ETA 14
+[25/45] nF=20 ipf=6 (120 items) rep=1 | GT:23/noise:22 | Parallel analysis suggests that the number of factors =  14  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  14  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  14  and the number of components =  NA 
+std=0.469 efa=0.471 iter=0.492 v2=0.396 | 18.7 min ETA 15
+[26/45] nF=20 ipf=6 (120 items) rep=2 | GT:23/noise:22 | Parallel analysis suggests that the number of factors =  14  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  16  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  13  and the number of components =  NA 
+std=0.388 efa=0.450 iter=0.475 v2=0.395 | 20.7 min ETA 15
+[27/45] nF=20 ipf=6 (120 items) rep=3 | GT:23/noise:22 | Parallel analysis suggests that the number of factors =  13  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  13  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  13  and the number of components =  NA 
+std=0.456 efa=0.403 iter=0.383 v2=0.425 | 22.2 min ETA 15
+[28/45] nF=30 ipf=6 (180 items) rep=1 | GT:23/noise:22 | Parallel analysis suggests that the number of factors =  20  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  20  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  20  and the number of components =  NA 
+std=0.597 efa=0.576 iter=0.526 v2=0.520 | 25.4 min ETA 15
+[29/45] nF=30 ipf=6 (180 items) rep=2 | GT:24/noise:21 | Parallel analysis suggests that the number of factors =  22  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  22  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  21  and the number of components =  NA 
+std=0.692 efa=0.619 iter=0.641 v2=0.594 | 32.4 min ETA 18
+[30/45] nF=30 ipf=6 (180 items) rep=3 | GT:22/noise:23 | Parallel analysis suggests that the number of factors =  17  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  17  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  17  and the number of components =  NA 
+std=0.631 efa=0.484 iter=0.504 v2=0.454 | 34.1 min ETA 17
+[31/45] nF=4 ipf=10 (40 items) rep=1 | GT:22/noise:23 | Parallel analysis suggests that the number of factors =  3  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  3  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  3  and the number of components =  NA 
+std=0.221 efa=0.225 iter=0.220 v2=0.214 | 34.4 min ETA 16
+[32/45] nF=4 ipf=10 (40 items) rep=2 | GT:23/noise:22 | Parallel analysis suggests that the number of factors =  4  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  4  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  4  and the number of components =  NA 
+std=0.147 efa=0.177 iter=0.171 v2=0.232 | 34.7 min ETA 14
+[33/45] nF=4 ipf=10 (40 items) rep=3 | GT:25/noise:20 | Parallel analysis suggests that the number of factors =  3  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  3  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  3  and the number of components =  NA 
+std=0.173 efa=0.209 iter=0.229 v2=0.185 | 34.8 min ETA 13
+[34/45] nF=8 ipf=10 (80 items) rep=1 | GT:22/noise:23 | Parallel analysis suggests that the number of factors =  7  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  7  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  7  and the number of components =  NA 
+std=0.353 efa=0.378 iter=0.393 v2=0.366 | 35.3 min ETA 11
+[35/45] nF=8 ipf=10 (80 items) rep=2 | GT:22/noise:23 | Parallel analysis suggests that the number of factors =  6  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  6  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  6  and the number of components =  NA 
+std=0.374 efa=0.235 iter=0.259 v2=0.306 | 35.8 min ETA 10
+[36/45] nF=8 ipf=10 (80 items) rep=3 | GT:22/noise:23 | Parallel analysis suggests that the number of factors =  7  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  7  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  7  and the number of components =  NA 
+std=0.395 efa=0.575 iter=0.535 v2=0.314 | 36.4 min ETA 9
+[37/45] nF=12 ipf=10 (120 items) rep=1 | GT:21/noise:24 | Parallel analysis suggests that the number of factors =  8  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  8  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  8  and the number of components =  NA 
+std=0.405 efa=0.343 iter=0.417 v2=0.341 | 37.4 min ETA 8
+[38/45] nF=12 ipf=10 (120 items) rep=2 | GT:20/noise:25 | Parallel analysis suggests that the number of factors =  8  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  8  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  8  and the number of components =  NA 
+std=0.487 efa=0.551 iter=0.540 v2=0.418 | 38.7 min ETA 7
+[39/45] nF=12 ipf=10 (120 items) rep=3 | GT:21/noise:24 | Parallel analysis suggests that the number of factors =  9  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  9  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  9  and the number of components =  NA 
+std=0.470 efa=0.567 iter=0.529 v2=0.441 | 39.6 min ETA 6
+[40/45] nF=20 ipf=10 (200 items) rep=1 | GT:23/noise:22 | Parallel analysis suggests that the number of factors =  16  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  16  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  15  and the number of components =  NA 
+std=0.566 efa=0.736 iter=0.640 v2=0.485 | 41.9 min ETA 5
+[41/45] nF=20 ipf=10 (200 items) rep=2 | GT:21/noise:24 | Parallel analysis suggests that the number of factors =  15  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  15  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  15  and the number of components =  NA 
+std=0.591 efa=0.481 iter=0.498 v2=0.656 | 44.0 min ETA 4
+[42/45] nF=20 ipf=10 (200 items) rep=3 | GT:19/noise:26 | Parallel analysis suggests that the number of factors =  14  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  14  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  14  and the number of components =  NA 
+std=0.741 efa=0.516 iter=0.528 v2=0.721 | 46.7 min ETA 3
+[43/45] nF=30 ipf=10 (300 items) rep=1 | GT:23/noise:22 | Parallel analysis suggests that the number of factors =  22  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  22  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  22  and the number of components =  NA 
+std=0.741 efa=0.712 iter=0.719 v2=0.576 | 51.2 min ETA 2
+[44/45] nF=30 ipf=10 (300 items) rep=2 | GT:25/noise:20 | Parallel analysis suggests that the number of factors =  22  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  22  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  22  and the number of components =  NA 
+std=0.768 efa=0.790 iter=0.838 v2=0.595 | 57.1 min ETA 1
+[45/45] nF=30 ipf=10 (300 items) rep=3 | GT:22/noise:23 | Parallel analysis suggests that the number of factors =  22  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  21  and the number of components =  NA 
+Parallel analysis suggests that the number of factors =  21  and the number of components =  NA 
+std=0.796 efa=0.694 iter=0.698 v2=0.705 | 65.3 min ETA 0
+
+============================================================
+ RESULTS
+============================================================
+
+=== OVERALL MEAN MCC ===
+   std efa_d iterative weighted_v2
+ 0.345 0.344     0.342        0.32
+
+=== BY ITEMS BIN ===
+     bin   std efa_d iterative weighted_v2
+     <30 0.170 0.159     0.150       0.102
+   30-60 0.210 0.212     0.215       0.204
+  60-100 0.299 0.347     0.337       0.370
+ 100-200 0.541 0.516     0.514       0.487
+    >200 0.768 0.732     0.752       0.625
+
+=== BY nF ===
+ nF   std efa_d iterative weighted_v2
+  4 0.168 0.176     0.168       0.144
+  8 0.269 0.247     0.252       0.202
+ 12 0.299 0.330     0.335       0.313
+ 20 0.437 0.442     0.428       0.427
+ 30 0.556 0.526     0.528       0.515
+
+=== WINNERS per cell ===
+ nF ipf total_items   std efa_d iterative weighted_v2      winner
+  4   3          12 0.145 0.155     0.141       0.070       efa_d
+  4   6          24 0.177 0.169     0.157       0.151         std
+  4  10          40 0.180 0.204     0.207       0.210 weighted_v2
+  8   3          24 0.188 0.154     0.152       0.085         std
+  8   6          48 0.244 0.190     0.207       0.193         std
+  8  10          80 0.374 0.396     0.396       0.329       efa_d
+ 12   3          36 0.177 0.145     0.169       0.156         std
+ 12   6          72 0.265 0.359     0.340       0.383 weighted_v2
+ 12  10         120 0.454 0.487     0.495       0.400   iterative
+ 20   3          60 0.239 0.308     0.279       0.255       efa_d
+ 20   6         120 0.438 0.441     0.450       0.405   iterative
+ 20  10         200 0.633 0.578     0.555       0.621         std
+ 30   3          90 0.260 0.286     0.275       0.398 weighted_v2
+ 30   6         180 0.640 0.560     0.557       0.523         std
+ 30  10         300 0.768 0.732     0.752       0.625         std
+
+Total runtime: 65.3 min
+Results saved: sim_weighted_v2_results.csv
+=== DONE ===

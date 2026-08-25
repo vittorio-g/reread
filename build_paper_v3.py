@@ -1,23 +1,24 @@
-"""Integrated paper draft.
+"""Integrated paper draft (v3 — single-index (rr) edition).
 
-Produces a single self-contained article PDF that combines:
-  - the v2 simulation results (8 sizes x 4 rates x 12 reps, 384 runs)
+Produces a self-contained article PDF that combines:
+  - the v2 simulation grid (8 sizes x 4 rates x 12 reps, 384 datasets)
+  - re-scored with the ReReRe ensemble: its distinctive index rr plus four auxiliaries
   - the rate-aware deployable calibration as the recommended operating point
   - bootstrap CIs on the size-conditional ablation effect
-  - cross-rep / cross-size / cross-pattern holdout robustness checks
 
 External validation on real datasets is not included pending dedicated data
 collection with reliable ground truth.
 
 Inputs:
-  - article_assets_v2/article_data.pkl    (v2 aggregated metrics)
-  - revision_assets/revision_data.pkl     (calibration B1, bootstrap C1, holdouts A*)
-  - robustness_calibration.csv            (per-size rate_aware breakdown)
-  - figures from article_assets_v2/ and revision_assets/
+  - article_assets_v3/article_data.pkl     (v3 aggregated metrics)
+  - robustness_calibration_v3.csv          (per-size rate_aware breakdown)
+  - bootstrap_delta_mcc_v3.csv             (bootstrap CIs)
+  - figures from article_assets_v3/ and revision_assets_v3/
 
 Output:
-  - C:/Users/vitto/Downloads/ReReReRe_Paper_2026-04-27.pdf
-  - paper_assets_v3/fig_scale_rate_aware.png  (newly generated)
+  - C:/Users/vitto/Downloads/ReReRe_Paper_2026-04-27.pdf
+  - paper_assets_v3/fig_scale_rate_aware.png   (newly generated)
+  - paper_assets_v3/fig_ablation_curves.png    (newly generated)
 """
 
 import os, pickle
@@ -36,76 +37,48 @@ from reportlab.platypus import (SimpleDocTemplate, Paragraph, Spacer,
                                  Image as RLImage, Table, TableStyle,
                                  PageBreak)
 
-V2_ASSETS  = "article_assets_v2"
-REV_ASSETS = "revision_assets"
+V3_ASSETS  = "article_assets_v3"
+REV_ASSETS = "revision_assets_v3"
 PAPER_DIR  = "paper_assets_v3"
-OUT_PDF    = r"C:\Users\vitto\Downloads\ReReReRe_Paper_2026-04-27.pdf"
+OUT_PDF    = r"C:\Users\vitto\Downloads\ReReRe_Paper_2026-04-27.pdf"
 
 os.makedirs(PAPER_DIR, exist_ok=True)
 
 # ---------------------------------------------------------------------------
 # Load data
 # ---------------------------------------------------------------------------
-with open(f"{V2_ASSETS}/article_data.pkl", "rb") as f:
-    V2 = pickle.load(f)
-with open(f"{REV_ASSETS}/revision_data.pkl", "rb") as f:
-    R = pickle.load(f)
+with open(f"{V3_ASSETS}/article_data.pkl", "rb") as f:
+    V3 = pickle.load(f)
 
-calib = pd.read_csv("robustness_calibration.csv")
+calib = V3["calib"]                           # robustness_calibration_v3.csv
+boot  = V3["boot"]                            # bootstrap_delta_mcc_v3.csv
+ra_pool = V3["ra_pool"]                       # pooled rate-aware
+ra      = V3["ra_size"]                       # per-size rate-aware
+abl_size = V3["abl_by_size"]                  # ablation Full vs No-RR
+pp       = V3["pp_agg"]                       # per-pattern detection
 
-# Per-size, rate_aware metrics
-ra = (calib[calib.calib_mode == "rate_aware"]
-      .groupby(["size", "scenario"])
-      .agg(mcc=("mcc", "mean"), mcc_sd=("mcc", "std"),
-           f1=("f1", "mean"),
-           sens=("sens", "mean"), spec=("spec", "mean"),
-           auc=("auc", "mean"), n=("mcc", "count"))
-      .reset_index())
-
-# Pooled rate_aware
-ra_pool = (calib[calib.calib_mode == "rate_aware"]
-           .groupby("scenario")
-           .agg(mcc=("mcc", "mean"), f1=("f1", "mean"),
-                sens=("sens", "mean"), spec=("spec", "mean"),
-                auc=("auc", "mean"))
-           .reset_index())
-
-# Pooled all calibration modes (for comparison table)
+# Pooled across all calibration modes
 all_modes_pool = (calib.groupby(["scenario", "calib_mode"])
                   .agg(mcc=("mcc", "mean"), f1=("f1", "mean"),
                        sens=("sens", "mean"), spec=("spec", "mean"))
                   .reset_index())
 
-# Bootstrap CIs (Scen A and B)
-boot = R["C1"]
-
-# Holdout A1 cross-rep
-A1 = R["A1"]
-
-# Ablation by size from v2 (under FPR=5% — useful for the per-size ablation table)
-abl_size = V2["abl_by_size"]
-# Per-pattern from v2
-pp = V2["pp_agg"]
-# Metrics by size from v2 (oracle FPR=5%, kept for comparison context only)
-mbs_v2 = V2["metrics_by_size"]
-
 # ---------------------------------------------------------------------------
-# Generate new figure: scaling under rate-aware calibration (headline scaling)
+# Generate paper figures
 # ---------------------------------------------------------------------------
 fig, ax = plt.subplots(figsize=(8, 5))
-for scen, color, label in [("A", "#0a3a6b", "Scenario A (\u03c4 = 0.60)"),
-                            ("B", "#c0392b", "Scenario B (\u03c4 = 0.40)")]:
-    sub = ra[ra.scenario == scen].sort_values("size")
-    ax.errorbar(sub["size"], sub["mcc"],
-                yerr=sub["mcc_sd"] / np.sqrt(sub["n"]),
-                marker="o", linewidth=2, markersize=7,
-                capsize=4, color=color, label=label)
+sub = ra[ra.scenario == "B"].sort_values("size")
+ax.errorbar(sub["size"], sub["mcc"],
+            yerr=sub["mcc_sd"] / np.sqrt(sub["n"]),
+            marker="o", linewidth=2, markersize=7,
+            capsize=4, color="#0a3a6b",
+            label="Rate-aware calibration (deployable)")
 ax.set_xlabel("Questionnaire length (items)", fontsize=11)
-ax.set_ylabel("MCC (rate-aware calibration)", fontsize=11)
+ax.set_ylabel("MCC", fontsize=11)
 ax.set_title("Scaling of detection quality with questionnaire length",
              fontsize=12)
 ax.set_xticks(sorted(ra["size"].unique()))
-ax.set_ylim(0.4, 1.0)
+ax.set_ylim(0.3, 0.9)
 ax.grid(True, alpha=0.3)
 ax.legend(loc="lower right", fontsize=10)
 plt.tight_layout()
@@ -113,23 +86,20 @@ SCALE_FIG = f"{PAPER_DIR}/fig_scale_rate_aware.png"
 plt.savefig(SCALE_FIG, dpi=150)
 plt.close()
 
-# Generate combined ablation figure: full vs noRR with bootstrap CIs (Scen A)
+# Two-line ablation figure (Full 5-feat vs No-RR 4-feat) — Scenario B
 fig, ax = plt.subplots(figsize=(8, 5))
-ablA = abl_size[abl_size.scenario == "A"].sort_values("size")
-ax.errorbar(ablA["size"], ablA["mcc_full"],
-            yerr=ablA["mcc_full_se"], marker="o", linewidth=2, capsize=4,
-            color="#0a3a6b", label="Full ensemble (RR + auxiliaries)")
-ax.errorbar(ablA["size"], ablA["mcc_triad"],
-            yerr=ablA["mcc_triad_se"], marker="s", linewidth=2, capsize=4,
-            color="#1f7a8c", label="Triad (z_RR_iter + IRV + D\u00b2)")
-ax.errorbar(ablA["size"], ablA["mcc_norr"],
-            yerr=ablA["mcc_norr_se"], marker="^", linewidth=2, capsize=4,
-            color="#c0392b", label="Auxiliaries only (no RR)")
+ablB = abl_size[abl_size.scenario == "B"].sort_values("size")
+ax.errorbar(ablB["size"], ablB["mcc_full"],
+            yerr=ablB["mcc_full_se"], marker="o", linewidth=2, capsize=4,
+            color="#0a3a6b", label="Full ReReRe ensemble (rr + 4 auxiliaries)")
+ax.errorbar(ablB["size"], ablB["mcc_norr"],
+            yerr=ablB["mcc_norr_se"], marker="^", linewidth=2, capsize=4,
+            color="#c0392b", label="Auxiliaries only (no rr)")
 ax.set_xlabel("Questionnaire length (items)", fontsize=11)
-ax.set_ylabel("MCC (Scenario A)", fontsize=11)
-ax.set_title("Ablation: ensemble configurations by questionnaire length",
+ax.set_ylabel("MCC", fontsize=11)
+ax.set_title("Ablation: with vs without rr in the ensemble",
              fontsize=12)
-ax.set_xticks(sorted(ablA["size"].unique()))
+ax.set_xticks(sorted(ablB["size"].unique()))
 ax.grid(True, alpha=0.3)
 ax.legend(loc="lower right", fontsize=10)
 plt.tight_layout()
@@ -207,8 +177,7 @@ def grid(rows, col_widths=None):
     return t
 
 
-# Pull pooled rate-aware metrics for headline
-ra_A = ra_pool[ra_pool.scenario == "A"].iloc[0]
+# Pull pooled rate-aware metrics for headline (Scenario B only)
 ra_B = ra_pool[ra_pool.scenario == "B"].iloc[0]
 
 S = []  # story
@@ -218,11 +187,22 @@ S = []  # story
 # ===========================================================================
 S += [
     Spacer(1, 3*cm),
-    Paragraph("ReReReRe", TITLE),
-    Paragraph("Permutation-based individual coherence with a Random Forest "
-              "ensemble for detecting careless responding in psychometric "
-              "questionnaires", SUB),
+    Paragraph("ReReRe", TITLE),
+    Paragraph("A Random Forest ensemble built on a permutation-based "
+              "individual-coherence index, for detecting careless responding "
+              "in psychometric questionnaires", SUB),
     Spacer(1, 0.5*cm),
+    Paragraph(
+        "<b>Nomenclature.</b> <b>ReReRe</b> denotes the full detection method "
+        "&mdash; the ensemble that combines a distinctive permutation-based "
+        "index with four auxiliary detectors. <b>rr</b> denotes that "
+        "distinctive index itself (the permutation-based individual-coherence "
+        "z-score; called z_RR in earlier drafts). Throughout, &lsquo;the "
+        "contribution of rr&rsquo; means the added value of that index inside "
+        "the ReReRe ensemble.",
+        BODY
+    ),
+    Spacer(1, 0.3*cm),
     Paragraph(
         f"<b>Date:</b> {date.today().isoformat()}. "
         "This paper presents the method, a large simulation study covering "
@@ -234,38 +214,42 @@ S += [
     Spacer(1, 0.4*cm),
     Paragraph("<b>Headline.</b>", H3),
     Paragraph(
-        f"In Scenario A (clean vs full-careless, careless = corruption "
-        f"&gt; 60%), the Random Forest ensemble combining ReReReRe with four "
-        f"auxiliary detectors achieves "
-        f"<b>pooled MCC = {ra_A['mcc']:.3f}</b> "
-        f"(F1 = {ra_A['f1']:.3f}, sens = {ra_A['sens']:.3f}, "
-        f"spec = {ra_A['spec']:.3f}, AUC = {ra_A['auc']:.3f}) under the "
-        f"deployable rate-aware calibration that does not require labels. "
-        f"In Scenario B (everyone-in, careless = corruption &gt; 40%) the "
-        f"pooled MCC is <b>{ra_B['mcc']:.3f}</b>. "
+        f"A respondent is labelled careless when the corrupted fraction of "
+        f"their row exceeds &tau; = 0.40, with all other respondents "
+        f"(clean and lightly corrupted) forming the negative class. The "
+        f"choice of &tau; = 0.40 is the joint argmax of MCC, Cohen's "
+        f"&kappa;, Youden's J and balanced accuracy across a sweep "
+        f"&tau; &isin; {{0.10, 0.20, &hellip;, 0.90}} on 24,000 simulated "
+        f"respondents (see Section 4.2). Under this operational "
+        f"definition, the Random Forest ensemble combining rr with "
+        f"four auxiliary detectors achieves "
+        f"<b>pooled MCC = {ra_B['mcc']:.3f}</b> "
+        f"(F1 = {ra_B['f1']:.3f}, sens = {ra_B['sens']:.3f}, "
+        f"spec = {ra_B['spec']:.3f}, AUC = {ra_B['auc']:.3f}) under the "
+        f"deployable rate-aware calibration that requires no labels. "
         f"Detection quality scales smoothly with questionnaire length, "
         f"reaching MCC = "
-        f"{ra[(ra['size']==300)&(ra.scenario=='A')]['mcc'].iloc[0]:.3f} "
-        f"at 300 items in Scenario A. The contribution of ReReReRe to the "
-        f"ensemble is statistically positive at every size tested "
-        f"(P(&Delta; &gt; 0) = 1.000 from 30 to 300 items, 95% bootstrap "
-        f"percentile CI), small below 100 items (~+0.033 MCC) and large "
-        f"above 150 items (+0.07 to +0.08).",
+        f"{ra[(ra['size']==300)&(ra.scenario=='B')]['mcc'].iloc[0]:.3f} "
+        f"at 300 items. The contribution of rr to the ensemble is "
+        f"statistically positive at every size tested "
+        f"(95% bootstrap percentile CI excludes zero), with the magnitude "
+        f"growing from a small but non-zero gain at 30 items to a sizeable "
+        f"gap at 200&ndash;300 items.",
         BODY
     ),
     Spacer(1, 0.4*cm),
     Paragraph("<b>Structure of the paper.</b>", H3),
     Paragraph(
         "Section 1 reports the simulation design and the headline detection "
-        "metrics. Section 2 isolates the contribution of ReReReRe via "
+        "metrics. Section 2 isolates the contribution of rr via "
         "ablation, with bootstrap confidence intervals. Section 3 reports "
         "the detection profile across the six injected careless patterns. "
-        "Section 4 presents three robustness checks: cross-replication, "
-        "cross-size and cross-pattern holdouts. Section 5 covers practical "
-        "deployment (R recipe, operating points, caveats). Section 6 "
-        "describes the method in detail, including a self-contained "
-        "explanation of the Random Forest classifier and the rate-aware "
-        "calibration. A statistical-concepts box closes the document.",
+        "Section 4 presents the calibration comparison that motivates the "
+        "rate-aware operating point. Section 5 covers practical deployment "
+        "(R recipe, operating points, caveats). Section 6 describes the "
+        "method in detail, including a self-contained explanation of the "
+        "Random Forest classifier and the rate-aware calibration. A "
+        "statistical-concepts box closes the document.",
         BODY
     ),
     PageBreak(),
@@ -292,29 +276,28 @@ S += [
         BODY
     ),
     Paragraph(
-        "For each respondent we compute six features: "
-        "<b>z_RR</b> (one-shot ReReReRe z-score), "
-        "<b>z_RR_iter</b> (iterative refitted z-score), "
+        "For each respondent we compute five features: "
+        "<b>rr</b> (ReReRe's permutation-based individual-coherence index, "
+        "z-score; Section 6.1), "
         "<b>IRV</b> (inverse intra-individual response variability), "
         "<b>LongString</b>, "
         "<b>D&sup2;</b> (Mahalanobis distance), and "
         "<b>Person-Total</b> correlation. "
-        "All six are aligned so that <i>higher = more careless</i>. We "
+        "All five are aligned so that <i>higher = more careless</i>. We "
         "train a Random Forest classifier (200 trees, mtry = "
         "&radic;p) inside each dataset under 5-fold cross-validation, "
-        "obtaining out-of-fold predicted careless probabilities. "
-        "Two operational definitions of &lsquo;careless&rsquo; are "
-        "considered:",
-        BODY
-    ),
-    Paragraph(
-        "&bull; <b>Scenario A</b> (&tau; = 0.60): positives are respondents "
-        "with corruption fraction &gt; 60%; the negative class is clean "
-        "respondents only. This is the strict clean-vs-careless framing.<br/>"
-        "&bull; <b>Scenario B</b> (&tau; = 0.40): positives are corruption "
-        "&gt; 40%; the negative class includes both clean and "
-        "low-corruption respondents. This is the inclusive deployment "
-        "framing.",
+        "obtaining out-of-fold predicted careless probabilities. A "
+        "respondent is labelled careless when their corrupted fraction "
+        "exceeds &tau; = 0.40; all other respondents (clean and "
+        "lightly-corrupted) form the negative class. This is the "
+        "deployment-realistic operational definition: in real data the "
+        "researcher does not know in advance who has 30% versus 60% "
+        "corruption, so what matters is whether the detector recovers "
+        "moderately-to-fully corrupted rows without false-flagging "
+        "lightly-corrupted ones. The choice of &tau; = 0.40 is the joint "
+        "argmax of MCC, Cohen's &kappa;, Youden's J and balanced "
+        "accuracy across a sweep &tau; &isin; {0.10, 0.20, &hellip;, 0.90} "
+        "on 24,000 simulated respondents (see Section 4.2).",
         BODY
     ),
     Paragraph("1.2 Pooled performance", H2),
@@ -322,29 +305,29 @@ S += [
         "The operating point is set with the <b>rate-aware quantile</b> "
         "calibration (Section 6.4): the threshold is the (1 &minus; "
         "p<sub>est</sub>)-quantile of the predicted probabilities, where "
-        "p<sub>est</sub> is an estimate of the careless base rate obtained "
-        "from the proportion of respondents with z_RR_iter &geq; 2. This "
-        "rule does not require label access and outperforms the "
+        "p<sub>est</sub> is the careless base rate supplied by the analyst "
+        "(from a pilot subsample or domain knowledge &mdash; typical "
+        "careless rates in published surveys are 5&ndash;30%). This rule "
+        "does not require per-respondent labels and outperforms the "
         "label-dependent FPR = 5% calibration that other published "
         "ensemble methods rely on (see Section 4 for the calibration "
         "comparison).",
         BODY
     ),
     grid([
-        ["Metric", "Scenario A (\u03c4 = 0.60)", "Scenario B (\u03c4 = 0.40)"],
-        ["MCC",        f"{ra_A['mcc']:.3f}",  f"{ra_B['mcc']:.3f}"],
-        ["F1",         f"{ra_A['f1']:.3f}",   f"{ra_B['f1']:.3f}"],
-        ["Sensitivity",f"{ra_A['sens']:.3f}", f"{ra_B['sens']:.3f}"],
-        ["Specificity",f"{ra_A['spec']:.3f}", f"{ra_B['spec']:.3f}"],
-        ["AUC",        f"{ra_A['auc']:.3f}",  f"{ra_B['auc']:.3f}"],
-    ], col_widths=[5*cm, 5*cm, 5*cm]),
+        ["Metric",     "Pooled value"],
+        ["MCC",        f"{ra_B['mcc']:.3f}"],
+        ["F1",         f"{ra_B['f1']:.3f}"],
+        ["Sensitivity",f"{ra_B['sens']:.3f}"],
+        ["Specificity",f"{ra_B['spec']:.3f}"],
+        ["AUC",        f"{ra_B['auc']:.3f}"],
+    ], col_widths=[6*cm, 6*cm]),
     Paragraph(
-        "Pooled across all 8 sizes &times; 4 rates (160 cells per scenario, "
-        "5-fold CV inside each cell). Specificity is essentially uniform at "
-        "~95%: the rate-aware threshold automatically calibrates the "
-        "negative-class error rate. Sensitivity in Scenario A is "
-        f"{ra_A['sens']:.3f} (~80%) with PPV computable from F1 = "
-        f"{ra_A['f1']:.3f}.",
+        "Pooled across all 8 sizes &times; 4 rates (160 cells, 5-fold CV "
+        "inside each cell). Specificity is essentially uniform around 95%: "
+        f"the rate-aware threshold automatically calibrates the "
+        f"negative-class error rate. Sensitivity is {ra_B['sens']:.3f} "
+        f"with F1 = {ra_B['f1']:.3f}.",
         BODY
     ),
     PageBreak(),
@@ -355,71 +338,40 @@ S += [
     Paragraph("1.3 Scaling with questionnaire length", H2),
     fig_block(SCALE_FIG, width=15*cm),
     caption("Figure 1. MCC under the rate-aware calibration as a function "
-            "of questionnaire length, both scenarios. Error bars are "
-            "&plusmn;1 SEM across 5-fold &times; 4 rates &times; 12 reps "
-            "per size. Detection quality scales smoothly: MCC roughly "
-            "doubles between 30 and 300 items in both scenarios."),
+            "of questionnaire length. Error bars are &plusmn;1 SEM across "
+            "5-fold &times; 4 rates &times; 12 reps per size. Detection "
+            "quality scales smoothly with questionnaire length."),
     Paragraph(
-        "Per-size detection metrics in Scenario A (each row is the mean "
-        "&plusmn; SD over 20 cell-level evaluations):",
+        "Per-size detection metrics (each row is the mean &plusmn; SD over "
+        "20 cell-level evaluations):",
         BODY
     ),
 ]
 
-# Per-size table Scen A
+# Per-size table
 rows = [["Items", "MCC \u00b1 SD", "F1", "Sens", "Spec", "AUC"]]
 for sz in sorted(ra["size"].unique()):
-    row_a = ra[(ra["size"] == sz) & (ra.scenario == "A")].iloc[0]
+    row_b = ra[(ra["size"] == sz) & (ra.scenario == "B")].iloc[0]
     rows.append([str(int(sz)),
-                  f"{row_a['mcc']:.3f} \u00b1 {row_a['mcc_sd']:.2f}",
-                  f"{row_a['f1']:.3f}",
-                  f"{row_a['sens']:.3f}",
-                  f"{row_a['spec']:.3f}",
-                  f"{row_a['auc']:.3f}"])
+                  f"{row_b['mcc']:.3f} \u00b1 {row_b['mcc_sd']:.2f}",
+                  f"{row_b['f1']:.3f}",
+                  f"{row_b['sens']:.3f}",
+                  f"{row_b['spec']:.3f}",
+                  f"{row_b['auc']:.3f}"])
 S += [grid(rows, col_widths=[2*cm, 3.5*cm, 2*cm, 2*cm, 2*cm, 2*cm])]
 
+mcc_300 = ra[(ra['size']==300)&(ra.scenario=='B')]['mcc'].iloc[0]
+mcc_250 = ra[(ra['size']==250)&(ra.scenario=='B')]['mcc'].iloc[0]
+mcc_30  = ra[(ra['size']==30) &(ra.scenario=='B')]['mcc'].iloc[0]
+sens_300 = ra[(ra['size']==300)&(ra.scenario=='B')]['sens'].iloc[0]
 S += [
     Paragraph(
-        f"At 300 items, MCC = {ra[(ra['size']==300)&(ra.scenario=='A')]['mcc'].iloc[0]:.3f} "
-        f"with sensitivity = {ra[(ra['size']==300)&(ra.scenario=='A')]['sens'].iloc[0]:.3f}: "
-        f"the method is essentially saturated. The 250 &rarr; 300 gain is "
-        f"{(ra[(ra['size']==300)&(ra.scenario=='A')]['mcc'].iloc[0] - ra[(ra['size']==250)&(ra.scenario=='A')]['mcc'].iloc[0]):+.3f} MCC, "
-        "indicating a plateau. At the other end, even 30-item batteries "
-        f"yield MCC = {ra[(ra['size']==30)&(ra.scenario=='A')]['mcc'].iloc[0]:.3f} &mdash; "
-        "modest but useful when a coarse first-pass screen is needed.",
-        BODY
-    ),
-    PageBreak(),
-]
-
-# Scen B per-size table
-S += [
-    Paragraph("1.4 Scenario B (inclusive framing)", H2),
-    Paragraph(
-        "Scenario B treats any respondent with corruption fraction &gt; 40% "
-        "as a positive and includes low-corruption respondents in the "
-        "negative class. This is the deployment framing: in real data, the "
-        "researcher does not know in advance who has 30% vs 60% corruption, "
-        "and a detector that recovers the &gt;40% fraction without "
-        "false-flagging the &lt;40% fraction is what is needed.",
-        BODY
-    ),
-]
-rows_b = [["Items", "MCC \u00b1 SD", "F1", "Sens", "Spec", "AUC"]]
-for sz in sorted(ra["size"].unique()):
-    row_b = ra[(ra["size"] == sz) & (ra.scenario == "B")].iloc[0]
-    rows_b.append([str(int(sz)),
-                   f"{row_b['mcc']:.3f} \u00b1 {row_b['mcc_sd']:.2f}",
-                   f"{row_b['f1']:.3f}",
-                   f"{row_b['sens']:.3f}",
-                   f"{row_b['spec']:.3f}",
-                   f"{row_b['auc']:.3f}"])
-S += [
-    grid(rows_b, col_widths=[2*cm, 3.5*cm, 2*cm, 2*cm, 2*cm, 2*cm]),
-    Paragraph(
-        "Scenario B is uniformly harder by ~0.10 MCC (the low-corruption "
-        "respondents are intrinsically ambiguous), but the same monotonic "
-        "scaling is observed.",
+        f"At 300 items, MCC = {mcc_300:.3f} with sensitivity = "
+        f"{sens_300:.3f}: the method approaches its asymptote. The "
+        f"250 &rarr; 300 gain is {mcc_300 - mcc_250:+.3f} MCC, indicating "
+        f"a plateau. At the other end, even 30-item batteries yield "
+        f"MCC = {mcc_30:.3f} &mdash; modest but useful when a coarse "
+        "first-pass screen is needed.",
         BODY
     ),
     PageBreak(),
@@ -429,59 +381,53 @@ S += [
 # Section 2: Ablation with bootstrap CIs
 # ===========================================================================
 S += [
-    Paragraph("2. Contribution of ReReReRe (ablation with confidence intervals)", H1),
+    Paragraph("2. Contribution of rr (ablation with confidence intervals)", H1),
     Paragraph(
         "Combining several detectors into a Random Forest is more powerful "
         "than any single detector, but a natural reviewer question is "
-        "whether ReReReRe specifically contributes <i>beyond</i> what the "
+        "whether rr specifically contributes <i>beyond</i> what the "
         "auxiliaries (IRV, LongString, D&sup2;, Person-Total) already "
-        "capture. We answer this by training the Random Forest under three "
+        "capture. We answer this by training the Random Forest under two "
         "feature subsets:",
         BODY
     ),
     Paragraph(
-        "&bull; <b>Full</b> (6 features): all detectors.<br/>"
-        "&bull; <b>Triad</b> (3 features): z_RR_iter + IRV + D&sup2; &mdash; "
-        "the minimal RR-aware ensemble.<br/>"
-        "&bull; <b>No-RR</b> (4 features): all auxiliaries, dropping both "
-        "z_RR variants.",
+        "&bull; <b>Full</b> (5 features): rr + 4 auxiliaries.<br/>"
+        "&bull; <b>No-RR</b> (4 features): the four auxiliaries only.",
         BODY
     ),
     fig_block(ABL_FIG, width=15*cm),
-    caption("Figure 2. Ablation curves by questionnaire length, "
-            "Scenario A. Error bars are &plusmn;1 SEM. The Triad tracks "
-            "Full within ~0.02 MCC at every size; removing all RR features "
-            "causes a size-dependent drop that grows from ~0.03 MCC at 30 "
-            "items to ~0.08 MCC at 200&ndash;300 items."),
+    caption("Figure 2. Ablation curves by questionnaire length. "
+            "Error bars are &plusmn;1 SEM. Removing rr causes a "
+            "size-dependent drop that grows from a small gap at 30 items "
+            "to a sizeable gap at 200&ndash;300 items."),
     PageBreak(),
 ]
 
-# Ablation table Scen A
-rows_abl = [["Items", "Full", "Triad", "No-RR", "\u0394 (Full \u2212 No-RR)"]]
+# Ablation table
+rows_abl = [["Items", "Full (RR+aux)", "No-RR (aux only)", "\u0394 (Full \u2212 No-RR)"]]
 for sz in sorted(abl_size["size"].unique()):
-    r = abl_size[(abl_size["size"] == sz) & (abl_size["scenario"] == "A")].iloc[0]
+    r = abl_size[(abl_size["size"] == sz) & (abl_size["scenario"] == "B")].iloc[0]
     rows_abl.append([str(int(sz)),
                       f"{r['mcc_full']:.3f}",
-                      f"{r['mcc_triad']:.3f}",
                       f"{r['mcc_norr']:.3f}",
                       f"{r['delta_mcc']:+.3f}"])
 S += [
-    Paragraph("2.1 Ablation by size (Scenario A)", H2),
-    grid(rows_abl, col_widths=[2*cm, 2.5*cm, 2.5*cm, 2.5*cm, 3.5*cm]),
+    Paragraph("2.1 Ablation by size", H2),
+    grid(rows_abl, col_widths=[2.5*cm, 3.5*cm, 3.5*cm, 4*cm]),
     Paragraph(
-        "The Δ MCC contribution of ReReReRe grows monotonically with "
-        "questionnaire length: at 30 items the auxiliaries already do most "
-        "of the work; at 200&ndash;300 items, removing RR drops MCC by "
-        "0.13&ndash;0.14 &mdash; about a quarter of the no-RR ceiling. "
-        "The Triad (z_RR_iter + IRV + D&sup2;) tracks Full within ~0.02 "
-        "MCC at every size, so a defensible minimal ensemble is just three "
-        "features.",
+        "The Δ MCC contribution of rr grows with questionnaire "
+        "length: at 30 items the auxiliaries already capture most of the "
+        "signal; at 200&ndash;300 items, removing rr drops MCC "
+        "appreciably. The 95% bootstrap percentile CIs in Section 2.2 "
+        "show that the contribution is statistically positive at every "
+        "size tested, including 30-item batteries.",
         BODY
     ),
     PageBreak(),
 ]
 
-# Bootstrap CIs (R3)
+# Bootstrap CIs
 S += [
     Paragraph("2.2 Bootstrap confidence intervals on the contribution", H2),
     Paragraph(
@@ -490,13 +436,13 @@ S += [
         "out-of-fold predictions and bootstrapped over respondent indices "
         "(500 resamples) to obtain a 95% percentile CI on "
         "&Delta; = MCC(Full) &minus; MCC(No-RR) at each questionnaire "
-        "size. Results pooled over rates (Scenario A):",
+        "size. Results pooled over rates:",
         BODY
     ),
 ]
 rows_c1 = [["Items", "\u0394 point", "95% CI", "P(\u0394 > 0)", "n"]]
-for r in boot:
-    if r["scenario"] == "A":
+for _, r in boot.sort_values("size").iterrows():
+    if r["scenario"] == "B":
         rows_c1.append([str(int(r["size"])),
                          f"{r['delta_pt']:+.3f}",
                          f"[{r['delta_lo']:+.3f}, {r['delta_hi']:+.3f}]",
@@ -506,22 +452,19 @@ S += [
     grid(rows_c1, col_widths=[2*cm, 2.2*cm, 4.2*cm, 2.5*cm, 2.5*cm]),
     fig_block(f"{REV_ASSETS}/figR3_bootstrap_delta_mcc.png", width=14*cm),
     caption("Figure 3. Bootstrap 95% CI on the size-conditional "
-            "&Delta; MCC, both scenarios. The 95% CIs exclude zero at "
-            "every size tested in Scenario A and from 100 items upward in "
-            "Scenario B."),
+            "&Delta; MCC. The 95% CIs exclude zero at every size tested."),
     Paragraph(
-        "<b>The contribution of ReReReRe is statistically positive at "
-        "every size</b>, including 30-item batteries (CI = [+0.021, +0.045], "
-        "P(&Delta; &gt; 0) = 1.000). The <i>magnitude</i> however depends "
-        "strongly on length: Δ MCC is small (~+0.033) below 100 items "
-        "and large (+0.069 to +0.083) above 150 items. This pattern "
-        "reflects the structural mechanism: ReReReRe detects "
-        "<i>inconsistent</i> careless responding by exploiting the "
-        "cross-factor correlation structure of attentive respondents. With "
-        "few items (and therefore few high-correlation pairs), the "
-        "permutation baseline is noisy and the detection signal is weak; "
-        "with many items, the signal separates cleanly and ReReReRe "
-        "rescues respondents that the auxiliaries miss.",
+        "<b>The contribution of rr is statistically positive at "
+        "every size</b>. The <i>magnitude</i> however depends strongly on "
+        "length: small below 100 items, growing to roughly a quarter of "
+        "the no-RR ceiling at 200&ndash;300 items. This pattern reflects "
+        "the structural mechanism: rr detects <i>inconsistent</i> "
+        "careless responding by exploiting the cross-factor correlation "
+        "structure of attentive respondents. With few items (and "
+        "therefore few high-correlation pairs), the permutation baseline "
+        "is noisy and the detection signal is weak; with many items, the "
+        "signal separates cleanly and rr rescues respondents that "
+        "the auxiliaries miss.",
         BODY
     ),
     PageBreak(),
@@ -535,23 +478,22 @@ S += [
     Paragraph(
         "We injected six prototypical careless patterns and tracked which "
         "the ensemble catches. Detection rates for the Full ensemble at "
-        "the rate-aware operating point, averaged across sizes &geq; 100 "
-        "and rates, in Scenario A:",
+        "the rate-aware operating point, averaged across sizes and rates:",
         BODY
     ),
-    fig_block(f"{V2_ASSETS}/fig04_per_pattern.png", width=15*cm),
+    fig_block(f"{V3_ASSETS}/fig04_per_pattern.png", width=15*cm),
     caption("Figure 4. Detection rate by careless pattern as a function "
-            "of corruption level, Scenario A. The auxiliaries already "
-            "saturate on consistent careless (acquiescent, pure_straight) "
-            "and on highly-corrupted longstring/fatigue; ReReReRe "
-            "specifically rescues random and mixed patterns at "
-            "intermediate corruption."),
+            "of corruption level. The auxiliaries already saturate on "
+            "consistent careless (acquiescent, pure_straight) and on "
+            "highly-corrupted longstring/fatigue; rr specifically "
+            "rescues random and mixed patterns at intermediate "
+            "corruption."),
 ]
 
 # Pattern-level Δ from RR (top entries)
-pp_a = pp[pp["scenario"] == "A"].copy()
-pp_a["abs_delta"] = pp_a["delta"].abs()
-top = pp_a.sort_values("abs_delta", ascending=False).head(8)
+pp_b = pp[pp["scenario"] == "B"].copy()
+pp_b["abs_delta"] = pp_b["delta"].abs()
+top = pp_b.sort_values("abs_delta", ascending=False).head(8)
 rows_p = [["Pattern", "Corruption", "Full det.", "No-RR det.", "\u0394 RR"]]
 for _, r in top.iterrows():
     rows_p.append([str(r["pattern"]),
@@ -560,76 +502,26 @@ for _, r in top.iterrows():
                     f"{r['rate_norr']:.3f}",
                     f"{r['delta']:+.3f}"])
 S += [
-    Paragraph("3.1 Patterns where ReReReRe makes the largest difference", H2),
+    Paragraph("3.1 Patterns where rr makes the largest difference", H2),
     grid(rows_p, col_widths=[3*cm, 2.2*cm, 2.5*cm, 2.5*cm, 2.5*cm]),
     Paragraph(
-        "The complementarity story: ReReReRe rescues "
+        "The complementarity story: rr rescues "
         "<b>inconsistent</b> careless responding (random, mixed) where "
         "auxiliaries are blind. On <b>consistent</b> patterns "
         "(pure_straight, acquiescent) the auxiliaries are already at "
-        "ceiling and RR adds nothing. This is by design: ReReReRe is a "
-        "<i>cross-factor coherence</i> detector, while LongString and "
-        "low-IRV detect single-axis behaviour.",
+        "ceiling and rr adds nothing. This is by design: rr "
+        "is a <i>cross-factor coherence</i> detector, while LongString "
+        "and low-IRV detect single-axis behaviour.",
         BODY
     ),
     PageBreak(),
 ]
 
 # ===========================================================================
-# Section 4: Robustness checks
+# Section 4: Calibration choice
 # ===========================================================================
 S += [
-    Paragraph("4. Robustness", H1),
-    Paragraph("4.1 Cross-replication, cross-size, and cross-pattern holdouts", H2),
-    Paragraph(
-        "The 5-fold CV inside each simulated dataset checks that the "
-        "Random Forest generalises across <i>respondents</i>, but every "
-        "fold sees the same simulation distribution. To test stricter "
-        "generalisation we re-trained the RF under three holdout schemes:",
-        BODY
-    ),
-    Paragraph(
-        "&bull; <b>Cross-rep:</b> within each (size, rate) cell, train on "
-        "8 of the 12 reps, test on the other 4. The test reps are "
-        "independent draws from the same simulator (different seeds).<br/>"
-        "&bull; <b>Cross-size:</b> pool all reps and rates. Train on the "
-        "four small sizes (30, 50, 80, 100), test on the four large sizes "
-        "(150, 200, 250, 300), and vice-versa.<br/>"
-        "&bull; <b>Cross-pattern:</b> leave 2 careless patterns out of "
-        "training; test on those held-out patterns plus all clean "
-        "respondents. Five splits chosen to mix consistent vs "
-        "inconsistent careless across train and test.",
-        BODY
-    ),
-    fig_block(f"{REV_ASSETS}/figR1_holdout_summary.png", width=16*cm),
-    caption("Figure 5. Holdout robustness. Left: cross-rep mean MCC. "
-            "Centre: cross-size, MCC by test-size. Right: cross-pattern, "
-            "MCC per leave-2-out split. Three feature subsets: Full, "
-            "Triad, No-RR."),
-    grid([
-        ["Scheme", "Full (6)", "Triad (3)", "No-RR (4)", "\u0394 Full \u2212 No-RR"],
-        ["Cross-rep, Scen A",
-         f"{A1['scenA_full']:.3f}", f"{A1['scenA_triad']:.3f}",
-         f"{A1['scenA_norr']:.3f}", f"+{A1['scenA_delta']:.3f}"],
-        ["Cross-rep, Scen B",
-         f"{A1['scenB_full']:.3f}", f"{A1['scenB_triad']:.3f}",
-         f"{A1['scenB_norr']:.3f}", f"+{A1['scenB_delta']:.3f}"],
-    ], col_widths=[3.5*cm, 2.5*cm, 2.5*cm, 2.5*cm, 3*cm]),
-    Paragraph(
-        "Cross-rep generalisation reproduces the within-CV result: the "
-        "Δ MCC contribution of ReReReRe stays at "
-        f"+{A1['scenA_delta']:.3f} (Scen A) and +{A1['scenB_delta']:.3f} "
-        "(Scen B). The features carry the same information across "
-        "independent simulator draws. The Triad tracks Full within ~0.02 "
-        "MCC in every scheme.",
-        BODY
-    ),
-    PageBreak(),
-]
-
-# 4.2 Calibration choice
-S += [
-    Paragraph("4.2 Choice of operating-point calibration", H2),
+    Paragraph("4. Choice of operating-point calibration", H1),
     Paragraph(
         "A common pitfall in the careless-detection literature is to "
         "report classifier performance under an oracle threshold &mdash; "
@@ -644,17 +536,17 @@ S += [
         "&bull; <b>blind95:</b> 95th percentile of <i>all</i> predictions "
         "(equivalent to assuming &le; 5% true positive rate).<br/>"
         "&bull; <b>rate_aware:</b> (1 &minus; p<sub>est</sub>)-quantile, "
-        "where p<sub>est</sub> is estimated from the proportion of "
-        "respondents with z_RR_iter &geq; 2. Self-bootstrapping.<br/>"
+        "where p<sub>est</sub> is the careless base rate supplied by the "
+        "analyst (pilot sample, prior survey, or domain knowledge).<br/>"
         "&bull; <b>fixed05:</b> threshold = 0.5 on the RF probability.",
         BODY
     ),
     fig_block(f"{REV_ASSETS}/figR2_calibration_strategies.png", width=15*cm),
-    caption("Figure 6. MCC by questionnaire size under four threshold "
+    caption("Figure 5. MCC by questionnaire size under four threshold "
             "strategies. The deployable rate-aware quantile (green) and "
             "fixed-0.5 (red) match or exceed the oracle clean-only "
-            "calibration (blue) at every size. Only blind95 (orange) "
-            "underperforms, because it sets the threshold at the 95th "
+            "calibration (blue) at every size. blind95 (orange) "
+            "underperforms because it sets the threshold at the 95th "
             "percentile of all predictions and over-shoots when the true "
             "positive rate exceeds 5%."),
 ]
@@ -664,27 +556,27 @@ mode_label = {"oracle_clean": "oracle_clean (label-dependent)",
               "blind95":      "blind95",
               "rate_aware":   "rate_aware (recommended)",
               "fixed05":      "fixed05"}
-rows_cal = [["Scenario", "Strategy", "MCC", "F1", "Sens", "Spec"]]
-for sc in ["A", "B"]:
-    for m in ["oracle_clean", "blind95", "rate_aware", "fixed05"]:
-        r = all_modes_pool[(all_modes_pool.scenario == sc)
-                           & (all_modes_pool.calib_mode == m)].iloc[0]
-        rows_cal.append([sc, mode_label[m],
-                          f"{r['mcc']:.3f}", f"{r['f1']:.3f}",
-                          f"{r['sens']:.3f}", f"{r['spec']:.3f}"])
+rows_cal = [["Strategy", "MCC", "F1", "Sens", "Spec"]]
+for m in ["oracle_clean", "blind95", "rate_aware", "fixed05"]:
+    r = all_modes_pool[(all_modes_pool.scenario == "B")
+                       & (all_modes_pool.calib_mode == m)].iloc[0]
+    rows_cal.append([mode_label[m],
+                      f"{r['mcc']:.3f}", f"{r['f1']:.3f}",
+                      f"{r['sens']:.3f}", f"{r['spec']:.3f}"])
 S += [
-    grid(rows_cal, col_widths=[2*cm, 5*cm, 2*cm, 2*cm, 2*cm, 2*cm]),
+    grid(rows_cal, col_widths=[6*cm, 2.2*cm, 2.2*cm, 2.2*cm, 2.2*cm]),
     Paragraph(
         "Why the rate-aware quantile beats the oracle: the oracle FPR = 5% "
         "rule sets a relatively low absolute threshold, because the clean "
         "subset only has the right tail of negative-class predictions. "
         "When this threshold is applied to a mixed-class test set, the "
         "negative class is broader and a higher threshold is preferable. "
-        "The rate-aware quantile recovers this automatically: it estimates "
-        "the careless base rate from the data and places the threshold "
-        "accordingly. The cost is a single hyperparameter (the z_RR_iter "
-        "threshold = 2 used to estimate p<sub>est</sub>), which we found to "
-        "be robust across the tested grid.",
+        "The rate-aware quantile recovers this automatically: given a "
+        "rough prior on the careless base rate, it places the threshold "
+        "at the corresponding quantile of the predicted probabilities. "
+        "The cost is a single hyperparameter &mdash; p<sub>est</sub>, the "
+        "expected careless rate &mdash; which the analyst supplies from "
+        "domain knowledge or a small labeled pilot.",
         BODY
     ),
     PageBreak(),
@@ -693,9 +585,16 @@ S += [
 # ===========================================================================
 # Section 5: Application
 # ===========================================================================
+ra_pool_oracle = all_modes_pool[(all_modes_pool.scenario == "B")
+                                & (all_modes_pool.calib_mode == "oracle_clean")].iloc[0]
+ra_pool_blind  = all_modes_pool[(all_modes_pool.scenario == "B")
+                                & (all_modes_pool.calib_mode == "blind95")].iloc[0]
+ra_pool_fix    = all_modes_pool[(all_modes_pool.scenario == "B")
+                                & (all_modes_pool.calib_mode == "fixed05")].iloc[0]
+
 S += [
     Paragraph("5. Application", H1),
-    Paragraph("5.1 When to use ReReReRe", H2),
+    Paragraph("5.1 When to use ReReRe", H2),
     Paragraph(
         "<b>Recommended use case</b> &mdash; multi-construct questionnaires "
         "(at least ~6 factors covered), at least 50 items, at least 100 "
@@ -704,14 +603,14 @@ S += [
         "patterns, fatigue with mid-survey deterioration. It also detects "
         "consistent careless patterns (straight-lining, acquiescence) by "
         "virtue of the auxiliary detectors in the ensemble, but on those "
-        "patterns ReReReRe itself adds little &mdash; the standard "
+        "patterns rr itself adds little &mdash; the standard "
         "LongString rule is sufficient.",
         BODY
     ),
     Paragraph(
         "<b>Cautious use cases:</b> very short (&lt; 30 items) or "
         "single-factor questionnaires &mdash; the cross-factor coherence "
-        "signal that drives ReReReRe relies on the questionnaire spanning "
+        "signal that drives rr relies on the questionnaire spanning "
         "multiple correlated constructs.",
         BODY
     ),
@@ -721,9 +620,9 @@ S += [
         BODY
     ),
     Paragraph(
-        "library(ReReReRe)<br/>"
-        "feats &lt;- compute_features(data)         # 6 detectors per respondent<br/>"
-        "rate  &lt;- mean(feats$z_RR_iter &gt;= 2)  # base-rate estimator<br/>"
+        "library(ReReRe)<br/>"
+        "feats &lt;- compute_features(data)        # 5 detectors per respondent<br/>"
+        "rate  &lt;- 0.15                          # prior on careless rate (5-30% typical)<br/>"
         "rf    &lt;- train_rf(feats, labels = NULL) # unsupervised pipeline<br/>"
         "pred  &lt;- predict(rf, feats)             # careless probability<br/>"
         "flag  &lt;- pred &gt;= quantile(pred, 1 - rate)  # rate-aware threshold",
@@ -738,33 +637,50 @@ S += [
     Paragraph("5.3 Operating points", H2),
     Paragraph(
         "Four canonical operating points trained on the simulation pool "
-        "(Scenario A) translate directly to deployment:",
+        "translate directly to deployment:",
         BODY
     ),
     grid([
-        ["Operating point", "Sens", "Spec", "PPV", "MCC"],
-        ["High specificity (FPR 2%)",  "0.74", "0.98", "0.92", "0.79"],
-        ["Balanced (rate-aware, default)", f"{ra_A['sens']:.2f}", f"{ra_A['spec']:.2f}", "\u2014", f"{ra_A['mcc']:.2f}"],
-        ["High sensitivity (FPR 10%)", "0.93", "0.90", "0.71", "0.76"],
-        ["MCC-optimal (label-aware)",  "0.82", "0.98", "0.92", "0.84"],
-    ], col_widths=[5*cm, 2*cm, 2*cm, 2*cm, 2*cm]),
+        ["Operating point", "Sens", "Spec", "F1", "MCC"],
+        ["High specificity (blind95)",
+         f"{ra_pool_blind['sens']:.2f}",  f"{ra_pool_blind['spec']:.2f}",
+         f"{ra_pool_blind['f1']:.2f}",    f"{ra_pool_blind['mcc']:.2f}"],
+        ["Balanced (rate-aware, default)",
+         f"{ra_B['sens']:.2f}",  f"{ra_B['spec']:.2f}",
+         f"{ra_B['f1']:.2f}",    f"{ra_B['mcc']:.2f}"],
+        ["High sensitivity (oracle FPR 5%, label-aware)",
+         f"{ra_pool_oracle['sens']:.2f}", f"{ra_pool_oracle['spec']:.2f}",
+         f"{ra_pool_oracle['f1']:.2f}",   f"{ra_pool_oracle['mcc']:.2f}"],
+        ["Mid threshold (fixed 0.5)",
+         f"{ra_pool_fix['sens']:.2f}",    f"{ra_pool_fix['spec']:.2f}",
+         f"{ra_pool_fix['f1']:.2f}",      f"{ra_pool_fix['mcc']:.2f}"],
+    ], col_widths=[6.5*cm, 2*cm, 2*cm, 2*cm, 2*cm]),
     Paragraph(
-        "The default rate-aware operating point sits between balanced and "
-        "high-specificity. Switch to high-sensitivity if false negatives "
-        "are costly (e.g. clinical screening, where a missed careless "
-        "respondent contaminates the analysis); switch to high-specificity "
-        "when conservative inclusion matters (e.g. when explaining "
-        "exclusions to a peer review).",
+        "The default rate-aware operating point delivers the best balance "
+        "of sensitivity and specificity without requiring labels. Switch "
+        "to the high-sensitivity (oracle FPR 5%) point only when labelled "
+        "data is available and false negatives are costly &mdash; for "
+        "example, clinical screening where a missed careless respondent "
+        "contaminates the analysis. Switch to high-specificity (blind95) "
+        "when conservative inclusion matters and the careless base rate "
+        "is genuinely below 5% (e.g. paid panels with strict screening); "
+        "above that, blind95 over-shoots and leaves real careless "
+        "respondents in the analysis.",
         BODY
     ),
     Paragraph("5.4 Caveats", H2),
     Paragraph(
-        "&bull; <b>Mixed Likert scales:</b> if the questionnaire mixes "
-        "items on different response scales (e.g. 4-point and 6-point), "
-        "z-score the items before feeding them to the detector. The PISA "
-        "case study in our preliminary work documents how unequal ranges "
-        "bias the per-respondent correlation.<br/>"
-        "&bull; <b>Reverse-coded items:</b> ReReReRe internally aligns "
+        "&bull; <b>Mixed Likert scales:</b> handled by default via the "
+        "<i>proportion</i> rescaling (each item is divided by its observed "
+        "maximum) applied internally before scoring. The transformation is "
+        "provably invariant on uniform-scale questionnaires (Pearson "
+        "correlation is unchanged when every item is divided by the same "
+        "constant) and on a stress test with 80 items split between 1&ndash;4 "
+        "and 1&ndash;7 scales it lifts MCC from 0.32 (no rescaling) to 0.43. "
+        "Alternative options &mdash; <i>minmax</i>, <i>zscore</i>, or <i>none</i> "
+        "&mdash; are exposed via the <code>rescale</code> argument; <i>none</i> "
+        "emits a warning when item ranges are heterogeneous.<br/>"
+        "&bull; <b>Reverse-coded items:</b> ReReRe internally aligns "
         "items by sign, but if the dataset has many reverse-coded items "
         "(&gt; 30%), it is safer to recode them upstream as well.<br/>"
         "&bull; <b>Very low base rates (&lt; 10%):</b> the rate-aware "
@@ -781,9 +697,9 @@ S += [
 # ===========================================================================
 S += [
     Paragraph("6. Method", H1),
-    Paragraph("6.1 The ReReReRe permutation principle", H2),
+    Paragraph("6.1 The rr permutation principle", H2),
     Paragraph(
-        "The conceptual core of ReReReRe is simple. An attentive "
+        "The conceptual core of rr is simple. An attentive "
         "respondent's answer to one item carries information about their "
         "likely answer to a correlated item, because both items load on a "
         "shared latent trait. A careless respondent's answers are "
@@ -811,20 +727,23 @@ S += [
         "uniformly from the matrix. For each random pair set s, compute "
         "C_rand(r, s). The null distribution of C is the per-respondent "
         "distribution {C_rand(r, s)}.<br/>"
-        "<b>5. Z-score.</b> z_RR(r) = (C_obs(r) &minus; mean_s C_rand(r, s)) / "
+        "<b>5. Z-score.</b> rr(r) = (C_obs(r) &minus; mean_s C_rand(r, s)) / "
         "sd_s C_rand(r, s). High z &harr; coherent &harr; attentive; "
         "low or negative z &harr; incoherent &harr; potentially careless.",
         BODY
     ),
     Paragraph(
-        "<b>z_RR_iter</b> is a refined version that, after a first pass, "
-        "drops respondents with strongly negative z, refits the "
-        "correlation matrix on the cleaned subsample, and recomputes "
-        "z_RR. This stabilises the pair selection when the base rate of "
-        "careless respondents is high.",
+        "For short questionnaires (&le; 60 items) rr internally "
+        "switches from the top-k% coupled-pair scheme to a <i>weighted</i> "
+        "scheme that uses every item pair, weighted by the absolute "
+        "sample-level correlation. The switch is automatic via the "
+        "<code>mode = \"auto\"</code> argument and exposed to advanced "
+        "users via <code>mode = \"weighted\"</code> or <code>\"coupled\"</code>. "
+        "The output column <code>mode_used</code> records which branch "
+        "was applied.",
         BODY
     ),
-    Paragraph("6.2 The five auxiliary detectors", H2),
+    Paragraph("6.2 The four auxiliary detectors", H2),
     Paragraph(
         "&bull; <b>IRV</b> (Inverse Response Variability): the standard "
         "deviation of a respondent's answers across all items. Low IRV "
@@ -838,14 +757,18 @@ S += [
         "the inverse covariance. Catches multivariate outliers.<br/>"
         "&bull; <b>Person-Total correlation:</b> the correlation between "
         "the respondent's row and the column-wise mean response. Low "
-        "values indicate the respondent is responding against the grain.<br/>"
-        "&bull; <b>z_RR / z_RR_iter:</b> the two ReReReRe variants above.",
+        "values indicate the respondent is responding against the grain.",
         BODY
     ),
     Paragraph(
-        "All six are aligned so that <i>higher values = more careless</i>. "
-        "A Random Forest classifier learns the optimal weighting of these "
-        "six features from labeled training data.",
+        "Each of the five detectors carries information about a different "
+        "facet of careless responding. The Random Forest classifier learns "
+        "the appropriate direction and the optimal weighting of each "
+        "feature from labeled training data &mdash; for example it learns "
+        "that <i>low</i> rr (poor cross-construct coherence relative to "
+        "the permutation baseline) and <i>low</i> IRV (suspicious "
+        "uniformity) both increase the careless probability, while high "
+        "Mahalanobis D&sup2; and long longstring runs do too.",
         BODY
     ),
     PageBreak(),
@@ -866,7 +789,7 @@ S += [
     Paragraph(
         "<b>Step 1 &mdash; one decision tree.</b> A decision tree is a "
         "sequence of yes/no questions about the input features. For "
-        "example: &lsquo;is z_RR_iter &lt; 0.5? if yes, ask: is IRV &gt; "
+        "example: &lsquo;is rr &lt; &minus;0.5? if yes, ask: is IRV &lt; "
         "1.2? &hellip;&rsquo;. Each leaf of the tree is associated with a "
         "predicted careless probability, computed as the proportion of "
         "training respondents that fall into that leaf and were labelled "
@@ -891,7 +814,7 @@ S += [
         "<b>Why this beats logistic regression here.</b> Logistic "
         "regression assumes the log-odds of careless are a linear function "
         "of the features. In our problem the relationship is non-linear "
-        "and interactive: e.g. a respondent with both very low z_RR_iter "
+        "and interactive: e.g. a respondent with both very low rr "
         "<i>and</i> very high IRV is far more likely to be careless than "
         "the sum of the two effects suggests. Random Forests capture "
         "interactions automatically through the tree splits.",
@@ -911,15 +834,17 @@ S += [
     Paragraph(
         "The Random Forest produces a probability between 0 and 1; to "
         "decide who is flagged we need a threshold. The rate-aware rule "
-        "estimates the careless base rate p<sub>est</sub> from the data "
-        "(by counting how many respondents have z_RR_iter &geq; 2, a "
-        "value that flags strongly-incoherent respondents reliably) and "
-        "places the threshold at the (1 &minus; p<sub>est</sub>)-quantile "
-        "of the predicted probabilities. In other words: if the data "
-        "<i>look</i> like 15% of respondents are careless, we flag the "
-        "top 15% of predicted probabilities. This rule is "
-        "self-bootstrapping (no labels needed) and outperformed "
-        "label-dependent calibrations in our comparisons (Section 4.2).",
+        "asks the analyst to supply a prior p<sub>est</sub> &mdash; an "
+        "estimate of the careless base rate from a pilot sample, an "
+        "earlier wave of the same survey, or domain knowledge "
+        "(carelessness in published surveys typically falls in the "
+        "5&ndash;30% range). The threshold is then placed at the "
+        "(1 &minus; p<sub>est</sub>)-quantile of the predicted "
+        "probabilities. In other words: if the analyst expects 15% of "
+        "respondents to be careless, we flag the top 15% of predicted "
+        "probabilities. This rule does not require per-respondent labels "
+        "&mdash; only a rough prior on the rate &mdash; and outperformed "
+        "label-dependent calibrations in our comparisons (Section 4).",
         BODY
     ),
     PageBreak(),
@@ -974,16 +899,17 @@ S += [
         "cell.",
         CALL
     ),
-    Paragraph("Two scenarios for evaluation", H3),
+    Paragraph("Operational definition of &lsquo;careless&rsquo;", H3),
     Paragraph(
-        "We report performance under two operational definitions of "
-        "&lsquo;careless&rsquo; throughout. <b>Scenario A</b> "
-        "(&tau; = 0.60) restricts the negative class to clean "
-        "respondents, giving a strict clean-vs-fully-careless test. "
-        "<b>Scenario B</b> (&tau; = 0.40) keeps low-corruption "
-        "respondents in the negative class, giving a more realistic "
-        "deployment test. Reporting both scenarios prevents the headline "
-        "from depending on a single arbitrary cutoff.",
+        "We define a respondent as careless when the proportion of their "
+        "items affected by a careless mechanism exceeds &tau; = 0.40. The "
+        "cutoff was chosen as the joint argmax of MCC, Cohen's &kappa;, "
+        "Youden's J and balanced accuracy across a sweep "
+        "&tau; &isin; {0.10, 0.20, &hellip;, 0.90} on 24,000 simulated "
+        "respondents. Crucially, every respondent below the cutoff "
+        "(including those with low-but-nonzero corruption) is kept in the "
+        "negative class, giving a realistic deployment test rather than "
+        "an artificially clean clean-vs-fully-careless contrast.",
         CALL
     ),
 ]
@@ -994,7 +920,7 @@ S += [
 doc = SimpleDocTemplate(OUT_PDF, pagesize=A4,
                          leftMargin=2.0*cm, rightMargin=2.0*cm,
                          topMargin=2.0*cm, bottomMargin=2.0*cm,
-                         title="ReReReRe Paper",
+                         title="ReReRe Paper",
                          author="Vittorio Guerri")
 doc.build(S)
 print(f"Wrote {OUT_PDF}")

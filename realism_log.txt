@@ -1,0 +1,53 @@
+Messaggio di avvertimento:
+il pacchetto 'lavaan' è stato creato con R versione 4.4.2 
+
+Caricamento pacchetto: 'psych'
+
+Il seguente oggetto è mascherato da 'package:lavaan':
+
+    cor2cov
+
+
+Caricamento pacchetto: 'mice'
+
+Il seguente oggetto è mascherato da 'package:stats':
+
+    filter
+
+I seguenti oggetti sono mascherati da 'package:base':
+
+    cbind, rbind
+
+[09:42:45] Starting realism simulation
+  Grid: 4 sizes x 2 rates x 2 conditions x 4 reps = 64 datasets
+  4/64 done (10s)  size=30 rate=0.20 cond=clean rep=4
+  8/64 done (20s)  size=30 rate=0.20 cond=realistic rep=4
+  12/64 done (29s)  size=30 rate=0.40 cond=clean rep=4
+  16/64 done (38s)  size=30 rate=0.40 cond=realistic rep=4
+  20/64 done (72s)  size=60 rate=0.20 cond=clean rep=4
+  24/64 done (106s)  size=60 rate=0.20 cond=realistic rep=4
+  28/64 done (140s)  size=60 rate=0.40 cond=clean rep=4
+  32/64 done (181s)  size=60 rate=0.40 cond=realistic rep=4
+  36/64 done (183s)  size=120 rate=0.20 cond=clean rep=4
+  40/64 done (188s)  size=120 rate=0.20 cond=realistic rep=4
+  44/64 done (192s)  size=120 rate=0.40 cond=clean rep=4
+  48/64 done (196s)  size=120 rate=0.40 cond=realistic rep=4
+  52/64 done (206s)  size=200 rate=0.20 cond=clean rep=4
+  56/64 done (216s)  size=200 rate=0.20 cond=realistic rep=4
+  60/64 done (225s)  size=200 rate=0.40 cond=clean rep=4
+  64/64 done (236s)  size=200 rate=0.40 cond=realistic rep=4
+
+[09:46:41] DONE. Wrote sim_realism_scores.csv (19200 rows) and sim_realism_diagnostic.csv (64 rows)
+
+Diagnostic summary by (size, condition):
+# A tibble: 8 × 7
+   size condition mean_sep mean_eig  n_ok n_marg n_weak
+  <dbl> <chr>        <dbl>    <dbl> <int>  <int>  <int>
+1    30 clean         2.89     3.66     2      6      0
+2    30 realistic     2.51     4.19     0      8      0
+3    60 clean         3.11     6.40     4      4      0
+4    60 realistic     2.72     7.35     0      8      0
+5   120 clean         3.33    12.2      7      1      0
+6   120 realistic     2.62    15.7      0      8      0
+7   200 clean         3.12    19.7      4      4      0
+8   200 realistic     2.58    26.9      0      8      0

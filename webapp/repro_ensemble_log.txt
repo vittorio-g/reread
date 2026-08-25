@@ -1,0 +1,22 @@
+Ensemble flag rule: eta >= -0.081 (full-study operating point at rate 0.548)
+
+== A. Determinism (same data, same seed) ==
+  max |p1-p2| over 84 respondents = 0.00e+0  -> BIT-IDENTICAL
+
+== B. Monte-Carlo stability across 40 seeds (full data) ==
+  iterations=50   | mean per-resp p SD = 0.0251 | flag-unstable = 7/84 (8%)
+  iterations=100  | mean per-resp p SD = 0.0177 | flag-unstable = 6/84 (7%)
+  iterations=200  | mean per-resp p SD = 0.0134 | flag-unstable = 5/84 (6%)
+  iterations=300  | mean per-resp p SD = 0.0109 | flag-unstable = 6/84 (7%)
+
+== C. Idempotence: clean, reload, re-flag? (absolute eta>=TAU) ==
+  round 0: n=84
+  round 1: on n=84 -> flags 47 (45 true-careless, 2 careful) | diag=marginal
+  round 2: on n=37 -> flags 20 (1 true-careless, 19 careful) | diag=weak
+  round 3: on n=17 -> flags 11 (0 true-careless, 11 careful) | diag=no_structure
+  -> STOP: diagnostic=no_structure — cleaned set has no careless structure left; the tool warns against a further pass (safeguard, not threshold convergence: within-dataset standardisation re-centres each pass).
+
+== C2. Reload a set of ONLY verified-careful respondents ==
+  38 verified-careful respondents, no careless present.
+  ensemble flags 21 of them (55%) at eta>=TAU (absolute)
+  (deployable top-15% rule would flag ~6 = 15% by construction — use a realistic prevalence)

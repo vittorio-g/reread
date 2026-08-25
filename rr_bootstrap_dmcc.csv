@@ -1,0 +1,4 @@
+"dataset","J","n","npos","gt","oMCC_PTonly","oMCC_M0","oMCC_M1","dMCC","boot_mean","ci_lo","ci_hi","P_gt0"
+"Kay S2",363,701,35,"self-report exclusion",0.396,0.396,0.477,0.08,0.083,0.002,0.163,0.978
+"smarvus",141,10234,1071,">=2 instructed checks",0.42,0.423,0.485,0.062,0.061,0.042,0.079,1
+"opsy 16PF",163,35381,265,"extreme speeders",0.078,0.074,0.098,0.023,0.023,0.007,0.04,0.995

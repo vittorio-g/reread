@@ -1,0 +1,115 @@
+Messaggio di avvertimento:
+il pacchetto 'ggplot2' è stato creato con R versione 4.4.3 
+This is lavaan 0.6-19
+lavaan is FREE software! Please report any bugs.
+Messaggio di avvertimento:
+il pacchetto 'lavaan' è stato creato con R versione 4.4.2 
+
+Caricamento pacchetto: 'magrittr'
+
+Il seguente oggetto è mascherato da 'package:tidyr':
+
+    extract
+
+
+Caricamento pacchetto: 'psych'
+
+Il seguente oggetto è mascherato da 'package:lavaan':
+
+    cor2cov
+
+I seguenti oggetti sono mascherati da 'package:ggplot2':
+
+    %+%, alpha
+
+
+Caricamento pacchetto: 'mice'
+
+Il seguente oggetto è mascherato da 'package:stats':
+
+    filter
+
+I seguenti oggetti sono mascherati da 'package:base':
+
+    cbind, rbind
+
+6 conditions x 4 reps = 24 runs
+Methods: std, std+VP, split-half (min), split-half (mean)
+
+[1/24] nF=8 ipf=6 rep=1 | 0.5 min ETA NA
+[2/24] nF=8 ipf=6 rep=2 | 0.8 min ETA 9
+[3/24] nF=8 ipf=6 rep=3 | 1.2 min ETA 8
+[4/24] nF=8 ipf=6 rep=4 | 1.6 min ETA 8
+[5/24] nF=16 ipf=6 rep=1 | 1.7 min ETA 6
+[6/24] nF=16 ipf=6 rep=2 | 1.7 min ETA 5
+[7/24] nF=16 ipf=6 rep=3 | 1.7 min ETA 4
+[8/24] nF=16 ipf=6 rep=4 | 1.8 min ETA 4
+[9/24] nF=30 ipf=6 rep=1 | 1.9 min ETA 3
+[10/24] nF=30 ipf=6 rep=2 | 2.0 min ETA 3
+[11/24] nF=30 ipf=6 rep=3 | 2.1 min ETA 2
+[12/24] nF=30 ipf=6 rep=4 | 2.2 min ETA 2
+[13/24] nF=8 ipf=10 rep=1 | 2.2 min ETA 2
+[14/24] nF=8 ipf=10 rep=2 | 2.2 min ETA 2
+[15/24] nF=8 ipf=10 rep=3 | 2.2 min ETA 1
+[16/24] nF=8 ipf=10 rep=4 | 2.2 min ETA 1
+[17/24] nF=16 ipf=10 rep=1 | 2.3 min ETA 1
+[18/24] nF=16 ipf=10 rep=2 | 2.4 min ETA 1
+[19/24] nF=16 ipf=10 rep=3 | 2.5 min ETA 1
+[20/24] nF=16 ipf=10 rep=4 | 2.5 min ETA 1
+[21/24] nF=30 ipf=10 rep=1 | 2.8 min ETA 0
+[22/24] nF=30 ipf=10 rep=2 | 3.1 min ETA 0
+[23/24] nF=30 ipf=10 rep=3 | 3.4 min ETA 0
+[24/24] nF=30 ipf=10 rep=4 | 3.6 min ETA 0
+
+=== Overall metrics (auto-z, GT=corruption>50%) ===
+f_std         sens=0.815  spec=0.774  MCC=0.567
+f_std_vp      sens=0.846  spec=0.762  MCC=0.582
+f_sh_min      sens=0.990  spec=0.455  MCC=0.464
+f_sh_mean     sens=0.889  spec=0.728  MCC=0.589
+
+=== Per-pattern sensitivity (truly careless, corruption>50%) ===
+       pattern    n   std std_vp sh_min sh_mean
+   acquiescent 1200 0.840  0.927  0.998   0.915
+    longstring  600 0.683  0.708  0.968   0.798
+         mixed  600 0.677  0.680  0.982   0.810
+ pure_straight 1200 1.000  1.000  1.000   1.000
+        random  600 0.663  0.678  0.987   0.787
+
+=== Detection rate by corruption bin (low-items: 10-50%) ===
+       pattern corruption_bin10    n det_std det_sh_min det_sh_mean
+   acquiescent              1.0 1200   0.840      0.998       0.915
+    longstring              0.1  120   0.250      0.583       0.333
+    longstring              0.2  120   0.300      0.608       0.358
+    longstring              0.3  120   0.383      0.792       0.450
+    longstring              0.4  120   0.458      0.833       0.558
+    longstring              0.5  120   0.558      0.908       0.717
+    longstring              0.6  120   0.508      0.983       0.633
+    longstring              0.7  120   0.683      0.958       0.783
+    longstring              0.8  120   0.675      0.958       0.833
+    longstring              0.9  120   0.792      0.967       0.883
+    longstring              1.0  120   0.758      0.975       0.858
+         mixed              0.1  120   0.258      0.583       0.292
+         mixed              0.2  120   0.267      0.667       0.358
+         mixed              0.3  120   0.375      0.817       0.467
+         mixed              0.4  120   0.383      0.833       0.450
+         mixed              0.5  120   0.600      0.917       0.642
+         mixed              0.6  120   0.592      0.942       0.733
+         mixed              0.7  120   0.575      0.992       0.733
+         mixed              0.8  120   0.758      0.992       0.867
+         mixed              0.9  120   0.725      0.983       0.858
+         mixed              1.0  120   0.733      1.000       0.858
+ pure_straight              1.0 1200   1.000      1.000       1.000
+        random              0.1  120   0.242      0.592       0.325
+        random              0.2  120   0.250      0.692       0.325
+        random              0.3  120   0.300      0.808       0.433
+        random              0.4  120   0.483      0.917       0.575
+        random              0.5  120   0.500      0.917       0.600
+        random              0.6  120   0.592      0.967       0.683
+        random              0.7  120   0.633      1.000       0.783
+        random              0.8  120   0.708      1.000       0.842
+        random              0.9  120   0.683      0.975       0.808
+        random              1.0  120   0.700      0.992       0.817
+
+Runtime: 3.7 min
+Saved: sim_splithalf_results.csv, plot_splithalf_metrics.png, plot_splithalf_curves.png
+=== DONE ===

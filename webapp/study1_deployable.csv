@@ -1,0 +1,10 @@
+"model","auc","auc_lo","auc_hi","full_gate_open","full_n_flagged","full_mcc_auto","band_mcc_auto","band_mcc_min","band_mcc_max","band_flag_share"
+"Shipped ensemble (rc + LongString + PT)",0.9839,0.9697,0.9981,TRUE,62,0.7246,0.8044,0.7447,0.851,0.2105
+"refit adding IRV + D2 (5 features)",0.9823,0.9672,0.9974,TRUE,58,0.6866,0.8068,0.7389,0.8482,0.1993
+"Auxiliaries only, no rc (IRV + LS + D2 + PT)",0.9417,0.9079,0.9755,TRUE,27,0.4088,0.5611,0.5556,0.5724,0.0659
+"rc alone",0.8686,0.807,0.9303,TRUE,54,0.5686,0.6311,0.5975,0.6608,0.1461
+"RPR alone",0.9166,0.8717,0.9614,FALSE,2,0.1019,0.5528,0.4734,0.613,0.2607
+"LongString + PT",0.9419,0.9067,0.977,TRUE,21,0.3525,0.6802,0.649,0.6947,0.1417
+"RPR + LongString + PT",0.9793,0.9619,0.9967,TRUE,42,0.5421,0.7643,0.752,0.7862,0.1115
+"rc + RPR + LongString + PT",0.9895,0.9793,0.9997,TRUE,61,0.715,0.8628,0.8138,0.8926,0.1825
+"[reference] shipped weights, frozen",0.9901,0.9805,0.9998,TRUE,66,0.7639,0.8126,0.735,0.8728,0.2111

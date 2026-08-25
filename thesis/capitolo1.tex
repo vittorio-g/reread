@@ -1,0 +1,455 @@
+% =====================================================================
+% Thesis — Chapter 1
+% Careless Responding Detection: The Field, Current Practices, and Software
+% Class: apa7 (doc option) + biblatex-apa (APA 7th)
+% Compile: biber (pdflatex -> biber -> pdflatex -> pdflatex)
+% =====================================================================
+\documentclass[doc,11pt,donotrepeattitle]{apa7}
+
+\usepackage[american]{babel}
+\usepackage{csquotes}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{tabularx}
+\usepackage{ragged2e}
+
+\usepackage[style=apa,sortcites=true,sorting=nyt,backend=biber]{biblatex}
+\DeclareLanguageMapping{american}{american-apa}
+\addbibresource{bibliografia.bib}
+
+% --- helper column types for the summary table ---
+\newcolumntype{L}[1]{>{\RaggedRight\arraybackslash}p{#1}}
+
+% apa7 loads hyperref; hide the colored link borders for a clean print look
+\hypersetup{hidelinks}
+
+\title{Careless Responding Detection: The Field, Current Practices, and Software}
+\shorttitle{Careless Responding Detection}
+\author{Vittorio Guerrieri}
+\affiliation{Chapter~1 of the thesis}
+
+\begin{document}
+
+\maketitle
+
+% =====================================================================
+\section{The Problem of Careless Responding}
+% =====================================================================
+
+Self-report questionnaires rest on a tacit assumption: that respondents read
+each item, retrieve the relevant information, form a judgment, and map it onto
+the response scale. When this process breaks down---when respondents answer
+without attending to item content---the resulting data carry the surface form
+of valid measurement but none of its substance. This phenomenon, variously
+labeled \emph{careless responding}, \emph{insufficient effort responding}
+(IER), \emph{inattentive responding}, or \emph{random responding}, has become
+one of the most actively studied threats to the validity of survey research
+\parencite{meade2012identifying, curran2016methods, ward2023dealing}.
+
+The terminological proliferation reflects subtly different emphases.
+\textcite{huang2012detecting} introduced \emph{insufficient effort responding}
+to foreground the motivational mechanism: respondents who are unwilling to
+expend the cognitive effort the task demands. \textcite{krosnick1991response}
+had earlier framed the same behavior as \emph{satisficing}---respondents who,
+rather than \emph{optimizing} their answer through the full cognitive sequence,
+settle for a response that is merely good enough, or in the limiting case of
+\emph{strong} satisficing, select responses with little or no reference to item
+content. \emph{Careless responding} is the broader umbrella term now favored in
+methodological reviews \parencite{ward2023dealing}; it encompasses both the
+low-effort respondent and the respondent whose attention lapses intermittently
+over a long instrument. Throughout this thesis I use \emph{careless responding}
+as the cover term and reserve more specific labels for particular response
+patterns.
+
+Whatever the label, the empirical consequences are well documented and
+consistently damaging. Careless responding inflates measurement error and
+depresses scale reliability \parencite{huang2012detecting}. Because careless
+responses are, to a first approximation, unrelated to the constructs a
+questionnaire targets, they attenuate true relationships between variables; yet
+they can also \emph{create} spurious relationships, most insidiously when
+careless respondents endorse the midpoint or an extreme of every scale and
+thereby manufacture artifactual covariance across otherwise unrelated measures
+\parencite{huang2015insufficient}. \textcite{maniaci2014caring} demonstrated
+across several studies that even modest proportions of inattentive participants
+can meaningfully distort effect sizes, suppress genuine effects, and reduce
+statistical power. \textcite{kam2015careless} showed that careless and
+acquiescent responding can distort the very factor structure recovered from a
+set of items, splitting a unidimensional construct into spurious method
+factors. In clinical and applied settings the stakes are higher still:
+\textcite{conijn2019assessment} found that careless responding in routine
+outcome monitoring biased symptom estimates in ways that could affect treatment
+decisions.
+
+Estimates of prevalence vary with population, mode of administration, and
+detection method, but they are rarely negligible. Reviews place the typical
+incidence somewhere between roughly 5\% and 15\% of respondents in
+well-controlled samples, with substantially higher rates in unsupervised online
+panels and crowdsourced labor markets \parencite{ward2023dealing,
+meade2012identifying, curran2016methods}. \textcite{bowling2016who} added an
+important nuance: carelessness is not purely situational noise but is partly a
+stable individual difference, correlated with low conscientiousness and low
+agreeableness, meaning that the same respondents tend to provide low-effort data
+across studies. The practical upshot, emphasized in every recent treatment of
+the topic, is that careless responding cannot be assumed away: it must be
+actively prevented where possible and detected and addressed where not
+\parencite{desimone2015best, desimone2018dirty, ward2023dealing}.
+
+% =====================================================================
+\section{A Taxonomy of Causes and Response Patterns}
+% =====================================================================
+
+Effective detection requires a clear picture of \emph{what careless responding
+looks like} in the data, because different careless behaviors leave different
+statistical fingerprints. The literature converges on a useful organizing
+distinction between \emph{consistent} and \emph{inconsistent} careless
+responding \parencite{ward2023dealing, curran2016methods}.
+
+\emph{Consistent} careless patterns are those in which the respondent produces
+a regular, low-information sequence. The clearest example is
+\emph{straightlining} (also called \emph{non-differentiation}): selecting the
+same response option for a long run of consecutive items, often the scale
+midpoint or an extreme. A closely related notion is the \emph{longstring}---the
+maximum length of consecutive identical responses, which \textcite{johnson2005ascertaining}
+established as a simple but effective marker of inattentive protocols.
+\emph{Acquiescent} responding (uniform agreement regardless of item keying) is
+another consistent pattern, particularly damaging because it survives naive
+reliability checks while corrupting the covariance structure
+\parencite{kam2015careless}. Consistent patterns are, paradoxically, both easy
+and hard to detect: easy because their regularity is conspicuous to a longstring
+counter, hard because a respondent who endorses the midpoint of every item can
+look indistinguishable from a genuinely neutral one.
+
+\emph{Inconsistent} careless patterns, by contrast, involve responses that vary
+across items but bear no coherent relationship to item content. The prototype is
+\emph{purely random} responding, in which answers are effectively drawn at
+random from the response scale. Such protocols display normal-looking variance
+and no long runs, so they slip past longstring and variability checks; what
+betrays them is the \emph{absence of the correlational structure} that attentive
+respondents exhibit---answers to items measuring the same latent trait, which
+should covary, instead scatter \parencite{meade2012identifying, curran2016methods}.
+\emph{Mixed} patterns, in which a respondent attends to part of the instrument
+and disengages for the rest (for example through mid-survey
+\emph{fatigue}), combine features of both families and are correspondingly
+difficult to catch with any single index \parencite{ward2023dealing}.
+
+This taxonomy matters for a reason that runs through the entire thesis: the
+indices in widest use were largely designed for, and excel at, consistent
+careless patterns, whereas inconsistent patterns---random and mixed
+responding---are precisely where most methods are weakest. The cross-factor
+coherence approach developed in later chapters is motivated by this gap.
+
+% =====================================================================
+\section{Prevention by Design}
+% =====================================================================
+
+Because no detection method is perfect, the first line of defense is to design
+instruments and data-collection procedures that discourage careless responding
+and that embed signals of inattention directly into the questionnaire
+\parencite{ward2023dealing, desimone2015best}.
+
+The most common device is the \emph{attention check}, which takes several forms.
+\emph{Instructed-response items} (IRIs) direct the respondent to select a
+specific option (``Please select \emph{strongly agree} for this item''); a
+deviation flags inattention. \emph{Bogus items} assert something patently true
+or false (``I was born on February 30th''); an implausible answer is
+diagnostic. \emph{Instructional manipulation checks} (IMCs), introduced by
+\textcite{oppenheimer2009instructional}, embed a comprehension test within a
+seemingly ordinary item and have been shown to identify respondents who are
+satisficing rather than reading. A self-report single-item approach simply asks
+respondents, at the end, whether their data should be used---a surprisingly
+informative question when posed without penalty \parencite{meade2012identifying}.
+
+These instruments are valuable but limited, and the limitations are
+instructive. \textcite{curran2019paid} showed that attention-check items
+generate a non-trivial rate of \emph{valid-but-incorrect} responses: attentive
+participants sometimes fail them (through misreading or genuine ambiguity),
+while determined careless respondents can pass an isolated check by chance or by
+briefly attending to a conspicuous item. A single check therefore has limited
+sensitivity and imperfect specificity. Attention checks also consume
+questionnaire space, can alter respondent behavior by signaling surveillance,
+and---being placed at fixed positions---catch inattention only at those points,
+missing the intermittent disengagement characteristic of fatigue. For
+time-stamped or computer-administered surveys, \emph{response latency} offers a
+complementary design-based signal: implausibly fast page completions indicate
+that a respondent could not have read the items, a logic formalized by
+\textcite{wise2005response} in the \emph{response time effort} measure and later
+embedded in model-based approaches \parencite{ulitzsch2022response}. Response
+times, however, are unavailable in the many settings where only the final
+responses are recorded.
+
+The recurring lesson is that prevention reduces but does not eliminate careless
+responding, and that the design-based signals it provides are partial. This
+motivates \emph{post-hoc} detection from the response data themselves---methods
+that require no special items, no timing information, and no advance planning,
+and that can therefore be applied to data already collected.
+
+% =====================================================================
+\section{Post-hoc Identification Methods}
+% =====================================================================
+
+Post-hoc methods infer carelessness from the structure of the observed
+responses. They fall into several families, each exploiting a different
+statistical signature of inattention. The two most authoritative syntheses of
+this literature---\textcite{meade2012identifying} and \textcite{curran2016methods}---organize
+the field around a core set of indices that I summarize here and collect, with
+their software implementations, in Table~\ref{tab:indices}.
+
+\subsection{Consistency and Response-Pattern Indices}
+
+\emph{Longstring} counts the maximum number of consecutive identical responses
+in a protocol. It is the canonical detector of straightlining and is trivial to
+compute, but it is blind to inconsistent careless responding and is biased by
+the number of items keyed in the same direction \parencite{johnson2005ascertaining,
+meade2012identifying}.
+
+The \emph{intra-individual response variability} (IRV) is the standard deviation
+of a respondent's answers across a set of items \parencite{dunn2018intra}. Very
+low IRV signals straightlining (little or no variation), while implausibly high
+IRV can indicate random responding across the full scale range. Because it
+condenses a protocol to a single dispersion statistic, IRV is cheap and
+intuitive, but it discards all information about \emph{which} items were answered
+how.
+
+\emph{Psychometric synonyms and antonyms} \parencite{meade2012identifying}
+operationalize coherence at the item-pair level. One identifies pairs of items
+that are strongly positively correlated in the sample (synonyms) or strongly
+negatively correlated (antonyms), then computes, \emph{within each respondent},
+the correlation between their answers to the two members of each pair. An
+attentive respondent answers synonym pairs similarly and antonym pairs
+oppositely, producing a high within-person correlation; a careless respondent
+does not. This is a powerful idea because it targets inconsistent careless
+responding directly, and it is the conceptual ancestor of the cross-factor
+coherence method developed later in this thesis.
+
+The \emph{person--total correlation} correlates a respondent's profile of
+answers with the sample's mean response to each item; respondents who answer
+against the grain of the typical pattern receive low values. \emph{Even--odd
+consistency} splits a scale into even- and odd-numbered items, computes two
+subscale scores, and assesses their agreement; \emph{resampled individual
+reliability} generalizes this by repeatedly splitting and correlating. These
+consistency indices trace back to classical work on individual-protocol
+validity \parencite{jackson1976jackson, johnson2005ascertaining}.
+
+\subsection{Multivariate Outlier Detection}
+
+A complementary strategy treats careless protocols as multivariate
+\emph{outliers}. The \emph{Mahalanobis distance} \parencite{mahalanobis1936generalised}
+measures how far a respondent's response vector lies from the sample centroid,
+scaled by the inverse covariance matrix, and is the most widely used outlier
+index in this literature \parencite{meade2012identifying, curran2016methods}.
+Under multivariate normality the squared distance follows a chi-square
+distribution with degrees of freedom equal to the number of items, which
+suggests a principled cutoff. In practice, Likert data violate the normality
+assumption badly, so the chi-square reference distribution is only approximate,
+and---as the simulation chapters of this thesis document in detail---the
+nominal cutoff can be far too conservative for questionnaire data, flagging
+almost no one. Mahalanobis distance also detects \emph{any} multivariate
+outlier, careless or not, including genuinely unusual but attentive respondents.
+
+\subsection{Person-Fit and Item-Response-Theory Approaches}
+
+A distinct tradition grew out of item response theory (IRT), where
+\emph{person-fit} statistics quantify how well an individual's response pattern
+conforms to the fitted measurement model. The $l_z$ statistic and the Rasch
+\emph{infit}/\emph{outfit} indices are the best known; \textcite{karabatsos2003comparing}
+compared thirty-six such statistics for detecting aberrant response patterns,
+and \textcite{meijer2016practical} provided a practical guide to applying them
+in clinical research. Person-fit methods rest on a strong measurement model,
+which is their strength (a principled probabilistic account of ``aberrance'')
+and their weakness (sensitivity to model misspecification, and a need for the
+model to be estimable). More recently, \emph{mixture-model} formulations treat
+the population as a blend of attentive and careless latent classes and estimate
+class membership directly; \textcite{ulitzsch2022response} combined item
+responses with response times in a latent-response mixture model that
+simultaneously identifies and adjusts for careless and insufficient-effort
+responding.
+
+\subsection{Machine-Learning and Ensemble Approaches}
+
+The newest family abandons the idea of a single hand-crafted index in favor of
+\emph{learning} a careless/attentive boundary from many indices at once.
+\textcite{schroeders2022detecting} trained a stochastic gradient-boosting
+classifier on a battery of careless indicators and reported detection
+performance exceeding that of any constituent index, demonstrating that the
+indices carry \emph{complementary} information that a flexible classifier can
+exploit. This ensemble logic is directly relevant to the present thesis, whose
+later chapters combine a novel coherence index with established detectors inside
+a Random Forest \parencite{breiman2001random}. The turn toward machine learning
+has not gone uncontested. \textcite{alfons2024openscience} offer an
+open-science critique, warning that supervised approaches risk overfitting to
+the idiosyncrasies of the simulated or instructed-careless data on which they
+are trained, that ground-truth labels for careless responding are inherently
+uncertain, and that reproducible benchmarks and shared data are largely absent
+from the field. Their related work on identifying the \emph{onset} of careless
+responding within a protocol \parencite{welz2023onset} illustrates an
+alternative, model-based direction. These cautions frame the methodological
+commitments of this thesis---in particular the emphasis on validation across
+independent simulation draws and on deployment-realistic, label-free
+calibration.
+
+% =====================================================================
+\section{Cutoffs, Thresholds, and Combining Indices}
+% =====================================================================
+
+Computing an index is only half the task; the other half is deciding \emph{where
+to draw the line}. Every method above yields a continuous score, and converting
+that score into a binary careless/attentive flag requires a threshold. This
+seemingly technical step is in fact one of the least settled and most
+consequential issues in the field.
+
+Two broad strategies exist. The first uses a \emph{theoretical} cutoff derived
+from a reference distribution---most prominently the chi-square cutoff for
+Mahalanobis distance---which has the appeal of requiring no tuning but, as
+noted, rests on distributional assumptions that questionnaire data routinely
+violate. The second uses an \emph{empirical} cutoff: a fixed quantile of the
+observed scores, a visual ``elbow'' in the score distribution, or a value
+optimized against known labels. Empirical cutoffs adapt to the data but risk
+either circularity (when tuned on the same labels used to evaluate them) or
+arbitrariness (when chosen by eye). \textcite{ward2023dealing} note that the
+absence of consensus cutoffs is a genuine obstacle to cumulative science,
+because two analysts applying ``the same'' index to the same data can reach
+different conclusions about who is careless.
+
+The comparative literature offers two robust findings that shape best practice.
+First, no single index dominates across conditions:
+\textcite{niessen2016detecting} compared several methods on web-questionnaire
+data and concluded that the best choice depends on the type of careless
+responding present and on questionnaire characteristics, with different indices
+catching different careless respondents. Second---and following directly from
+the first---\emph{combining} indices outperforms relying on any one of them
+\parencite{curran2016methods, schroeders2022detecting}. The recommended
+practice in recent reviews is therefore to compute multiple indices, examine
+their convergence, and flag respondents identified by several of them
+\parencite{ward2023dealing, desimone2015best}. The ensemble and threshold-calibration
+methods developed in this thesis are a formalization of exactly this advice: they
+replace ad hoc multi-index agreement rules with a trained classifier and a
+deployment-realistic operating point.
+
+% =====================================================================
+\section{Software for Careless Responding Detection}
+% =====================================================================
+
+The methods reviewed above are only as useful as the tools that implement them,
+and here the \textsf{R} ecosystem has become the de facto standard for careless
+responding detection. This section surveys the packages in current use; their
+indices and the constructs they target are summarized in
+Table~\ref{tab:indices}.
+
+The central package is \textsf{careless} \parencite{yentes2023careless}, which
+provides a unified implementation of the core response-pattern indices:
+\texttt{longstring} (and its average-run variant), \texttt{irv}, \texttt{mahad}
+(Mahalanobis distance, with optional robust covariance estimation),
+\texttt{evenodd} (even--odd consistency), and \texttt{psychsyn}/\texttt{psychant}
+(psychometric synonyms and antonyms). Because it gathers the indices of
+\textcite{meade2012identifying} and \textcite{curran2016methods} behind a
+consistent interface, \textsf{careless} is the package most often cited in
+applied work and the natural baseline against which new methods are compared.
+
+Several other packages contribute pieces of the workflow. The
+\textsf{responsePatterns} package \parencite{rihacek2023responsepatterns}
+implements autocorrelation-based screening for repetitive response patterns
+\parencite{gottfried2022autocorrelation}, targeting the machine-like regularity
+that some careless protocols exhibit. For the multivariate-outlier branch, the
+\textsf{performance} package \parencite{ludecke2021performance} exposes
+\texttt{check\_outliers}, which computes Mahalanobis (and several robust
+alternatives) within a tidy model-checking framework, while the venerable
+\textsf{psych} package \parencite{revelle2024psych} supplies the
+factor-analytic and reliability machinery---exploratory factor analysis,
+parallel analysis, and scale-reliability estimation---on which several careless
+indices and most downstream psychometric analyses depend. Mixture-model
+approaches to careless detection draw on general-purpose finite-mixture engines
+such as \textsf{mclust} \parencite{scrucca2016mclust} and \textsf{mixtools}
+\parencite{benaglia2009mixtools}, which fit the latent attentive/careless class
+structure used by model-based methods. All of these run within base
+\textsf{R} \parencite{rcoreteam2024}, and supervised-ensemble approaches add a
+classifier layer---gradient boosting in \textcite{schroeders2022detecting}, or a
+Random Forest in the present work---on top of the index computations these
+packages provide.
+
+What the ecosystem still lacks is as informative as what it offers.
+\textcite{alfons2024openscience} observe that, despite the maturity of the
+individual-index tooling, the field has no shared, labeled benchmark dataset
+against which competing detectors can be evaluated on equal terms, and that
+machine-learning detectors in particular are typically validated only on the
+simulated data their authors generate. There is, similarly, no standard,
+well-validated routine for \emph{calibrating} an index threshold without access
+to ground-truth labels---the very problem the deployment-oriented chapters of
+this thesis address. Outside \textsf{R}, careless detection is comparatively
+underserved: commercial survey platforms offer little beyond fixed-position
+attention checks, and although general-purpose machine-learning libraries in
+other languages could in principle implement any of these methods, no
+established, careless-specific toolkit exists outside the \textsf{R} packages
+surveyed here.
+
+% --- summary table -----------------------------------------------------
+\begin{table}[t]
+\centering
+\caption{Principal careless-responding detection methods, the careless
+behavior each is best suited to detect, and their implementation in current
+\textsf{R} software.}
+\label{tab:indices}
+\footnotesize
+\begin{tabular}{L{0.20\linewidth} L{0.30\linewidth} L{0.14\linewidth} L{0.25\linewidth}}
+\toprule
+\textbf{Method} & \textbf{What it captures} & \textbf{Target pattern} & \textbf{R implementation} \\
+\midrule
+Longstring & Longest run of identical consecutive responses & Consistent (straightlining) & \texttt{careless::\allowbreak longstring} \\
+IRV & SD of a respondent's answers across items & Consistent (low) / random (high) & \texttt{careless::\allowbreak irv} \\
+Psychometric synonyms / antonyms & Within-person correlation over high-$|r|$ item pairs & Inconsistent (random, mixed) & \texttt{careless::\allowbreak psychsyn},\newline \texttt{psychant} \\
+Person--total correlation & Agreement of a profile with the sample mean profile & Inconsistent & \texttt{careless} / base \textsf{R} \\
+Even--odd / resampled reliability & Internal consistency across item splits & Inconsistent & \texttt{careless::\allowbreak evenodd} \\
+Mahalanobis $D^2$ & Multivariate distance from the sample centroid & Multivariate outliers & \texttt{careless::\allowbreak mahad};\newline \texttt{performance::\allowbreak check\_outliers} \\
+Autocorrelation screening & Machine-like repetitiveness of a protocol & Consistent (patterned) & \texttt{responsePatterns} \\
+Person-fit ($l_z$, infit/outfit) & Departure from a fitted IRT model & Aberrant patterns & \texttt{mirt} / \texttt{PerFit} \\
+Mixture / response-time models & Latent attentive vs.\ careless classes & All (model-based) & \texttt{mclust}, \texttt{mixtools} \\
+Ensemble / machine learning & Learned combination of many indices & All & gradient boosting; Random Forest \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+% =====================================================================
+\section{Gaps in the Field and the Contribution of This Thesis}
+% =====================================================================
+
+This review motivates the work that follows by making three gaps explicit.
+
+First, the methods in widest use are strongest on \emph{consistent} careless
+responding and weakest on the \emph{inconsistent} patterns---random and
+mixed---that are arguably the hardest to prevent and the most damaging to
+covariance-based analyses. Longstring and IRV detect regularity; Mahalanobis
+distance detects outlyingness; but the cross-item \emph{coherence} that
+distinguishes an attentive from a randomly responding participant is captured
+only partially, by the synonym/antonym indices, and only for short lists of
+hand-selected item pairs. A method that exploits the full correlational
+structure of a multi-construct questionnaire to detect inconsistent careless
+responding would fill a real gap. This is the motivation for the
+permutation-based coherence index, \emph{ReReReRe}, developed in Chapter~3.
+
+Second, the field has converged on the principle that \emph{combining} indices
+beats any single one \parencite{niessen2016detecting, curran2016methods,
+schroeders2022detecting}, but the dominant practice---flagging respondents
+identified by several indices under separately chosen cutoffs---remains
+informal. A trained classifier that learns the optimal combination of
+complementary detectors, and that is evaluated honestly across independent
+data, is the natural next step. This is the motivation for the Random Forest
+ensemble of Chapter~4.
+
+Third, every detection method ultimately requires a \emph{threshold}, and the
+field lacks a validated procedure for setting one without ground-truth labels
+that no analyst possesses in practice \parencite{ward2023dealing,
+alfons2024openscience}. A calibration strategy that is both deployment-realistic
+and competitive with label-dependent oracles would make these methods usable by
+the applied researchers who need them. This is the motivation for the
+rate-aware calibration evaluated in Chapter~5.
+
+The remaining chapters take up these gaps in turn. Chapter~2 reviews the
+statistical concepts on which the methods rest---correlation, exploratory factor
+analysis, the Random Forest classifier, and the evaluation metrics used
+throughout. Chapter~3 introduces ReReReRe and its underlying coherence
+principle. Chapter~4 develops the ensemble that combines ReReReRe with the
+established detectors surveyed above. Chapter~5 applies the ensemble under a
+deployment-realistic protocol and characterizes when, and how well, it works.
+
+\printbibliography
+
+\end{document}

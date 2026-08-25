@@ -1,0 +1,21 @@
+﻿R.exe : * installing *source* package 'carerere' ...
+In riga:1 car:641
++ ... ct -Last 3; & "C:\Program Files\R\R-4.6.0\bin\R.exe" CMD INSTALL --no ...
++                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (* installing *s... 'carerere' ...:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+** this is package 'carerere' version '0.1.0'
+** using staged installation
+** R
+** data
+*** moving datasets to lazyload DB
+** byte-compile and prepare package for lazy loading
+** help
+*** installing help indices
+** building package indices
+** installing vignettes
+** testing if installed package can be loaded from temporary location
+** testing if installed package can be loaded from final location
+** testing if installed package keeps a record of temporary installation path
+* DONE (carerere)

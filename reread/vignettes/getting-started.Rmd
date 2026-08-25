@@ -1,0 +1,122 @@
+---
+title: "Getting started with reread"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Getting started with reread}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
+```
+
+`reread` detects careless or insufficient-effort responding in questionnaire
+data. This vignette walks through the one-call workflow, the pieces underneath,
+and how to compare against other indices.
+
+```{r setup}
+library(reread)
+```
+
+## One call
+
+The main function takes a matrix or data frame of Likert responses (respondents
+in rows, items in columns) and returns scores, flags, and a calibrated
+prevalence estimate.
+
+```{r detect}
+fit <- reread(demo_careless$responses)
+fit
+```
+
+The per-respondent output is a data frame:
+
+```{r scores}
+head(fit$scores)
+```
+
+`rc` is the coherence index (low = careless); `eta` is the ensemble log-odds
+(high = careless); `prob` is the careless probability; `flagged` is the decision.
+Because `demo_careless` is simulated, we can check the flags against the truth:
+
+```{r truth}
+table(flagged = fit$flagged, careless = demo_careless$careless)
+```
+
+## Sensitivity
+
+There is one shipped cut and normally nothing to choose: it sits 2.5 standard
+deviations above the attentive mode and is the better setting from the cleanest
+samples up to a careless rate of about 35%. Past that a more liberal cut recovers
+more of the careless, and you ask for it explicitly:
+
+```{r custom-z}
+fl <- auto_flag(ensemble_score(demo_careless$responses)$eta, z = 1.5)
+fl$n_flagged
+```
+
+If you already know (or can estimate) the careless rate, supply it and the
+automatic threshold is bypassed:
+
+```{r manual}
+reread(demo_careless$responses, prevalence = 0.2)$n_flagged
+```
+
+## Under the hood
+
+The ensemble score is a reliability-gated logistic combination of `rc`,
+longstring, and person--total, with frozen weights:
+
+```{r pieces}
+es <- ensemble_score(demo_careless$responses)
+str(es[c("gate", "profile_info", "signal_strength")])
+```
+
+The label-free threshold comes from a one-sided fit of the attentive mode on the
+ensemble log-odds: the dominant mode `m`, a scale read from that mode's left
+flank alone, and a cut at `m + 2.5 * sigma`. The rule is applied
+unconditionally, so a careless-free sample is not guaranteed to yield nothing —
+it yields its own 2.5-sigma tail, on the order of one to two per cent of
+respondents. That cost is a property of the sample's size, not a surprise:
+report it alongside the flags rather than assuming it away.
+
+```{r flag}
+fl <- auto_flag(es$eta)
+c(flagged = fl$n_flagged, prevalence = round(fl$prevalence, 3), status = fl$status)
+```
+
+Because the rule is equivariant to the scale of whatever score it is given, it
+can be applied to a single index instead of the ensemble. On external data the
+ensemble and the person-total correlation are close to interchangeable, so that
+choice is offered rather than hidden — though the ensemble remains the default,
+being the more robust of the two where the ground truth is clean:
+
+```{r pt}
+pt <- reread(demo_careless$responses, score = "person_total")
+c(ensemble = sum(fit$flagged), person_total = pt$n_flagged)
+```
+
+## Benchmarking
+
+`benchmark_indices()` compares the ensemble against the auxiliary indices by AUC,
+with DeLong confidence intervals and tests (requires `pROC`):
+
+```{r bench, eval = requireNamespace("pROC", quietly = TRUE)}
+benchmark_indices(demo_careless$responses, demo_careless$careless)
+```
+
+## Simulating your own data
+
+```{r sim}
+clean <- simulate_clean(n_factors = 10, items_per_factor = 6, n = 200, seed = 1)
+dat   <- inject_careless(clean$data, prevalence = 0.2, seed = 2)
+reread(dat$data)$n_flagged
+```
+
+## Scope
+
+`reread` targets *inconsistent* careless responding on multi-construct
+questionnaires (roughly 60+ items). It warns on data with no usable structure,
+does not detect content-responsive distortions such as faking, and on short or
+single-factor scales leans on the auxiliary detectors.

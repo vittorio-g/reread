@@ -1,0 +1,109 @@
+variant,weights,rate,mcc,precision,recall,pi_hat,pi_bias
+V0 shipped (first-local mode, left MAD),shipped,0.05,0.6193,0.7271,0.5875,0.0585,0.0085
+V0 shipped (first-local mode, left MAD),shipped,0.1,0.7250,0.8332,0.6833,0.0922,-0.0078
+V0 shipped (first-local mode, left MAD),shipped,0.15,0.7893,0.9106,0.7500,0.1448,-0.0052
+V0 shipped (first-local mode, left MAD),shipped,0.2,0.8305,0.9340,0.8019,0.2002,0.0002
+V0 shipped (first-local mode, left MAD),shipped,0.25,0.8187,0.9241,0.8065,0.2607,0.0107
+V0 shipped (first-local mode, left MAD),shipped,0.3,0.8269,0.9286,0.8278,0.3092,0.0092
+V0 shipped (first-local mode, left MAD),shipped,0.4,0.8115,0.9586,0.8064,0.3895,-0.0105
+V0 shipped (first-local mode, left MAD),shipped,0.5,0.8042,0.9784,0.8088,0.4714,-0.0286
+V1 global mode, left MAD,shipped,0.05,0.6410,0.7537,0.5792,0.0320,-0.0180
+V1 global mode, left MAD,shipped,0.1,0.7250,0.8332,0.6833,0.0922,-0.0078
+V1 global mode, left MAD,shipped,0.15,0.7893,0.9106,0.7500,0.1448,-0.0052
+V1 global mode, left MAD,shipped,0.2,0.8305,0.9340,0.8019,0.2002,0.0002
+V1 global mode, left MAD,shipped,0.25,0.8187,0.9241,0.8065,0.2607,0.0107
+V1 global mode, left MAD,shipped,0.3,0.8269,0.9286,0.8278,0.3092,0.0092
+V1 global mode, left MAD,shipped,0.4,0.8115,0.9586,0.8064,0.3895,-0.0105
+V1 global mode, left MAD,shipped,0.5,0.8042,0.9784,0.8088,0.4714,-0.0286
+V2 global mode, central-quantile scale,shipped,0.05,0.6650,0.7867,0.5875,0.0187,-0.0313
+V2 global mode, central-quantile scale,shipped,0.1,0.7607,0.8896,0.6813,0.0703,-0.0297
+V2 global mode, central-quantile scale,shipped,0.15,0.8118,0.9805,0.7153,0.1214,-0.0286
+V2 global mode, central-quantile scale,shipped,0.2,0.8188,0.9886,0.7315,0.1700,-0.0300
+V2 global mode, central-quantile scale,shipped,0.25,0.7825,0.9891,0.6884,0.2097,-0.0403
+V2 global mode, central-quantile scale,shipped,0.3,0.7393,0.9979,0.6361,0.2344,-0.0656
+V2 global mode, central-quantile scale,shipped,0.4,0.5719,1.0000,0.4496,0.2836,-0.1164
+V2 global mode, central-quantile scale,shipped,0.5,0.4136,1.0000,0.2926,0.3255,-0.1745
+V3 global mode, max(left, central),shipped,0.05,0.6560,0.8000,0.5625,0.0159,-0.0341
+V3 global mode, max(left, central),shipped,0.1,0.7392,0.8917,0.6479,0.0654,-0.0346
+V3 global mode, max(left, central),shipped,0.15,0.7959,0.9844,0.6889,0.1151,-0.0349
+V3 global mode, max(left, central),shipped,0.2,0.8163,0.9896,0.7269,0.1680,-0.0320
+V3 global mode, max(left, central),shipped,0.25,0.7821,0.9918,0.6855,0.2078,-0.0422
+V3 global mode, max(left, central),shipped,0.3,0.7377,0.9986,0.6333,0.2340,-0.0660
+V3 global mode, max(left, central),shipped,0.4,0.5719,1.0000,0.4496,0.2836,-0.1164
+V3 global mode, max(left, central),shipped,0.5,0.4136,1.0000,0.2926,0.3255,-0.1745
+V4 global mode, central below 30% else left,shipped,0.05,0.6650,0.7867,0.5875,0.0187,-0.0313
+V4 global mode, central below 30% else left,shipped,0.1,0.7503,0.8701,0.6854,0.0772,-0.0228
+V4 global mode, central below 30% else left,shipped,0.15,0.8045,0.9618,0.7236,0.1303,-0.0197
+V4 global mode, central below 30% else left,shipped,0.2,0.8221,0.9809,0.7444,0.1750,-0.0250
+V4 global mode, central below 30% else left,shipped,0.25,0.7883,0.9463,0.7413,0.2391,-0.0109
+V4 global mode, central below 30% else left,shipped,0.3,0.8020,0.9398,0.7822,0.2954,-0.0046
+V4 global mode, central below 30% else left,shipped,0.4,0.8040,0.9586,0.7968,0.3869,-0.0131
+V4 global mode, central below 30% else left,shipped,0.5,0.8042,0.9784,0.8088,0.4714,-0.0286
+V5 global mode, adaptive upper quantile,shipped,0.05,0.6650,0.7867,0.5875,0.0187,-0.0313
+V5 global mode, adaptive upper quantile,shipped,0.1,0.7607,0.8896,0.6813,0.0703,-0.0297
+V5 global mode, adaptive upper quantile,shipped,0.15,0.8102,0.9777,0.7153,0.1216,-0.0284
+V5 global mode, adaptive upper quantile,shipped,0.2,0.8188,0.9886,0.7315,0.1700,-0.0300
+V5 global mode, adaptive upper quantile,shipped,0.25,0.7824,0.9879,0.6891,0.2100,-0.0400
+V5 global mode, adaptive upper quantile,shipped,0.3,0.7420,0.9979,0.6400,0.2355,-0.0645
+V5 global mode, adaptive upper quantile,shipped,0.4,0.6054,1.0000,0.4929,0.2945,-0.1055
+V5 global mode, adaptive upper quantile,shipped,0.5,0.5099,1.0000,0.4133,0.3674,-0.1326
+V0 shipped (first-local mode, left MAD),sim,0.05,0.4417,0.2674,0.9292,0.3346,0.2846
+V0 shipped (first-local mode, left MAD),sim,0.1,0.5874,0.4559,0.9250,0.3341,0.2341
+V0 shipped (first-local mode, left MAD),sim,0.15,0.6931,0.6496,0.8819,0.3028,0.1528
+V0 shipped (first-local mode, left MAD),sim,0.2,0.7596,0.7981,0.8306,0.2833,0.0833
+V0 shipped (first-local mode, left MAD),sim,0.25,0.7970,0.8517,0.8449,0.3084,0.0584
+V0 shipped (first-local mode, left MAD),sim,0.3,0.8003,0.9110,0.8050,0.3186,0.0186
+V0 shipped (first-local mode, left MAD),sim,0.4,0.7650,0.9587,0.7443,0.3779,-0.0221
+V0 shipped (first-local mode, left MAD),sim,0.5,0.7379,0.9790,0.7281,0.4642,-0.0358
+V1 global mode, left MAD,sim,0.05,0.4417,0.2674,0.9292,0.3346,0.2846
+V1 global mode, left MAD,sim,0.1,0.5874,0.4559,0.9250,0.3341,0.2341
+V1 global mode, left MAD,sim,0.15,0.6957,0.6663,0.8694,0.2876,0.1376
+V1 global mode, left MAD,sim,0.2,0.7596,0.7981,0.8306,0.2833,0.0833
+V1 global mode, left MAD,sim,0.25,0.7970,0.8517,0.8449,0.3084,0.0584
+V1 global mode, left MAD,sim,0.3,0.8003,0.9110,0.8050,0.3186,0.0186
+V1 global mode, left MAD,sim,0.4,0.7650,0.9587,0.7443,0.3779,-0.0221
+V1 global mode, left MAD,sim,0.5,0.7379,0.9790,0.7281,0.4642,-0.0358
+V2 global mode, central-quantile scale,sim,0.05,0.5815,0.4337,0.8625,0.2265,0.1765
+V2 global mode, central-quantile scale,sim,0.1,0.7359,0.6815,0.8625,0.2287,0.1287
+V2 global mode, central-quantile scale,sim,0.15,0.7533,0.7910,0.7903,0.2132,0.0632
+V2 global mode, central-quantile scale,sim,0.2,0.7633,0.8742,0.7472,0.2193,0.0193
+V2 global mode, central-quantile scale,sim,0.25,0.7557,0.9169,0.7116,0.2445,-0.0055
+V2 global mode, central-quantile scale,sim,0.3,0.7298,0.9827,0.6350,0.2522,-0.0478
+V2 global mode, central-quantile scale,sim,0.4,0.5322,1.0000,0.3989,0.2865,-0.1135
+V2 global mode, central-quantile scale,sim,0.5,0.3644,1.0000,0.2348,0.3174,-0.1826
+V3 global mode, max(left, central),sim,0.05,0.5815,0.4337,0.8625,0.2259,0.1759
+V3 global mode, max(left, central),sim,0.1,0.7359,0.6815,0.8625,0.2287,0.1287
+V3 global mode, max(left, central),sim,0.15,0.7491,0.8109,0.7681,0.2074,0.0574
+V3 global mode, max(left, central),sim,0.2,0.7601,0.8779,0.7398,0.2164,0.0164
+V3 global mode, max(left, central),sim,0.25,0.7546,0.9182,0.7087,0.2440,-0.0060
+V3 global mode, max(left, central),sim,0.3,0.7298,0.9827,0.6350,0.2522,-0.0478
+V3 global mode, max(left, central),sim,0.4,0.5322,1.0000,0.3989,0.2865,-0.1135
+V3 global mode, max(left, central),sim,0.5,0.3644,1.0000,0.2348,0.3174,-0.1826
+V4 global mode, central below 30% else left,sim,0.05,0.4624,0.2944,0.9250,0.3204,0.2704
+V4 global mode, central below 30% else left,sim,0.1,0.6122,0.4969,0.9167,0.3201,0.2201
+V4 global mode, central below 30% else left,sim,0.15,0.6904,0.6517,0.8681,0.2881,0.1381
+V4 global mode, central below 30% else left,sim,0.2,0.7575,0.8065,0.8167,0.2740,0.0740
+V4 global mode, central below 30% else left,sim,0.25,0.7839,0.8644,0.8123,0.2930,0.0430
+V4 global mode, central below 30% else left,sim,0.3,0.7855,0.9278,0.7683,0.3081,0.0081
+V4 global mode, central below 30% else left,sim,0.4,0.7633,0.9587,0.7422,0.3768,-0.0232
+V4 global mode, central below 30% else left,sim,0.5,0.7379,0.9790,0.7281,0.4642,-0.0358
+V5 global mode, adaptive upper quantile,sim,0.05,0.5733,0.4234,0.8625,0.2284,0.1784
+V5 global mode, adaptive upper quantile,sim,0.1,0.7324,0.6767,0.8625,0.2277,0.1277
+V5 global mode, adaptive upper quantile,sim,0.15,0.7527,0.7866,0.7944,0.2158,0.0658
+V5 global mode, adaptive upper quantile,sim,0.2,0.7639,0.8743,0.7481,0.2200,0.0200
+V5 global mode, adaptive upper quantile,sim,0.25,0.7561,0.9167,0.7123,0.2443,-0.0057
+V5 global mode, adaptive upper quantile,sim,0.3,0.7307,0.9802,0.6383,0.2530,-0.0470
+V5 global mode, adaptive upper quantile,sim,0.4,0.5534,1.0000,0.4262,0.2931,-0.1069
+V5 global mode, adaptive upper quantile,sim,0.5,0.4286,1.0000,0.3119,0.3519,-0.1481
+V0 shipped (first-local mode, left MAD),shipped,CLEAN,,,,0.0000,0.0000
+V0 shipped (first-local mode, left MAD),sim,CLEAN,,,,0.0008,0.0420
+V1 global mode, left MAD,shipped,CLEAN,,,,0.0000,0.0000
+V1 global mode, left MAD,sim,CLEAN,,,,0.0008,0.0420
+V2 global mode, central-quantile scale,shipped,CLEAN,,,,0.0000,0.0000
+V2 global mode, central-quantile scale,sim,CLEAN,,,,0.0008,0.0360
+V3 global mode, max(left, central),shipped,CLEAN,,,,0.0000,0.0000
+V3 global mode, max(left, central),sim,CLEAN,,,,0.0007,0.0340
+V4 global mode, central below 30% else left,shipped,CLEAN,,,,0.0000,0.0000
+V4 global mode, central below 30% else left,sim,CLEAN,,,,0.0008,0.0360
+V5 global mode, adaptive upper quantile,shipped,CLEAN,,,,0.0000,0.0000
+V5 global mode, adaptive upper quantile,sim,CLEAN,,,,0.0008,0.0360

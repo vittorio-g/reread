@@ -1,0 +1,3 @@
+Messaggi di avvertimento:
+1: il pacchetto 'careless' è stato creato con R versione 4.6.1 
+2: il pacchetto 'pROC' è stato creato con R versione 4.6.1 

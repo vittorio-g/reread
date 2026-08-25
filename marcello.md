@@ -1,20 +1,40 @@
 # Aggiornamenti per Marcello — 2026-04-27
 
-## Paper integrato
+## Paper integrato (revisione: solo Scenario B)
 
-PDF in Downloads: **`ReReReRe_Paper_2026-04-27.pdf`** (~640 KB, 14 pagine).
+PDF in Downloads: **`ReReReRe_Paper_2026-04-27.pdf`** (~620 KB, 13 pagine).
 
-Versione integrata che incorpora tutti i miglioramenti emersi dalla revisione
-metodologica come parte di un singolo studio coerente: design simulativo
-8 size × 4 rate × 12 repliche, calibrazione rate-aware come default,
-IC bootstrap sull'ablation, holdout robustness. La validazione su dati reali
-è esplicitamente rimandata in attesa della raccolta dati di Vittorio.
+Versione integrata che incorpora tutti i miglioramenti della revisione
+metodologica come singolo studio coerente: design simulativo 8 size × 4 rate
+× 12 repliche, calibrazione rate-aware come default, IC bootstrap
+sull'ablation, holdout robustness. La validazione su dati reali è
+esplicitamente rimandata in attesa della raccolta dati di Vittorio.
 
-**Headline:** in Scenario A (clean vs full-careless, τ=0.60) MCC pooled = **0.788**
-sotto calibrazione rate-aware (deployable, no labels). Scaling da MCC=0.570 a
-30 item fino a MCC=0.943 a 300 item. Contributo di ReReReRe statisticamente
-positivo a tutte le size testate (P(Δ>0)=1.000), piccolo sotto 100 item
-(~+0.033 MCC) e grande sopra 150 item (+0.07–+0.08).
+### Una sola definizione operativa di careless
+
+Abbiamo eliminato la narrativa "due scenari" presente nelle versioni
+precedenti. Lo "Scenario A" (τ=0.60, escludeva i careless 1–60% dalla
+classe negativa) è metodologicamente improprio: quel set negativo *cherry-picked*
+solo i veri puliti e gonfiava artificialmente le metriche. Adesso il paper
+adotta una sola definizione, deployment-realistica:
+
+> Un rispondente è etichettato come careless quando la frazione corrotta
+> della sua riga supera **τ = 0.40**; tutti gli altri (puliti e leggermente
+> corrotti) restano nella classe negativa.
+
+τ = 0.40 è l'**argmax congiunto** di MCC, κ di Cohen, J di Youden e
+balanced accuracy nello sweep τ ∈ {0.10, 0.20, …, 0.90} su 24 000
+rispondenti simulati (Phase 6, file `phase6_threshold_sweep.csv`).
+F1 favorisce τ=0.30 di +0.007 e AUPRC favorisce τ=0.20 di +0.017,
+ma sono metriche secondarie; sui quattro indicatori primari τ=0.40 vince
+in modo unanime.
+
+**Headline.** Pooled MCC = **0.673** (F1 = 0.730, sens = 0.704,
+spec = 0.945, AUC = 0.919) sotto calibrazione rate-aware
+(deployable, no labels). Scaling da MCC = 0.484 a 30 item fino a
+MCC = 0.824 a 300 item. Contributo di ReReReRe statisticamente positivo a
+**tutte** le size testate (P(Δ>0) = 1.000, IC bootstrap 95%), magnitudo da
+~+0.03 MCC a 30 item fino a ~+0.13 MCC a 300 item.
 
 ## Revisione v2.1 — risposta alle obiezioni metodologiche (aggiornamento notturno precedente)
 

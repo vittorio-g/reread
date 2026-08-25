@@ -1,0 +1,51 @@
+kay_s2         J=363 rate=0.05 | ens 0.920 rr 0.918 PT 0.893 | Mah 0.495 IRV 0.803 Long 0.701 Psyn 0.880
+warning300     J=301 rate=0.26 | ens 0.733 rr 0.618 PT 0.734 | Mah 0.395 IRV 0.718 Long 0.636 Psyn 0.627
+kay_s1         J=250 rate=0.29 | ens 0.562 rr 0.547 PT 0.628 | Mah 0.453 IRV 0.599 Long 0.519 Psyn 0.569
+opsy_16pf      J=163 rate=0.01 | ens 0.644 rr 0.628 PT 0.640 | Mah 0.548 IRV 0.573 Long 0.502 Psyn 0.607
+smarvus        J=141 rate=0.10 | ens 0.823 rr 0.803 PT 0.824 | Mah 0.629 IRV 0.613 Long 0.530 Psyn 0.782
+kay_s6         J=67  rate=0.37 | ens 0.682 rr 0.573 PT 0.758 | Mah 0.338 IRV 0.710 Long 0.622 Psyn 0.708
+kay_s5         J=62  rate=0.09 | ens 0.727 rr 0.576 PT 0.714 | Mah 0.507 IRV 0.660 Long 0.535 Psyn 0.644
+duckworth      J=50  rate=0.26 | ens 0.464 rr 0.500 PT 0.425 | Mah 0.483 IRV 0.434 Long 0.495 Psyn 0.459
+douglas        J=50  rate=0.80 | ens 0.507 rr 0.489 PT 0.542 | Mah 0.465 IRV 0.599 Long 0.526 Psyn 0.505
+krause         J=49  rate=0.45 | ens 0.749 rr 0.557 PT 0.749 | Mah 0.555 IRV 0.564 Long 0.662 Psyn 0.580
+ivanov21       J=41  rate=0.20 | ens 0.771 rr 0.690 PT 0.813 | Mah 0.622 IRV 0.632 Long 0.447 Psyn 0.727
+moss23         J=8   rate=0.10 | ens 0.565 rr 0.291 PT 0.796 | Mah 0.732 IRV 0.335 Long 0.635 Psyn NA
+alvarez19      J=6   rate=0.09 | ens 0.723 rr 0.620 PT 0.699 | Mah 0.337 IRV 0.705 Long 0.685 Psyn 0.537
+ogrady19       J=30  rate=0.06 | ens 0.677 rr 0.637 PT 0.643 | Mah 0.631 IRV 0.489 Long 0.596 Psyn 0.543
+mastroianni22  J=100 rate=0.03 | ens 0.532 rr 0.359 PT 0.736 | Mah 0.733 IRV 0.564 Long 0.499 Psyn 0.509
+pennycook20    J=30  rate=0.27 | ens 0.594 rr 0.598 PT 0.596 | Mah 0.506 IRV 0.557 Long 0.491 Psyn 0.594
+
+=== per-dataset AUC (sorted by J desc) ===
+       dataset  kind   J  rate ReReRe    rr    PT   Mah   IRV  Long  Psyn
+        kay_s2  core 363 0.050  0.920 0.918 0.893 0.495 0.803 0.701 0.880
+    warning300  core 301 0.261  0.733 0.618 0.734 0.395 0.718 0.636 0.627
+        kay_s1  core 250 0.288  0.562 0.547 0.628 0.453 0.599 0.519 0.569
+     opsy_16pf  core 163 0.007  0.644 0.628 0.640 0.548 0.573 0.502 0.607
+       smarvus  core 141 0.105  0.823 0.803 0.824 0.629 0.613 0.530 0.782
+ mastroianni22 bound 100 0.029  0.532 0.359 0.736 0.733 0.564 0.499 0.509
+        kay_s6  core  67 0.368  0.682 0.573 0.758 0.338 0.710 0.622 0.708
+        kay_s5  core  62 0.087  0.727 0.576 0.714 0.507 0.660 0.535 0.644
+     duckworth  core  50 0.260  0.464 0.500 0.425 0.483 0.434 0.495 0.459
+       douglas  core  50 0.801  0.507 0.489 0.542 0.465 0.599 0.526 0.505
+        krause  core  49 0.448  0.749 0.557 0.749 0.555 0.564 0.662 0.580
+      ivanov21 bound  41 0.203  0.771 0.690 0.813 0.622 0.632 0.447 0.727
+      ogrady19 bound  30 0.059  0.677 0.637 0.643 0.631 0.489 0.596 0.543
+   pennycook20 bound  30 0.272  0.594 0.598 0.596 0.506 0.557 0.491 0.594
+        moss23 bound   8 0.101  0.565 0.291 0.796 0.732 0.335 0.635    NA
+     alvarez19 bound   6 0.087  0.723 0.620 0.699 0.337 0.705 0.685 0.537
+
+mean AUC:  ReReRe 0.667  rr 0.588  Mah 0.527  IRV 0.597  Long 0.568  Psyn 0.618 
+
+=== cross-dataset paired tests (n datasets) ===
+  vs Mah         ReReRe wins 13/16 (Wilcoxon p=0.005) | rr wins 14/16 (p=0.025)
+  vs IRV         ReReRe wins 12/16 (Wilcoxon p=0.011) | rr wins  7/16 (p=0.647)
+  vs Long        ReReRe wins 13/16 (Wilcoxon p=0.001) | rr wins  9/16 (p=0.316)
+  vs Psyn        ReReRe wins 12/15 (Wilcoxon p=0.001) | rr wins  7/15 (p=0.635)
+
+=== datasets with significant DeLong advantage (p<.05) ===
+  vs Mahalanobis ReReRe sig-better in 12, rr sig-better in  9 datasets
+  vs IRV         ReReRe sig-better in  9, rr sig-better in  5 datasets
+  vs LongString  ReReRe sig-better in 10, rr sig-better in  5 datasets
+  vs PsychSyn    ReReRe sig-better in  5, rr sig-better in  2 datasets
+
+wrote benchmark_ext2.csv

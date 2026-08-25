@@ -1,0 +1,17 @@
+name,n,J,rate,kind
+kay_s2,701,363,0.050,core
+warning300,812,301,0.261,core
+kay_s1,500,250,0.288,core
+opsy_16pf,35381,163,0.007,core
+smarvus,10234,141,0.105,core
+kay_s6,562,67,0.368,core
+kay_s5,629,62,0.087,core
+duckworth,3874,50,0.260,core
+douglas,2071,50,0.801,core
+krause,1783,49,0.448,core
+ivanov21,869,41,0.203,bound
+moss23,2107,8,0.101,bound
+alvarez19,1887,6,0.087,bound
+ogrady19,358,30,0.059,bound
+mastroianni22,1004,100,0.029,bound
+pennycook20,853,30,0.272,bound

@@ -1,0 +1,12 @@
+a,b,auc_wins,auc_n,auc_p,mcc_wins,mcc_n,mcc_p
+ens,Mahalanobis,9,9,0.0020,9,9,0.0020
+ens,IRV,6,9,0.1016,5,9,0.1250
+ens,LongString,8,9,0.0039,8,9,0.0488
+ens,PsychSyn,7,9,0.0195,7,9,0.0273
+ens,PT,5,9,0.7148,4,9,0.3262
+ens,rc,9,9,0.0020,6,9,0.1016
+rc,Mahalanobis,9,9,0.0020,7,9,0.0645
+rc,IRV,3,9,0.6738,4,8,0.6797
+rc,LongString,5,9,0.2129,4,9,0.5898
+rc,PsychSyn,3,9,0.8203,4,8,0.5273
+rc,PT,1,9,0.9961,3,8,0.8438

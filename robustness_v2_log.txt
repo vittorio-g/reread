@@ -1,0 +1,51 @@
+Loading...
+  192,000 respondents in 8 sizes × 4 rates × 12 reps
+
+[A1] Cross-rep holdout (8 reps train, 4 reps test)...
+  size=30 done
+  size=50 done
+  size=80 done
+  size=100 done
+  size=150 done
+  size=200 done
+  size=250 done
+  size=300 done
+  A1 rows: 576
+
+[A2] Cross-size holdout (small <-> large)...
+  small_to_large done
+  large_to_small done
+  A2 rows: 48
+
+[A3] Cross-pattern holdout (leave-2-out)...
+  split=rand+long_held done
+  split=mix+fatigue_held done
+  split=straight+acq_held done
+  split=rand+mix_held done
+  split=long+fatigue_held done
+  A3 rows: 30
+Wrote robustness_holdouts.csv
+
+[B1] Calibration realism (4 strategies)...
+  size=30 done
+  size=50 done
+  size=80 done
+  size=100 done
+  size=150 done
+  size=200 done
+  size=250 done
+  size=300 done
+  B1 rows: 1280 -> robustness_calibration.csv
+
+[C1] Bootstrap CI for Delta MCC by size...
+  size=30 done
+  size=50 done
+  size=80 done
+  size=100 done
+  size=150 done
+  size=200 done
+  size=250 done
+  size=300 done
+  C1 rows: 16 -> robustness_bootstrap.csv
+
+All done.
