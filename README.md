@@ -47,6 +47,12 @@ licences, and re-downloadable from the sources named in each subdirectory README
 The derived per-respondent scores that the analyses actually read are committed
 under `webapp/ext_bench2/*_y.csv`.
 
-This repository is **private**. It contains item-level responses from the
-validation study, which is embargoed until the manuscript is accepted; the public
-release is prepared separately on OSF.
+Item-level responses from the validation study are **not** included: they are
+embargoed until the manuscript is accepted, and the public release is prepared
+separately on OSF. The per-respondent condition labels and derived scores are
+here, and the browser tool's demo publishes the same quantities, so the analyses
+can be inspected without the raw responses.
+
+## Licence
+
+GPL-3, as declared by the R package.
