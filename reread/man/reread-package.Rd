@@ -22,7 +22,7 @@ and \code{\link{benchmark_indices}} compares against other indices.
 \seealso{
 Useful links:
 \itemize{
-  \item \url{https://ca.re-re.re}
+  \item \url{https://reread.tools}
 }
 
 }

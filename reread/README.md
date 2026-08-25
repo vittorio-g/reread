@@ -16,7 +16,7 @@ calibrated prevalence estimate (a one-sided fit of the attentive mode that high
 careless rates cannot contaminate).
 
 The package is a faithful R port of the shipped browser tool at
-[ca.re-re.re](https://ca.re-re.re) and reproduces its scores.
+[reread.tools](https://reread.tools) and reproduces its scores.
 
 ## Installation
 

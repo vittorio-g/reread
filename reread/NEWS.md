@@ -13,4 +13,4 @@
   `benchmark_indices()` for head-to-head comparison with DeLong tests.
 * Operational permutation count defaults to 400; per-respondent Monte Carlo standard error
   of the score and a `borderline` flag are reported. Bundled `demo_careless` dataset;
-  faithful port of the shipped tool at re-re.re.
+  faithful port of the shipped tool at reread.tools.

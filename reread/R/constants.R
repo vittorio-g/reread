@@ -1,5 +1,5 @@
 # Frozen constants of the shipped the reread procedure model (n = 157, 109 items).
-# These are the exact values used by the browser tool at ca.re-re.re and reported
+# These are the exact values used by the browser tool at reread.tools and reported
 # in the paper; the package reproduces its scores. Do not edit without refitting
 # and re-validating (see `reread_weights`).
 

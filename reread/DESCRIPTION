@@ -37,6 +37,6 @@ Suggests:
     rmarkdown
 VignetteBuilder: knitr
 Config/testthat/edition: 3
-URL: https://ca.re-re.re
+URL: https://reread.tools
 LazyData: true
 Config/roxygen2/version: 8.0.0
